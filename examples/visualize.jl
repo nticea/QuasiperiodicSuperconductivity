@@ -14,22 +14,10 @@ Q = (1 + √5) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
-#V0s = [0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
-V0s = [1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]
+V0s = [0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
 Ts = LinRange(0, 0.49, 50)
 
-λs = zeros(length(V0s), length(Ts))
-for (i, T) in enumerate(Ts)
-    for (j, V0) in enumerate(V0s)
-        λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
-        @show T, λ
-        λs[j, i] = λ
-    end
-end
-
-# save the results 
-savepath = joinpath(@__DIR__, "results2.h5")
-npzwrite(savepath, λs)
+λs = npzread("/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/examples/results.npy")
 
 # visualize everything 
 global p = plot()
@@ -52,6 +40,9 @@ for j in 1:length(V0s)
         push!(Tcs, NaN)
     end
 end
-plot(V0s, Tcs, xaxis=:log10, yaxis=:log10)
-
+p2 = plot(V0s, Tcs, xaxis=:log10, yaxis=:log10)
+scatter!(p2, V0s, Tcs, xaxis=:log10, yaxis=:log10)
+title!(p2, "Transition temperature")
+xlabel!(p2, "V")
+ylabel!(p2, "Tc")
 
