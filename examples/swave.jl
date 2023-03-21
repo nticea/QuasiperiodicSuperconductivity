@@ -16,7 +16,7 @@ pairing_symmetry = "s-wave"
 # temperature & potential 
 #V0s = [0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
 V0s = [1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]
-Ts = LinRange(0, 0.49, 50)
+Ts = LinRange(0.49, 1, 50)
 
 λs = zeros(length(V0s), length(Ts))
 for (i, T) in enumerate(Ts)
@@ -27,8 +27,8 @@ for (i, T) in enumerate(Ts)
     end
 end
 
-# save the results 
-savepath = joinpath(@__DIR__, "results2.h5")
+#save the results 
+savepath = joinpath(@__DIR__, "results3.npy")
 npzwrite(savepath, λs)
 
 # visualize everything 
