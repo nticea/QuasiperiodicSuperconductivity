@@ -14,13 +14,13 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
-V0s = [5]
-Ts = [2.5]
+V0s = [7]
+Ts = [3.5]
 
 λs = zeros(length(V0s), length(Ts))
 for (i, T) in enumerate(Ts)
     for (j, V0) in enumerate(V0s)
-        λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
+        λ = @time λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
         @show T, V0, λ
         λs[j, i] = λ
     end
