@@ -14,7 +14,7 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
-V0s = collect(0.3:0.2:5)
+V0s = collect(0.3:0.15:5)
 Ts = LinRange(0, 2.5, 20)
 
 λs = zeros(length(V0s), length(Ts))
