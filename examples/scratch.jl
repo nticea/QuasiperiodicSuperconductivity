@@ -14,8 +14,8 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
-V0s = collect(0.3:0.2:5)
-Ts = LinRange(0, 2.5, 20)
+V0s = [5]
+Ts = [2.5]
 
 λs = zeros(length(V0s), length(Ts))
 for (i, T) in enumerate(Ts)
@@ -25,10 +25,6 @@ for (i, T) in enumerate(Ts)
         λs[j, i] = λ
     end
 end
-
-#save the results 
-savepath = joinpath(@__DIR__, "results_full.npy")
-npzwrite(savepath, λs)
 
 # visualize everything 
 global p = plot()

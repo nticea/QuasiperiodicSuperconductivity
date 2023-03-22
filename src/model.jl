@@ -78,21 +78,37 @@ function pairfield_susceptibility(T; E, U)
     N = size(U)[1]
     χ = zeros(N, N, N, N)
 
+    fs = fermi.(E, T)
+
     Threads.@threads for abcd in CartesianIndices(χ)
-        χ[abcd] = χelem(Tuple(abcd)..., T=T, E=E, U=U)
+        χ[abcd] = χelem(Tuple(abcd)..., T=T, E=E, U=U, fs=fs)
     end
 
     return χ
 
 end
 
-function χelem(a::Int, b::Int, c::Int, d::Int; T::Real, E, U)
+# function pairfield_tensor(T; E, U)
+#     N = size(U)[1] # Lx x Ly  
+
+#     n, m, a, b, c, d = Index(N, "n"), Index(N, "m"), Index(N, "a"), Index(N, "b"), Index(N, "c"), Index(N, "d")
+#     fs = fermi.(E, T)
+#     fn = ITensor(fs, n)
+#     fm = ITensor(fs, m)
+#     En = ITensor(E, n)
+#     Em = ITensor(E, m)
+
+#     @show (fn - fm)
+#     @assert 1 == 0
+# end
+
+function χelem(a::Int, b::Int, c::Int, d::Int; T::Real, E, U, fs)
     N = size(U)[1] # this is L^2 
 
     χelem = 0
     for n in 1:N
         for m in 1:N
-            prefac = (1 - fermi(E[n], T) - fermi(E[m], T)) / (E[n] + E[m])
+            prefac = (1 - fs[n] - fs[m]) / (E[n] + E[m])
             χelem += prefac * (conj(U[a, n]) * U[c, n] * conj(U[b, m]) * U[d, m] +
                                conj(U[a, n]) * U[d, n] * conj(U[b, m]) * U[c, m])
         end
