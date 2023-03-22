@@ -14,18 +14,17 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
-V0s = collect(0.3:0.15:5)
-Ts = LinRange(0, 2.5, 20)
+V0s = collect(0.3:0.015:7)
+Ts = LinRange(0, 3.5, 40)
 
 λs = npzread("/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/examples/results_full.npy")
-
 
 # visualize everything 
 global p = plot()
 cmap = cgrad(:acton, length(V0s), categorical=true)
 for (j, V0) in enumerate(V0s)
     global p = plot!(p, Ts, λs[j, :], label=nothing, c=cmap[j])
-    global p = scatter!(p, Ts, λs[j, :], label="V=$(V0)", c=cmap[j])
+    #global p = scatter!(p, Ts, λs[j, :], label="V=$(V0)", c=cmap[j])
 end
 plot(p)
 

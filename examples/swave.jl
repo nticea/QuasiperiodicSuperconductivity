@@ -8,26 +8,28 @@ using NPZ
 
 L = 5 # the full system is L × L 
 t = 1 # hopping 
-J = 3
 Q = (√5 - 1) / 2
 μ = 0
 pairing_symmetry = "s-wave"
 
-# temperature & potential 
-V0s = collect(0.3:0.015:7)
+# other parameters
+Js = [0, 1, 2, 3, 4]
+V0s = collect(0.3:0.015:2)
 Ts = LinRange(0, 3.5, 40)
 
-λs = zeros(length(V0s), length(Ts))
-for (i, T) in enumerate(Ts)
-    for (j, V0) in enumerate(V0s)
-        λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
-        @show T, V0, λ
-        λs[j, i] = λ
+λs = zeros(length(Js), length(V0s), length(Ts))
+for (k, J) in enumerate(Js)
+    for (i, T) in enumerate(Ts)
+        for (j, V0) in enumerate(V0s)
+            λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
+            @show J, T, V0, λ
+            λs[k, j, i] = λ
+        end
     end
 end
 
 #save the results 
-savepath = joinpath(@__DIR__, "results_full.npy")
+savepath = joinpath(@__DIR__, "manyJ_results.npy")
 npzwrite(savepath, λs)
 
 # visualize everything 
