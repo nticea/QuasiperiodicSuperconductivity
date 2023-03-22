@@ -15,7 +15,7 @@ pairing_symmetry = "s-wave"
 
 # temperature & potential 
 V0s = collect(0.3:0.015:7)
-Ts = LinRange(0, 3.5, 20)
+Ts = LinRange(0, 3.5, 40)
 
 λs = zeros(length(V0s), length(Ts))
 for (i, T) in enumerate(Ts)
