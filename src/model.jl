@@ -7,6 +7,7 @@ using ArnoldiMethod
 function λmax(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real)
     # Construct the non-interacting Hamiltonian matrix
     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ)
+    #heatmap(Matrix(H0),yflip=true,clims=(-maximum(abs.(H0)),maximum(abs.(H0))),cmap=:bwr)
 
     # Diagonalize this Hamiltonian
     E, U = diagonalize_hamiltonian(H0)
@@ -70,8 +71,7 @@ end
 
 function diagonalize_hamiltonian(H)
     # we must compute all eigenvalues
-    # vals, vecs = eigen(Hermitian(Matrix(H)), sortby=nothing)
-    vals, vecs = eigen(Matrix(H), sortby=nothing)
+    vals, vecs = eigen(Hermitian(Matrix(H)))
     return vals, vecs
 end
 
