@@ -6,16 +6,19 @@ using Plots
 using Interpolations
 using NPZ
 
-L = 5 # the full system is L × L 
+savepath = joinpath(@__DIR__, "9Nx9Ny_results.npy")
+
+L = 9 # the full system is L × L 
 t = 1 # hopping 
+J = 3
 Q = (√5 - 1) / 2
 μ = 0
 pairing_symmetry = "s-wave"
 
-# other parameters
+# temperature & potential 
 Js = [0, 1, 2, 3, 4]
-V0s = collect(0.3:0.015:2)
-Ts = LinRange(0, 3.5, 40)
+V0s = [0.5, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57, 0.58, 0.59, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
+Ts = LinRange(0, 1, 20)
 
 λs = zeros(length(Js), length(V0s), length(Ts))
 for (k, J) in enumerate(Js)
@@ -24,35 +27,36 @@ for (k, J) in enumerate(Js)
             λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
             @show J, T, V0, λ
             λs[k, j, i] = λ
+
+            #save the results 
+            npzwrite(savepath, λs)
         end
     end
 end
 
-#save the results 
-savepath = joinpath(@__DIR__, "manyJ_results.npy")
-npzwrite(savepath, λs)
-
-# visualize everything 
-global p = plot()
-cmap = cgrad(:acton, length(V0s), categorical=true)
-for (j, V0) in enumerate(V0s)
-    global p = plot!(p, Ts, λs[j, :], label=nothing, c=cmap[j])
-    global p = scatter!(p, Ts, λs[j, :], label="V=$(V0)", c=cmap[j])
-end
-plot(p)
-
 # do interpolations 
-Tcs = []
-for j in 1:length(V0s)
-    knots = reverse(λs[j, :])
-    Interpolations.deduplicate_knots!(knots)
-    try
-        interp_linear = linear_interpolation(knots, reverse(Ts))
-        push!(Tcs, interp_linear(1))
-    catch e
-        push!(Tcs, NaN)
+Tcs = zeros(length(Js), length(V0s))
+for k in 1:length(Js)
+    for j in 1:length(V0s)
+        knots = reverse(λs[k, j, :])
+        Interpolations.deduplicate_knots!(knots)
+        try
+            interp_linear = linear_interpolation(knots, reverse(Ts))
+            Tcs[k, j] = interp_linear(1)
+        catch e
+            Tcs[k, j] = NaN
+        end
     end
 end
-plot(V0s, Tcs, xaxis=:log10, yaxis=:log10)
+
+p2 = plot()
+cmap = cgrad(:Set1_9, length(V0s), categorical=true)
+for (k, J) in enumerate(Js)
+    plot!(p2, V0s, Tcs[k, :], xaxis=:log10, yaxis=:log10, c=cmap[k], label=nothing)
+    scatter!(p2, V0s, Tcs[k, :], xaxis=:log10, yaxis=:log10, c=cmap[k], label="J=$(J)")
+end
+title!(p2, "Transition temperature")
+xlabel!(p2, "V")
+ylabel!(p2, "Tc")
 
 
