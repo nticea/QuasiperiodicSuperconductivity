@@ -14,8 +14,8 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
-Js = [3]
-V0s = [0.39]
+Js = [2]
+V0s = [0.16]
 Ts = [0]
 
 λs = zeros(length(Js), length(V0s), length(Ts))
