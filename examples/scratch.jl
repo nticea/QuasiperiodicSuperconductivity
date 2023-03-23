@@ -6,7 +6,7 @@ using Plots
 using Interpolations
 using NPZ
 
-L = 9 # the full system is L × L 
+L = 15 # the full system is L × L 
 t = 1 # hopping 
 J = 0
 Q = (√5 - 1) / 2
@@ -15,8 +15,12 @@ pairing_symmetry = "s-wave"
 
 # temperature & potential 
 Js = [2]
-V0s = [0.16]
+V0s = [0.54]
 Ts = [0]
+λ = λmax(Ts[1], L=L, t=t, J=Js[1], Q=Q, μ=μ, V0=V0s[1])
+@show λ
+
+@assert 1 == 0
 
 λs = zeros(length(Js), length(V0s), length(Ts))
 for (k, J) in enumerate(Js)

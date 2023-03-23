@@ -6,9 +6,9 @@ using Plots
 using Interpolations
 using NPZ
 
-savepath = joinpath(@__DIR__, "9Nx9Ny_results.npy")
+savepath = joinpath(@__DIR__, "15Nx15Ny_results.npy")
 
-L = 9 # the full system is L × L 
+L = 15 # the full system is L × L 
 t = 1 # hopping 
 J = 3
 Q = (√5 - 1) / 2
@@ -16,8 +16,12 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
+# Js = [0, 1, 2, 3, 4]
+# V0s = [0.16, 0.17, 0.18, 0.2, 0.25, 0.3, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
+# Ts = LinRange(0, 1, 20)
+
 Js = [0, 1, 2, 3, 4]
-V0s = [0.16, 0.17, 0.18, 0.2, 0.25, 0.3, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
+V0s = [0.5, 0.51, 0.52, 0.53, 0.54, 0.56, 0.58, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
 Ts = LinRange(0, 1, 20)
 
 λs = zeros(length(Js), length(V0s), length(Ts))

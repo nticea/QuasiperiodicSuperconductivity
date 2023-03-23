@@ -10,7 +10,7 @@ L = 9 # the full system is L × L
 
 # temperature & potential 
 Js = [0, 1, 2, 3, 4]
-V0s = [0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
+V0s = [0.16, 0.17, 0.18, 0.2, 0.25, 0.3, 0.37, 0.38, 0.39, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2]
 Ts = LinRange(0, 1, 20)
 
 λs = npzread("/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/examples/9Nx9Ny_results.npy")

@@ -10,11 +10,9 @@ function λmax(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real)
     #heatmap(Matrix(H0),yflip=true,clims=(-maximum(abs.(H0)),maximum(abs.(H0))),cmap=:bwr)
 
     # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
+    E, U = @time diagonalize_hamiltonian(H0)
 
     # Construct the pairfield susceptibility
-    #χ = @time pairfield_susceptibility(T, E=E, U=U)
-    #χ = @time pairfield_tensor(T, E=E, U=U)
     χ = @time pairfield_singlet(T, E=E, U=U)
 
     # Construct M (for s-wave, all we do is multiply χ by +V0)
@@ -80,55 +78,9 @@ function diagonalize_M(M)
     return decomp.R
 end
 
-# function pairfield_susceptibility(T; E, U)
-#     # χ is a Hermitian object, so we only need to compute the upper triangular 
-#     N = size(U)[1]
-#     χ = zeros(N, N, N, N)
-
-#     fs = fermi.(E, T)
-
-#     Threads.@threads for abcd in CartesianIndices(χ)
-#         χ[abcd] = χelem(Tuple(abcd)..., T=T, E=E, U=U, fs=fs)
-#     end
-
-#     return χ
-
-# end
-
-# function pairfield_tensor(T; E, U)
-#     N = size(U)[1] # Lx x Ly  
-
-#     # indices for all of our tensors 
-#     n, m, a, b, c, d = Index(N, "n"), Index(N, "m"), Index(N, "a"), Index(N, "b"), Index(N, "c"), Index(N, "d")
-
-#     # make the prefactor (validated -- this works correctly)
-#     fs = fermi.(E, T)
-#     fnm = zeros(N, N)
-#     Enm = zeros(N, N)
-#     for i in 1:N
-#         fnm[:, i] = fs .+ fs[i]
-#         Enm[:, i] = E .+ E[i]
-#     end
-#     Pnm = (1 .- fnm) ./ Enm
-#     P = ITensor(Pnm, n, m)
-
-#     # make the U tensors
-#     Uan, Ucn, Ubm, Udm = ITensor(U, a, prime(n, 1)), ITensor(U, c, prime(n, 2)), ITensor(U, b, prime(m, 1)), ITensor(U, d, prime(m, 2))
-#     Udn, Ucm = ITensor(U, d, prime(n, 2)), ITensor(U, c, prime(m, 2))
-#     δn = delta(n, prime(n, 1), prime(n, 2))
-#     δm = delta(m, prime(m, 1), prime(m, 2))
-
-#     # Contract the tensors together
-#     U1 = dag(Uan) * δn * Ucn * P * δm * dag(Ubm) * Udm
-#     U2 = dag(Uan) * δn * Udn * P * δm * dag(Ubm) * Ucm
-#     χ = array(U1 + U2)
-
-#     return χ
-# end
-
 function pairfield_singlet(T::Real; E, U)
     N = size(U)[1]
-    χ = zeros(N, N, N, N)
+    χ = zeros(N, N)
 
     # make the prefactor
     fs = fermi.(E, T)
@@ -140,10 +92,19 @@ function pairfield_singlet(T::Real; E, U)
     end
     Pnm = (1 .- fnm) ./ Enm
 
+    # upper triangular part 
     for r in 1:N
-        for rprime in 1:N
-            χ[r, r, rprime, rprime] = χelem(r, r, rprime, rprime; U=U, P=Pnm)
+        for rprime in (r+1):N
+            χ[r, rprime] = χelem(r, r, rprime, rprime; U=U, P=Pnm)
         end
+    end
+
+    # lower triangular part
+    χ += χ'
+
+    # diagonal 
+    for r in 1:N
+        χ[r, r] = χelem(r, r, r, r; U=U, P=Pnm)
     end
 
     return χ
@@ -153,8 +114,8 @@ function χelem(a::Int, b::Int, c::Int, d::Int; U, P)
     N = size(U)[1] # this is L^2 
 
     χelem = 0
-    for n in 1:N#cat(collect(1:N), collect(1:N)) # from 1 to 2L*L
-        for m in 1:N#vcat(collect(1:N), collect(1:N)) # from 1 to 2L*L
+    for n in 1:N
+        for m in 1:N
             χelem += P[n, m] * (conj(U[a, n]) * U[c, n] * conj(U[b, m]) * U[d, m] +
                                 conj(U[a, n]) * U[d, n] * conj(U[b, m]) * U[c, m])
         end
@@ -164,14 +125,5 @@ function χelem(a::Int, b::Int, c::Int, d::Int; U, P)
 end
 
 function make_M(χ, V0)
-    M = χ * V0 # scale by V0
-    N = size(χ)[1]
-
-    # reshape M into a 2dx2d matrix 
-    a, b, c, d = Index(N, "a"), Index(N, "b"), Index(N, "c"), Index(N, "d")
-    M = ITensor(M, a, b, c, d)
-    ab, cd = combiner(a, b), combiner(c, d)
-    M = M * ab * cd # combine the indices 
-
-    return array(M)
+    return χ * V0 # scale by V0
 end
