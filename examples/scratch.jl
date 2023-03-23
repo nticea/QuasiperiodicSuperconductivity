@@ -14,9 +14,9 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # temperature & potential 
-Js = [2]
-V0s = [0.54]
-Ts = [0]
+Js = [0]
+V0s = [0.5]
+Ts = [1e-4]
 λ = λmax(Ts[1], L=L, t=t, J=Js[1], Q=Q, μ=μ, V0=V0s[1])
 @show λ
 

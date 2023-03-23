@@ -28,9 +28,15 @@ Ts = LinRange(0, 1, 20)
 for (k, J) in enumerate(Js)
     for (i, T) in enumerate(Ts)
         for (j, V0) in enumerate(V0s)
-            λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
-            @show J, T, V0, λ
-            λs[k, j, i] = λ
+            try
+                λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
+                @show J, T, V0, λ
+                λs[k, j, i] = λ
+            catch e
+                @show e
+                @show J, T, V0, λ
+                λs[k, j, i] = NaN
+            end
 
             #save the results 
             npzwrite(savepath, λs)
