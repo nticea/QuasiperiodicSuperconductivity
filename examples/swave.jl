@@ -34,7 +34,7 @@ for (k, J) in enumerate(Js)
                 λs[k, j, i] = λ
             catch e
                 @show e
-                @show J, T, V0, λ
+                @show J, T, V0
                 λs[k, j, i] = NaN
             end
 
