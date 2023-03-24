@@ -6,7 +6,7 @@ using Plots
 using Interpolations
 using NPZ
 
-savepath = joinpath(@__DIR__, "15Nx15Ny_results.npy")
+savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.npy")
 
 L = 16 # the full system is L × L 
 t = 1 # hopping 
