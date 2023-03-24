@@ -6,14 +6,14 @@ using Plots
 using Interpolations
 using NPZ
 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.npy")
-
 L = 16 # the full system is L × L 
 t = 1 # hopping 
 J = 3
 Q = (√5 - 1) / 2
 μ = 0
 pairing_symmetry = "s-wave"
+
+savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.npy")
 
 # temperature & potential 
 # Js = [0, 1, 2, 3, 4]
