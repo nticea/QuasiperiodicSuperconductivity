@@ -121,7 +121,7 @@ function χelem(a::Int, b::Int, c::Int, d::Int; U, P)
         end
     end
 
-    return 2 * χelem
+    return 1 / 2 * χelem
 end
 
 function make_M(χ, V0)
