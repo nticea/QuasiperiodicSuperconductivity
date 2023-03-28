@@ -19,16 +19,16 @@ function λmax(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real)
     #heatmap(Matrix(H0),yflip=true,clims=(-maximum(abs.(H0)),maximum(abs.(H0))),cmap=:bwr)
 
     # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
+    E, U = @time diagonalize_hamiltonian(H0)
 
     # Construct the pairfield susceptibility
-    χ = pairfield_singlet(T, E=E, U=U)
+    χ = @time pairfield_singlet(T, E=E, U=U)
 
     # Construct M (for s-wave, all we do is multiply χ by +V0)
     M = make_M(χ, V0)
 
     # Calculate Tc by finding the eigenvalues of M
-    λs = diagonalize_M(M)
+    λs = @time diagonalize_M(M)
 
     return λs[1]
 end
