@@ -6,7 +6,7 @@ using Plots
 using ProgressBars
 
 ## PARAMETERS ##
-L = 39 # the full system is L × L 
+L = 45 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
