@@ -13,12 +13,16 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # saving information 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.npy")
+savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results_J1.h5")
 
 # J, V0, T 
-Js = [0, 1, 2, 3]
-V0s = expspace(-0.8, 0.7, 20)
-Ts = expspace(-3, 0, 20)
+# Js = [0, 1, 2, 3]
+# V0s = expspace(-0.8, 0.7, 20)
+# Ts = expspace(-3, 0, 20)
+# λs = zeros(length(Js), length(V0s), length(Ts))
+Js = [1]
+V0s = expspace(0.2, 0.3, 10)
+Ts = expspace(-3, -1, 20)
 λs = zeros(length(Js), length(V0s), length(Ts))
 
 # for storing the results

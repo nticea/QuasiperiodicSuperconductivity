@@ -16,9 +16,9 @@ pairing_symmetry = "s-wave"
 savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.npy")
 
 # J, V0, T 
-Js = [0, 1, 2, 3]
-V0s = expspace(-0.8, 0.7, 20)
-Ts = expspace(-3, 0, 20)
+Js = [1]
+V0s = expspace(0.2, 0.3, 10)
+Ts = expspace(-3, -1, 20)
 λs = zeros(length(Js), length(V0s), length(Ts))
 
 # for storing the results
@@ -37,7 +37,7 @@ for (k, J) in enumerate(Js) # iterate through all J values
 
         # interim update results & save
         global results = Results(L, λs, Js, V0s, Ts)
-        save_structs(results, savepath)
+        #save_structs(results, savepath)
     end
 end
 
