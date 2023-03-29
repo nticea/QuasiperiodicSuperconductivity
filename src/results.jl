@@ -53,7 +53,6 @@ function already_calculated(df::DataFrame; L, J, V0, T)
 end
 
 function load_dataframe(path)
-
     try # try loading the DataFrames
         return DataFrame(CSV.File(path))
     catch error_reading_dataframe # if the file does not exist, create a new dataframe
@@ -61,7 +60,42 @@ function load_dataframe(path)
         nodenames = ["L", "J", "V0", "T", "λ"]
         return DataFrame([name => [] for name in nodenames])
     end
+end
 
+function find_Tc(results::Results)
+    L, λs, Js, V0s, Ts = results.L, results.λs, results.Js, results.V0s, results.Ts
 
+    # do interpolations 
+    Tcs = zeros(length(Js), length(V0s))
+    for k in 1:length(Js)
+        for j in 1:length(V0s)
+            knots = reverse(λs[k, j, :])
+            Interpolations.deduplicate_knots!(knots, move_knots=true)
+            try
+                interp_linear = linear_interpolation(knots, reverse(Ts))
+                Tcs[k, j] = interp_linear(1)
+            catch e
+                Tcs[k, j] = NaN
+            end
+        end
+    end
+
+    return Tcs
+end
+
+function plot_Tcs(results::Results)
+    L, λs, Js, V0s, Ts = results.L, results.λs, results.Js, results.V0s, results.Ts
+    Tcs = find_Tc(results)
+
+    p2 = plot()
+    cmap = cgrad(:Set1_9, length(V0s), categorical=true)
+    for (k, J) in enumerate(Js)
+        plot!(p2, V0s, Tcs[k, :], xaxis=:log10, yaxis=:log10, c=cmap[k], label=nothing)
+        scatter!(p2, V0s, Tcs[k, :], xaxis=:log10, yaxis=:log10, c=cmap[k], label="J=$(J)")
+    end
+
+    title!(p2, "Transition temperature for $(L)x$(L) square lattice")
+    xlabel!(p2, "V")
+    ylabel!(p2, "Tc")
 end
 

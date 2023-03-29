@@ -4,6 +4,8 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 include("../src/model.jl")
 using Plots
 using ProgressBars
+using CSV
+using DataFrames
 
 ## PARAMETERS ##
 L = 29 # the full system is L × L 
@@ -13,37 +15,33 @@ Q = (√5 - 1) / 2
 pairing_symmetry = "s-wave"
 
 # saving information 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results_J1.h5")
+savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.csv")
 
 # J, V0, T 
-# Js = [0, 1, 2, 3]
-# V0s = expspace(-0.8, 0.7, 20)
-# Ts = expspace(-3, 0, 20)
-# λs = zeros(length(Js), length(V0s), length(Ts))
-Js = [1]
-V0s = expspace(0.2, 0.3, 10)
-Ts = expspace(-3, -1, 20)
+Js = [0, 3]
+V0s = LinRange(0.81, 0.975, 20)#expspace(-0.8, 0.7, 20)
+Ts = expspace(-3, 0, 20)
 λs = zeros(length(Js), length(V0s), length(Ts))
 
-# for storing the results
-global results = Results(L, λs, Js, V0s, Ts)
+# load in the dataframe, if it exists. If not, make a new one
+df = load_dataframe(savepath)
 
 ## RUNNING THE CODE ## 
-for (k, J) in enumerate(Js) # iterate through all J values
+for J in Js # iterate through all J values
     println("Running J=$(J)")
     iter = ProgressBar(1:length(Ts))
-    for i in iter # iterate through all temperatures
-        T = Ts[i]
-        for (j, V0) in enumerate(V0s) # iterature through all V0 values 
-            # calculate λmax at a given (J,T,V0)
-            λs[k, j, i] = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
+    for t in iter # iterate through all temperatures
+        T = Ts[t]
+        for V0 in V0s # iterature through all V0 values 
+            # check whether this particular (J,T,V0) combo has been already computed 
+            if !already_calculated(df; L=L, J=J, V0=V0, T=T)
+                # calculate λmax at a given (J,T,V0)
+                λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
+                update_results!(df; L=L, λ=λ, J=J, V0=V0, T=T)
+                CSV.write(savepath, df)
+            end
         end
-
-        # interim update results & save
-        global results = Results(L, λs, Js, V0s, Ts)
-        save_structs(results, savepath)
     end
 end
 
-# interpolate to find the Tcs and then plot 
-plot_Tcs(results)
+
