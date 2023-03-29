@@ -39,6 +39,7 @@ for J in Js # iterate through all J values
                 λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
                 update_results!(df; L=L, λ=λ, J=J, V0=V0, T=T)
                 CSV.write(savepath, df)
+                flush(stdout)
             end
         end
     end
