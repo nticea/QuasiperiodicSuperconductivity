@@ -1,4 +1,5 @@
 using HDF5
+using DataFrames
 
 struct Results
     L
@@ -40,3 +41,27 @@ function load_results(loadpath::String)
     d = read(f)
     return Results(d["L"], d["λs"], d["Js"], d["V0s"], d["Ts"])
 end
+
+function update_results!(df::DataFrame; L, λ, J, V0, T)
+    df2 = DataFrame(L=[L], λ=[λ], J=[J], V0=[V0], T=[T])
+    append!(df, df2)
+end
+
+function already_calculated(df::DataFrame; L, J, V0, T)
+    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.T.==T), :]
+    return size(sub)[1] > 0
+end
+
+function load_dataframe(path)
+
+    try # try loading the DataFrames
+        return DataFrame(CSV.File(path))
+    catch error_reading_dataframe # if the file does not exist, create a new dataframe
+        @show error_reading_dataframe
+        nodenames = ["L", "J", "V0", "T", "λ"]
+        return DataFrame([name => [] for name in nodenames])
+    end
+
+
+end
+

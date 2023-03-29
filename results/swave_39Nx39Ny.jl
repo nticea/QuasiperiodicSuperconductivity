@@ -8,7 +8,7 @@ using CSV
 using DataFrames
 
 ## PARAMETERS ##
-L = 9 # the full system is L × L 
+L = 39 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -43,5 +43,3 @@ for J in Js # iterate through all J values
         end
     end
 end
-
-
