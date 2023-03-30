@@ -7,7 +7,14 @@ using CSV
 using DataFrames
 using StatsPlots
 
-loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/examples/29Nx29Ny_results.csv"
+# loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/examples/29Nx29Ny_results.csv"
+# loadpath2 = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/examples/29Nx29Ny_results_copy.csv"
+# df = DataFrame(CSV.File(loadpath))
+# df_old = DataFrame(CSV.File(loadpath2))
+
+# append!(df, df_old)
+
+loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/results/49Nx49Ny_results.csv"
 df = DataFrame(CSV.File(loadpath))
 
 # Get the unique Js, V0s from the dataframe 
@@ -47,10 +54,13 @@ for J in Js
 end
 
 # Now, do plotting 
-@df Tc_df scatter(
+@df Tc_df plot(
     :V0,
     :Tc,
     group=:J,
-    m=(0.5, [:+ :h :star7 :circle], 8),
+    m=(0.75, [:+ :h :star7 :circle], 5),
     xaxis=:log10, yaxis=:log10,
 )
+title!("Transition temperature")
+xlabel!("V")
+ylabel!("Tc")
