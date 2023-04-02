@@ -18,7 +18,7 @@ files = readdir(@__DIR__)
 #         append!(df, dfi)
 #     end
 # end
-loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/results/39Nx39Ny_results.csv"
+loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/results/9Nx9Ny_results.csv"
 df = DataFrame(CSV.File(loadpath))
 
 Tc_df = find_Tc(df)

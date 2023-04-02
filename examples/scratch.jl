@@ -27,12 +27,12 @@ Ts = expspace(-3, 0, 20)
 df = load_dataframe(savepath)
 
 ## RUNNING THE CODE ## 
-for J in Js # iterate through all J values
+for (k, J) in enumerate(Js)
     println("Running J=$(J)")
     iter = ProgressBar(1:length(Ts))
-    for t in iter # iterate through all temperatures
-        T = Ts[t]
-        for V0 in V0s # iterature through all V0 values 
+    for i in iter # iterate through all temperatures
+        T = Ts[i]
+        for (j, V0) in enumerate(V0s) # iterature through all V0 values 
             # check whether this particular (J,T,V0) combo has been already computed 
             if !already_calculated(df; L=L, J=J, V0=V0, T=T)
                 # calculate λmax at a given (J,T,V0)
@@ -43,5 +43,41 @@ for J in Js # iterate through all J values
         end
     end
 end
+
+λs = zeros(length(Js), length(V0s), length(Ts))
+for (k, J) in enumerate(Js)
+    for (i, T) in enumerate(Ts)
+        for (j, V0) in enumerate(V0s)
+            λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
+            @show J, T, V0, λ
+            λs[k, j, i] = λ
+        end
+    end
+end
+
+# do interpolations 
+Tcs = zeros(length(Js), length(V0s))
+for k in 1:length(Js)
+    for j in 1:length(V0s)
+        knots = reverse(λs[k, j, :])
+        Interpolations.deduplicate_knots!(knots)
+        try
+            interp_linear = linear_interpolation(knots, reverse(Ts))
+            Tcs[k, j] = interp_linear(1)
+        catch e
+            Tcs[k, j] = NaN
+        end
+    end
+end
+
+p2 = plot()
+cmap = cgrad(:Set1_9, length(V0s), categorical=true)
+for (k, J) in enumerate(Js)
+    plot!(p2, V0s, Tcs[k, :], xaxis=:log10, yaxis=:log10, c=cmap[k], label=nothing)
+    scatter!(p2, V0s, Tcs[k, :], xaxis=:log10, yaxis=:log10, c=cmap[k], label="J=$(J)")
+end
+title!(p2, "Transition temperature for $(L)x$(L) square lattice")
+xlabel!(p2, "V")
+ylabel!(p2, "Tc")
 
 

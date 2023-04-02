@@ -14,7 +14,7 @@ using StatsPlots
 
 # append!(df, df_old)
 
-loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/results/49Nx49Ny_results.csv"
+loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/examples/9Nx9Ny_results.csv"
 df = DataFrame(CSV.File(loadpath))
 
 # Get the unique Js, V0s from the dataframe 
