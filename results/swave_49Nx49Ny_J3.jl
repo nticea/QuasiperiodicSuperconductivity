@@ -30,8 +30,8 @@ df = load_dataframe(savepath)
 for J in Js # iterate through all J values
     println("Running J=$(J)")
     iter = ProgressBar(1:length(Ts))
-    for t in iter # iterate through all temperatures
-        T = Ts[t]
+    for i in iter # iterate through all temperatures
+        T = Ts[i]
         for V0 in V0s # iterature through all V0 values 
             # check whether this particular (J,T,V0) combo has been already computed 
             if !already_calculated(df; L=L, J=J, V0=V0, T=T)
