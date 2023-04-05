@@ -19,8 +19,8 @@ savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results_J3.csv")
 
 # J, V0, T 
 Js = [3]
-V0s = expspace(-0.5, 0.25, 20)
-Ts = expspace(-3.5, 0, 20)
+V0s = expspace(-0.9, 0.3, 20)
+Ts = expspace(-4, 0, 20)
 λs = zeros(length(Js), length(V0s), length(Ts))
 
 # load in the dataframe, if it exists. If not, make a new one
