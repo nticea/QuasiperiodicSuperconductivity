@@ -8,7 +8,7 @@ using CSV
 using DataFrames
 
 ## PARAMETERS ##
-L = 29 # the full system is L × L 
+L = 19 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
