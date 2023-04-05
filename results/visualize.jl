@@ -13,7 +13,7 @@ files = readdir(@__DIR__)
 nodenames = ["L", "J", "V0", "T", "λ"]
 df = DataFrame([name => [] for name in nodenames])
 for f in files
-    if startswith(f, "$(L)Nx$(L)Ny")
+    if startswith(f, "$(L)Nx$(L)Ny_results")
         dfi = DataFrame(CSV.File(joinpath(@__DIR__, f)))
         append!(df, dfi)
     end

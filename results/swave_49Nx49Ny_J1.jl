@@ -19,7 +19,7 @@ savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results_J1.csv")
 
 # J, V0, T 
 Js = [1]
-V0s = expspace(-0.5, 1.5, 20)
+V0s = expspace(-0.5, 0.25, 20)
 Ts = expspace(-3.5, 0, 20)
 λs = zeros(length(Js), length(V0s), length(Ts))
 
