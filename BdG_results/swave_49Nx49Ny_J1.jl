@@ -18,7 +18,7 @@ pairing_symmetry = "s-wave"
 tol = 1e-4
 
 # saving information 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.csv")
+savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results_J1.csv")
 
 # J, V0, T 
 Js = [1]

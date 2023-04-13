@@ -10,11 +10,11 @@ using CSV
 using DataFrames
 using StatsPlots
 
-loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/BdG_results/9Nx9Ny_results.csv"
+loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/BdG_results/49Nx49Ny_results.csv"
 df = DataFrame(CSV.File(loadpath))
 
 ## PARAMETERS ##
-L = 9 # the full system is L × L 
+L = 49 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
