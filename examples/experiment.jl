@@ -1,30 +1,31 @@
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
-include("../src/model.jl")
 using Plots
-using ProgressBars
+using LinearAlgebra
 
-## PARAMETERS ##
-L = 49 # the full system is L × L 
-t = 1 # hopping 
-Q = (√5 - 1) / 2
-μ = 1e-8
-pairing_symmetry = "s-wave"
+function V(kn, km)
+    V(kn + km)
+end
 
-# saving information 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.npy")
+function V(k)
+    cos(k)
+    # 1 / 2 * (-2 + cos(2 * kx) + 2 * cos(ky) + cos(kx) * (2 + 4 * cos(ky)) + cos(2 * ky)) * sec(ky / 2)^2
+end
 
-# J, V0, T
-J = 2
-V0 = 1
-T = 1e-2
-λ = @time λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
-@show λ
-flush(stdout)
-println("Repeating due to compilation time")
-λ = @time λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
-flush(stdout)
+niter = 100
+N = 50
+ks = LinRange(-2 * π, 2 * π, N)
+err = []
 
-results = Results(L, λ, J, V0, T)
-save_structs(results, savepath)
+global g0 = rand(N)
+for _ in 1:niter
+    for kn in ks
+        for km in ks
+            g = V(kn, km) ./ g0
+            global g0 = copy(g)
+        end
+    end
+end
+
+plot(err)

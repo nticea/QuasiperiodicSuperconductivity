@@ -1,7 +1,8 @@
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
-include("../src/model.jl")
+include("../src/results.jl")
+
 using Plots
 using CSV
 using DataFrames

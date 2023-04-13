@@ -7,30 +7,8 @@ using Tullio
 using Einsum
 using Interpolations
 
-include("../src/results.jl")
-
 function expspace(start, stop, length)
     exp10.(range(start, stop, length=length))
-end
-
-function λmax(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real)
-    # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ)
-    #heatmap(Matrix(H0),yflip=true,clims=(-maximum(abs.(H0)),maximum(abs.(H0))),cmap=:bwr)
-
-    # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
-
-    # Construct the pairfield susceptibility
-    χ = pairfield_singlet(T, E=E, U=U)
-
-    # Construct M (for s-wave, all we do is multiply χ by +V0)
-    M = make_M(χ, V0)
-
-    # Calculate Tc by finding the eigenvalues of M
-    λs = diagonalize_M(M)
-
-    return λs[1]
 end
 
 function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool=true)
@@ -49,6 +27,12 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
     Hint = spdiagm(Hint)
 
     return Ht + Hint
+end
+
+function diagonalize_hamiltonian(H)
+    # we must compute all eigenvalues
+    vals, vecs = eigen(Hermitian(Matrix(H)))
+    return vals, vecs
 end
 
 function square_lattice_kinetic(; L::Int, t::Real, periodic::Bool=true)
@@ -76,42 +60,20 @@ function fermi(ε::Real, T::Real)
     1 / (exp(ε / T) + 1)
 end
 
-function diagonalize_hamiltonian(H)
-    # we must compute all eigenvalues
-    vals, vecs = eigen(Hermitian(Matrix(H)))
-    return vals, vecs
-end
-
-function diagonalize_M(M)
-    decomp, _ = partialschur(M, nev=1, tol=1e-6, which=LM())
-    return decomp.R
-end
-
-function pairfield_singlet(T::Real; E, U)
-    N = size(U)[1]
-    χ = zeros(N, N)
-
-    Uconj = conj.(U)
-
-    # make the prefactor
-    fs = fermi.(E, T)
-    fnm = zeros(N, N)
-    Enm = zeros(N, N)
-    for i in 1:N
-        fnm[:, i] = fs .+ fs[i]
-        Enm[:, i] = E .+ E[i]
+function plot_potential(; L::Int, J::Real, Q::Real)
+    potmat = zeros(L, L)
+    for x in 1:L
+        for y in 1:L
+            potmat[x, y] = aubry_andre(x, y; J=J, Q=Q)
+        end
     end
-    P = (1 .- fnm) ./ Enm
+    h = heatmap(potmat)
+    h = xticks(h, collect(1:2:L))
+    h = yticks(h, collect(1:2:L))
+    h = xlabel(h, "Site (x)")
+    h = ylabel(h, "Site (y)")
+    h = title(h, "Potential")
 
-    @einsimd PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
-    @einsimd UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
-    PUU = reshape(PUU, N, N * N)
-    UU = reshape(UU, N * N, N)
-    χ = PUU * UU
-
-    return χ
+    return h
 end
 
-function make_M(χ, V0)
-    return χ * V0 # scale by V0
-end

@@ -2,6 +2,8 @@
 using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 include("../src/model.jl")
+include("../src/meanfield.jl")
+
 using Plots
 using ProgressBars
 using CSV

@@ -62,7 +62,7 @@ function load_dataframe(path)
     end
 end
 
-function find_Tc(results::Results)
+function find_Tc(results::Results; interp_value::Real=1)
     L, λs, Js, V0s, Ts = results.L, results.λs, results.Js, results.V0s, results.Ts
 
     # do interpolations 
@@ -73,7 +73,7 @@ function find_Tc(results::Results)
             Interpolations.deduplicate_knots!(knots, move_knots=true)
             try
                 interp_linear = linear_interpolation(knots, reverse(Ts))
-                Tcs[k, j] = interp_linear(1)
+                Tcs[k, j] = interp_linear(interp_value)
             catch e
                 Tcs[k, j] = NaN
             end
@@ -83,7 +83,7 @@ function find_Tc(results::Results)
     return Tcs
 end
 
-function find_Tc(df::DataFrame)
+function find_Tc(df::DataFrame; interp_value::Real=1)
 
     # Get the unique Js, V0s from the dataframe 
     Js, V0s = unique(df.J), unique(df.V0)
@@ -107,7 +107,7 @@ function find_Tc(df::DataFrame)
                 Interpolations.deduplicate_knots!(knots, move_knots=true)
                 try
                     interp_linear = linear_interpolation(knots, reverse(Ts))
-                    Tc = interp_linear(1)
+                    Tc = interp_linear(interp_value)
                     # Put it into a new dataframe indexed by (J,V0,Tc)
                     df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0])
                     append!(Tc_df, df2)
