@@ -10,7 +10,7 @@ using CSV
 using DataFrames
 
 ## PARAMETERS ##
-L = 49 # the full system is L × L 
+L = 20 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -29,7 +29,7 @@ Ts = expspace(-3, 0, 20)
 # load in the dataframe, if it exists. If not, make a new one
 df = load_dataframe(savepath)
 
-# the finite size gap is determined by the gap in the J=0 system 
+# the finite size gap is determined by the largest gap in the J=0 system 
 ΔE = finite_size_gap(L=L, t=t, J=0, Q=Q, μ=μ)
 fsgap = maximum(ΔE)
 @show fsgap

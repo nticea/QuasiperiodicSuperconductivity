@@ -10,16 +10,16 @@ using CSV
 using DataFrames
 using StatsPlots
 
-loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/BdG_results/49Nx49Ny_results.csv"
+loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/BdG_results/20Nx20Ny_results.csv"
 df = DataFrame(CSV.File(loadpath))
 
 ## PARAMETERS ##
-L = 49 # the full system is L × L 
+L = 20 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
 pairing_symmetry = "s-wave"
-tol = 1e-6
+tol = 1e-4
 
 # read files
 # files = readdir(@__DIR__)
@@ -37,6 +37,10 @@ tol = 1e-6
 
 ΔE = finite_size_gap(L=L, t=t, J=0, Q=Q, μ=μ)
 fsgap = maximum(ΔE)
+
+## REMOVE LATER ## 
+fsgap = norm(ΔE) / length(ΔE)
+## END REMOVE 
 
 Tc_df = find_Tc(df, interp_value=fsgap)
 

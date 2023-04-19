@@ -22,14 +22,16 @@ function BdG_iteration(M::Matrix{Float64}, Δi; V0::Real, T::Real)
     # Fill in the off-diagonal blocks 
     M[1:N, (N+1):end] .= Δi
     M[(N+1):end, 1:N] .= conj.(Δi)
+
     # diagonalize this matrix to get the eigenvalues 
     E, UV = eigen(Hermitian(M))
 
+    # check this !!!
     U = UV[1:N, :]
     V = UV[(N+1):end, :]
 
     # compute the gap parameter 
-    @einsimd Δnew[i] := V0 / 2 * U[i, n] * V[i, n] * tanh(E[n] / (2 * T))
+    @einsimd Δnew[i] := V0 / 2 * U[i, n] * conj(V[i, n]) * tanh(E[n] / (2 * T))
 
     return Δnew
 end
@@ -80,5 +82,6 @@ function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, ni
     Δi, conv = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol)
 
     # the gap is the maximum value of Δi 
+    # Δ = norm(Δi) / length(Δi)
     Δ = maximum(Δi)
 end

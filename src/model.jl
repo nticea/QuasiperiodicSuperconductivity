@@ -51,8 +51,13 @@ function site_to_coordinate(r; L::Int)
     return x, y
 end
 
-function aubry_andre(x, y; J::Real, Q::Real)
-    J * (cos(2 * π * Q * (x + y)) - cos(2 * π * Q * (x - y)))
+function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing)
+    if isnothing(L)
+        return J * (cos(2 * π * Q * (x + y)) - cos(2 * π * Q * (x - y)))
+    else
+        Q̃ = floor(Int, Q * L) / L
+        return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
+    end
 end
 
 function fermi(ε::Real, T::Real)
