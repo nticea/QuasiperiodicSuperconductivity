@@ -9,8 +9,8 @@ using Interpolations
 
 include("../src/results.jl")
 
-function finite_size_gap(; L::Int, t::Real, J::Real, Q::Real, μ::Real)
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ)
+function finite_size_gap(; L::Int, t::Real, J::Real, Q::Real, μ::Real, θ::Union{Real,Nothing})
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ)
     E, _ = diagonalize_hamiltonian(H0)
     sort!(E)
     ΔE = [E[i+1] - E[i] for i in 1:(length(E)-1)]
@@ -41,19 +41,20 @@ function rms(a, b)
     norm(a - b) / prod(size(a))
 end
 
-function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, niter::Int=20, ε::Real=1e-2, tol::Union{Real,Nothing}=nothing)
+function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, niter::Int=5, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing})
     N = L * L
 
     # make the BdG equation matrix (fill in just diagonals)
     M = zeros(2 * N, 2 * N)
-    hij = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ)
+    hij = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ)
     M[1:N, 1:N] .= hij
     M[(N+1):end, (N+1):end] .= -conj.(hij)
 
     ## Converge Δ
 
-    # make an initial guess for the gap parameter -- all ones along diagonal
-    Δi = ε * Matrix(I, (N, N))
+    # make an initial guess for the gap parameter -- all ones along diagonal, size of fs gap 
+    fsgap = maximum(finite_size_gap(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ))
+    Δi = fsgap * Matrix(I, (N, N))
     Δi_diag_prev = diag(Δi)
 
     # iterate 
@@ -65,7 +66,8 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, 
         # calculate convergence information  
         ΔΔ = rms(Δi_diag, Δi_diag_prev) # the change in Δ from one iteration to the next 
         push!(conv, ΔΔ)
-        if !isnothing(tol) && ΔΔ <= tol
+        @show (ΔΔ / maximum(Δi_diag))
+        if !isnothing(tol) && (ΔΔ / maximum(Δi_diag) <= tol) && (n > 1)
             # if this change is below a certain tolerance, stop iterating and return 
             return Δi_diag, conv
         end
@@ -77,11 +79,10 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, 
     return Δi_diag_prev, conv # the converged value for Δ
 end
 
-function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, niter::Int=20, ε::Real=1e-2, tol::Union{Real,Nothing}=nothing)
+function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, niter::Int=20, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing})
     # converge the BdG 
-    Δi, conv = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol)
+    Δi, conv = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, niter=niter)
 
     # the gap is the maximum value of Δi 
-    # Δ = norm(Δi) / length(Δi)
-    Δ = maximum(Δi)
+    Δ = maximum(abs.(Δi))
 end
