@@ -40,7 +40,10 @@ function rms(a, b)
     norm(a - b) / prod(size(a))
 end
 
-function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, niter::Int=100, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing})
+function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool,
+    V0::Real, niter::Int=100, tol::Union{Real,Nothing}=nothing,
+    θ::Union{Real,Nothing}, fsgap::Union{Real,Nothing}=nothing)
+
     N = L * L
 
     # make the BdG equation matrix (fill in just block diagonals)
@@ -49,9 +52,11 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
     M[1:N, 1:N] .= hij
     M[(N+1):end, (N+1):end] .= -conj.(hij)
 
+    if isnothing(fsgap)
+        fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, periodic=periodic))
+    end
+
     # initial gues for Δ_i
-    fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, periodic=periodic))
-    @show fsgap
     Δi = fsgap * Matrix(I, (N, N))
     Δi_diag_prev = diag(Δi)
 
@@ -62,13 +67,10 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
         Δi_diag = BdG_iteration(M, Δi; V0=V0, T=T) # perform one BdG iteration and get the new Δi 
         Δi = diagm(Δi_diag) # make a matrix with Δi along the diagonals
 
-        @show maximum(Δi_diag)
-
         # calculate convergence information  
         ΔΔ = abs(maximum(abs.(Δi_diag)) - maximum(abs.(Δi_diag_prev)))
         push!(conv, (ΔΔ / maximum(Δi_diag)))
         push!(max_Δ, maximum(Δi_diag))
-        @show conv[end]
         if !isnothing(tol) && (ΔΔ / maximum(Δi_diag) <= tol) && (n > 1)
             # if this change is below a certain tolerance, stop iterating and return 
             return Δi_diag, conv
@@ -81,50 +83,11 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
     return Δi_diag_prev, conv, max_Δ # the converged value for Δ
 end
 
-# function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, V1::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing})
-#     N = L * L
+function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing})
+    fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, periodic=periodic))
 
-#     # make the BdG equation matrix (fill in just diagonals)
-#     M = zeros(2 * N, 2 * N)
-#     hij = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ)
-#     M[1:N, 1:N] .= hij
-#     M[(N+1):end, (N+1):end] .= -conj.(hij)
-
-#     ## Converge Δ
-
-#     # make an initial guess for the gap parameter -- all ones along diagonal, size of fs gap 
-#     fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ))
-#     @show fsgap
-#     Δi = fsgap * Matrix(I, (N, N))
-#     Δi_diag_prev = diag(Δi)
-
-#     # iterate 
-#     conv = []
-#     for n in 1:niter
-#         Δi_diag = BdG_iteration(M, Δi; V0=V0, T=T) # perform one BdG iteration and get the new Δi 
-#         Δi = diagm(Δi_diag) # make a matrix with Δi along the diagonals 
-
-#         @show maximum(Δi_diag)
-
-#         # calculate convergence information  
-#         ΔΔ = rms(Δi_diag, Δi_diag_prev) # the change in Δ from one iteration to the next 
-#         push!(conv, ΔΔ)
-#         @show (ΔΔ / maximum(Δi_diag))
-#         if !isnothing(tol) && (ΔΔ / maximum(Δi_diag) <= tol) && (n > 1)
-#             # if this change is below a certain tolerance, stop iterating and return 
-#             return Δi_diag, conv
-#         end
-
-#         # if not, keep iterating 
-#         Δi_diag_prev = Δi_diag
-#     end
-
-#     return Δi_diag_prev, conv # the converged value for Δ
-# end
-
-function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing})
     # converge the BdG 
-    Δi, conv = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, niter=niter, periodic=periodic)
+    Δi, conv = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, niter=niter, periodic=periodic, fsgap=fsgap)
 
     # the gap is the maximum value of Δi 
     Δ = maximum(abs.(Δi))
