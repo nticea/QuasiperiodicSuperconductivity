@@ -9,6 +9,7 @@ using Plots
 using CSV
 using DataFrames
 using StatsPlots
+using StatsBase
 
 # loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/BdG_results/20Nx20Ny_results.csv"
 # df = DataFrame(CSV.File(loadpath))
@@ -18,9 +19,10 @@ L = 55 # the full system is L × L
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
-θ = nothing
+θ = π / 7
 pairing_symmetry = "s-wave"
 tol = 1e-4
+periodic = true
 
 # read files
 files = readdir(@__DIR__)
@@ -36,8 +38,26 @@ end
 @assert length(unique(df.L)) == 1
 @assert df.L[1] == L
 
-ΔE = finite_size_gap(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ)
+ΔE = finite_size_gap(L=L, t=t, Q=Q, μ=μ, periodic=periodic)
 fsgap = maximum(ΔE)
+
+J = 3
+dfJ = df[(df.J.==J), :]
+V0s = unique(dfJ.V0)
+cs = palette([:purple, :black], length(V0s))
+
+global p = plot()
+for (i, V0) in enumerate(V0s)
+    dfsub = df[(df.J.==J).&(df.V0.==V0), :]
+    Ts = dfsub.T
+    Δs = dfsub.λ
+    global p = plot!(p, Ts, Δs, xscale=:log10, yscale=:log10, label=nothing, c=cs[i])
+    global p = scatter!(p, Ts, Δs, xscale=:log10, yscale=:log10, label="V=$(round(V0,digits=3))", legend=:bottomleft, c=cs[i])
+end
+plot(p)
+hline!([fsgap], ls=:dash, c="red", label="Finite size gap")
+title!("|Δ| for J=$J")
+xlabel!("Temperature")
 
 Tc_df = find_Tc(df, interp_value=fsgap)
 

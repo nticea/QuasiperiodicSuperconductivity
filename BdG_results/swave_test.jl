@@ -31,7 +31,7 @@ Ts = expspace(-3, 0, 20)
 df = load_dataframe(savepath)
 
 # the finite size gap is determined by the largest gap in the J=0 system 
-ΔE = finite_size_gap(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ)
+ΔE = finite_size_gap(L=L, t=t, Q=Q, μ=μ)
 fsgap = maximum(ΔE)
 @show fsgap
 

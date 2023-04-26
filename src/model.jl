@@ -93,11 +93,11 @@ function plot_potential(; L::Int, J::Real, Q::Real)
         end
     end
     h = heatmap(potmat)
-    h = xticks(h, collect(1:2:L))
-    h = yticks(h, collect(1:2:L))
-    h = xlabel(h, "Site (x)")
-    h = ylabel(h, "Site (y)")
-    h = title(h, "Potential")
+    # h = xticks(h, collect(1:2:L))
+    # h = yticks(h, collect(1:2:L))
+    # h = xlabel(h, "Site (x)")
+    # h = ylabel(h, "Site (y)")
+    # h = title(h, "Potential")
 
     return h
 end

@@ -13,13 +13,13 @@ using DataFrames
 L = 55 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
-θ = π / 7
-μ = 1e-8
+θ = nothing
+μ = 0
 pairing_symmetry = "s-wave"
 tol = 1e-4
 
 # saving information 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results_J0.csv")
+savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results_J0_untilted.csv")
 
 # J, V0, T 
 Js = [0]
@@ -31,7 +31,7 @@ Ts = expspace(-4, 0, 20)
 df = load_dataframe(savepath)
 
 # the finite size gap is determined by the gap in the J=0 system 
-ΔE = finite_size_gap(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ)
+ΔE = finite_size_gap(L=L, t=t, Q=Q, μ=μ)
 fsgap = maximum(ΔE)
 @show fsgap
 
