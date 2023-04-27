@@ -10,24 +10,29 @@ using Interpolations
 include("../src/results.jl")
 include("../src/model.jl")
 
-function λmax(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real)
+function λmax(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, μ::Real, V0::Real, V1::Real=0, symmetry::String="s-wave")
     # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ)
-    #heatmap(Matrix(H0),yflip=true,clims=(-maximum(abs.(H0)),maximum(abs.(H0))),cmap=:bwr)
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ)
 
     # Diagonalize this Hamiltonian
     E, U = diagonalize_hamiltonian(H0)
 
     # Construct the pairfield susceptibility
-    χ = pairfield_singlet_dwave(T, E=E, U=U)
-
-    # Construct M (for s-wave, all we do is multiply χ by +V0)
-    M = make_M(χ, V0)
+    if symmetry == "s-wave" || symmetry == "d"
+        M = swave(T, E=E, U=U, V0=V0)
+    elseif symmetry == "d-wave" || symmetry == "d"
+        M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
+    else
+        @error "Pairing symmetry not recognized"
+        return
+    end
 
     # Calculate Tc by finding the eigenvalues of M
     λs = diagonalize_M(M)
 
-    return λs[1]
+    ## TODO: DIAGONALIZE EACH BLOCK INDEPENDENTLY
+
+    return M, λs[1]
 end
 
 function diagonalize_M(M)
@@ -35,7 +40,8 @@ function diagonalize_M(M)
     return decomp.R
 end
 
-function pairfield_singlet(T::Real; E, U)
+function swave(T::Real; E, U, V0)
+    println("s-wave configuration")
     N = size(U)[1]
     χ = zeros(N, N)
 
@@ -57,14 +63,13 @@ function pairfield_singlet(T::Real; E, U)
     UU = reshape(UU, N * N, N)
     χ = PUU * UU
 
-    return χ
+    return V0 * χ
 end
 
-function pairfield_singlet_dwave(T::Real; E, U)
-    N = size(U)[1]
-    χ = zeros(N, N)
-
-    Uconj = conj.(U)
+function dwave(T::Real; L, E, U, V0, V1)
+    println("d-wave configuration")
+    N = L^2
+    Vs = [V1, V1, V1, V1, V0]
 
     # make the prefactor
     fs = fermi.(E, T)
@@ -76,19 +81,33 @@ function pairfield_singlet_dwave(T::Real; E, U)
     end
     P = (1 .- fnm) ./ Enm
 
-    @time @einsimd PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r+1, m]
-    @time @einsimd UU[m, n, rprime] := U[rprime, n] * U[rprime-1, m]
-    @show size(PUU)
-    @show size(UU)
+    # because a=b always, we can do this multiplication quickly 
+    Uconj = conj.(U)
+    @einsimd PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
 
-    @assert 1 == 0
-    PUU = reshape(PUU, N, N * N)
-    UU = reshape(UU, N * N, N)
-    χ = PUU * UU
+    ## TODO:: CONSTRUCT EACH BLOCK INDEPENDENTLY
 
-    return χ
-end
+    # put together the M matrix 
+    M = zeros(N, 5, N, 5)
+    Threads.@threads for r in 1:N
+        for rp in 1:N
+            nn = [nearest_neighbours(rp, L=L)...]
+            push!(nn, rp)
+            for (idx, rpd) in enumerate(nn)
+                PUUr = PUU[r, :, :]
+                Ucn = U[rp, :]
+                Udm = U[rpd, :]
+                @einsimd UU[m, n] := Ucn[n] * Udm[m]
 
-function make_M(χ, V0)
-    return χ * V0 # scale by V0
+                @einsimd χ := PUUr[n, m] * UU[m, n]
+
+                M[r, idx, rp, idx] = Vs[idx] * χ
+            end
+        end
+    end
+
+    # reshape M 
+    M = reshape(M, 5 * N, 5 * N)
+
+    return M
 end

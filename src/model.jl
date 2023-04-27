@@ -41,6 +41,43 @@ function square_lattice_kinetic(; L::Int, t::Real, periodic::Bool=true)
     return -t .* H
 end
 
+function nearest_neighbours(r::Int; L::Int)
+    x, y = site_to_coordinate(r, L=L)
+
+    # left 
+    if x == 1
+        xL = L
+    else
+        xL = x - 1
+    end
+    # right 
+    if x == L
+        xR = 1
+    else
+        xR = x + 1
+    end
+    # up 
+    if y == L
+        yU = 1
+    else
+        yU = y + 1
+    end
+    # down 
+    if y == 1
+        yD = L
+    else
+        yD = y - 1
+    end
+
+    # convert back to r representation 
+    rL = coordinate_to_site(xL, y, L=L)
+    rU = coordinate_to_site(x, yU, L=L)
+    rR = coordinate_to_site(xR, y, L=L)
+    rD = coordinate_to_site(x, yD, L=L)
+
+    return rL, rU, rR, rD
+end
+
 function coordinate_to_site(x::Int, y::Int; L::Int)
     (x - 1) * L + y
 end
@@ -48,6 +85,10 @@ end
 function site_to_coordinate(r; L::Int)
     x = floor(Int, r / L) + 1
     y = r % L
+    if y == 0
+        x -= 1
+        y = L
+    end
     return x, y
 end
 

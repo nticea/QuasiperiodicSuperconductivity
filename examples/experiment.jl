@@ -11,10 +11,12 @@ t = 1 # hopping
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = nothing
-J = 2
-T = 0
-V0 = 1
+J = 3
+T = 1e-1
+V0 = 0.2
 V1 = 0
 periodic = true
 
-λ = λmax(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0)
+M, λ = λmax(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, symmetry="d-wave")
+heatmap(reverse(M, dims=2), c=:bwr, clims=(-maximum(abs.(M)), maximum(abs.(M))))
+@show λ
