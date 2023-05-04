@@ -14,9 +14,9 @@ Q = (√5 - 1) / 2
 μ = 1e-8
 θ = nothing
 J = 3
-T = 0.0435
+T = 0.24
 V0 = 0
-V1 = -1
+V1 = 1.5
 periodic = true
 
 M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")

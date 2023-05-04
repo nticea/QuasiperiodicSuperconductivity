@@ -28,7 +28,7 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
     H0 = Ht + Hint
 
     # scale the Hamiltonian
-    H0 = 1 / 1(1 + J / 2) .* H0
+    H0 = 1 / (1 + J / 2) .* H0
 
     return H0
 end
@@ -116,9 +116,11 @@ end
 function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing)
     if !isnothing(L) && isnothing(θ)
         Q̃ = floor(Int, Q * L) / L
-        return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
+        @error "Flipped the sign!!"
+        return J * (cos(2 * π * Q̃ * (x + y)) + cos(2 * π * Q̃ * (x - y)))
     elseif isnothing(L) || isnothing(θ)
-        return J * (cos(2 * π * Q * (x + y)) - cos(2 * π * Q * (x - y)))
+        @error "Flipped the sign!!"
+        return J * (cos(2 * π * Q * (x + y)) + cos(2 * π * Q * (x - y)))
     else
         BSD = B(L=L, Q=Q, θ=θ)
         return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y)) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y)))
