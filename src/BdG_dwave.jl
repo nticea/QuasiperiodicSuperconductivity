@@ -34,25 +34,6 @@ function BdG_iteration(M::Matrix{Float64}, Δi; Vij, T::Real)
     # compute the gap parameter 
     @einsimd Δnew[i, j] := Vij[i, j] / 2 * U[i, n] * conj(V[j, n]) * tanh(E[n] / (2 * T))
 
-    # # try this using ITensors
-    # # define the indices
-    # dim_i, dim_j = size(Vij)
-    # dim_n = length(E)
-    # i, j, n = Index(dim_i, "i"), Index(dim_j, "j"), Index(dim_n, "n")
-
-    # # make the tensors 
-    # Vij = ITensor(Matrix(Vij), i'', j'')
-    # U = ITensor(U, i', n)
-    # conjV = ITensor(conj.(V), j', n)
-    # tanhE = tanh.(E) ./ (2 * T)
-    # tanhE = ITensor(tanhE, n)
-
-    # # perform the contraction 
-    # println("New way...")
-    # @time Δnew = 1 / 2 * Vij * ITensors.δ(i', i'', i) * U * ITensors.δ(j', j'', j) #* conjV * tanhE
-    # @show inds(Δnew)
-    # Δnew = array(Δnew)
-
     return Δnew
 end
 
@@ -65,7 +46,6 @@ function initialize_Δ(; L::Int, t::Real, Q::Real, μ::Real, V0::Real, V1::Real,
 
     # make an initial guess for the gap parameter -- size of fs gap 
     fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, periodic=periodic))
-    @show fsgap
 
     if V1 == 0
         return sparse(diagm(fsgap * ones(L * L)))
@@ -117,13 +97,11 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
     max_Δ = []
     for n in 1:niter
         Δij = BdG_iteration(M, Δij_prev; Vij=Vij, T=T) # perform one BdG iteration and get the new Δi 
-        @show maximum(Δij)
 
         # calculate convergence information  
         ΔΔ = abs(maximum(abs.(Δij)) - maximum(abs.(Δij_prev)))
         push!(conv, (ΔΔ / maximum(Δij)))
         push!(max_Δ, maximum(Δij))
-        @show conv[end]
         # if this change is below a certain tolerance, stop iterating and return 
         if !isnothing(tol) && (ΔΔ / maximum(Δij) <= tol) && (n > 1)
             return Δij, conv, max_Δ
@@ -136,7 +114,9 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
     return Δij_prev, conv, max_Δ # the converged value for Δ
 end
 
-function compute_Δ_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, V1::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing}, periodic::Bool)
+function compute_Δ_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, V1::Real, niter::Int=100, tol::Union{Real,Nothing}=nothing, θ::Union{Real,Nothing}, periodic::Bool)
     # converge the BdG 
     Δij, conv, max_Δ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, periodic=periodic, V0=V0, V1=V1, tol=tol, θ=θ, niter=niter)
+
+    return maximum(abs.(Δij))
 end

@@ -25,8 +25,12 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
         end
     end
     Hint = spdiagm(Hint)
+    H0 = Ht + Hint
 
-    return Ht + Hint
+    # scale the Hamiltonian
+    H0 = 1 / 1(1 + J / 2) .* H0
+
+    return H0
 end
 
 function diagonalize_hamiltonian(H)
@@ -134,11 +138,11 @@ function plot_potential(; L::Int, J::Real, Q::Real)
         end
     end
     h = heatmap(potmat)
-    # h = xticks(h, collect(1:2:L))
-    # h = yticks(h, collect(1:2:L))
-    # h = xlabel(h, "Site (x)")
-    # h = ylabel(h, "Site (y)")
-    # h = title(h, "Potential")
+    xticks!(h, collect(1:2:L))
+    yticks!(h, collect(1:2:L))
+    xlabel!(h, "Site (x)")
+    ylabel!(h, "Site (y)")
+    title!(h, "Potential for J=$J")
 
     return h
 end

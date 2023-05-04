@@ -87,8 +87,8 @@ function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, pe
     fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, periodic=periodic))
 
     # converge the BdG 
-    Δi, conv = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, niter=niter, periodic=periodic, fsgap=fsgap)
+    Δi, conv, max_Δ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, niter=niter, periodic=periodic, fsgap=fsgap)
 
     # the gap is the maximum value of Δi 
-    Δ = maximum(abs.(Δi))
+    #Δ = maximum(abs.(Δi))
 end
