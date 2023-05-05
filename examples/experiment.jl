@@ -15,8 +15,8 @@ Q = (√5 - 1) / 2
 θ = nothing
 J = 3
 T = 0.24
-V0 = 0
-V1 = 1.5
+V0 = 1
+V1 = -1.5
 periodic = true
 
 M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
@@ -41,6 +41,7 @@ function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
 end
 
 p = plot(xlims=(0, L + 1), ylims=(0, L + 1))
+# p = plot(xlims=(0, L + 1), ylims=(-L - 1, 0))
 for x in 1:L
     for y in 1:L
         # onsite dot 
@@ -49,6 +50,13 @@ for x in 1:L
         plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
         plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
         plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
+
+        # onsite dot 
+        # scatter!(p, [y], [-x], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
+        # plot!(p, [y, y], [-x, -x + 1], lw=10 * abs(evs[1, x, y]), alpha=10 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
+        # plot!(p, [y, y + 1], [-x, -x], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
+        # plot!(p, [y, y], [-x, -x - 1], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
+        # plot!(p, [y, y - 1], [-x, -x], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
     end
 end
 plot(p)

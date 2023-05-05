@@ -82,18 +82,26 @@ function nearest_neighbours(r::Int; L::Int)
     return rL, rU, rR, rD
 end
 
+function coordinate_map(; L::Int)
+    mat = Matrix{Tuple{Int64,Int64}}(undef, L, L)
+    for x in 1:L
+        for y in 1:L
+            mat[x, y] = (x, y)
+        end
+    end
+
+    vec = reshape(mat, L * L)
+    return mat, vec
+end
+
 function coordinate_to_site(x::Int, y::Int; L::Int)
-    (x - 1) * L + y
+    _, vec = coordinate_map(L=L)
+    return findall(r -> r == (x, y), vec)[1]
 end
 
 function site_to_coordinate(r; L::Int)
-    x = floor(Int, r / L) + 1
-    y = r % L
-    if y == 0
-        x -= 1
-        y = L
-    end
-    return x, y
+    _, vec = coordinate_map(L=L)
+    return vec[r]
 end
 
 function B(; L::Int, Q::Real, θ::Real)
@@ -114,17 +122,20 @@ function B(; L::Int, Q::Real, θ::Real)
 end
 
 function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing)
-    if !isnothing(L) && isnothing(θ)
-        Q̃ = floor(Int, Q * L) / L
-        @error "Flipped the sign!!"
-        return J * (cos(2 * π * Q̃ * (x + y)) + cos(2 * π * Q̃ * (x - y)))
-    elseif isnothing(L) || isnothing(θ)
-        @error "Flipped the sign!!"
-        return J * (cos(2 * π * Q * (x + y)) + cos(2 * π * Q * (x - y)))
-    else
-        BSD = B(L=L, Q=Q, θ=θ)
-        return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y)) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y)))
-    end
+    Q̃ = floor(Int, Q * L) / L
+    # @error "Flipped the sign!!"
+    return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
+    # if !isnothing(L) && isnothing(θ)
+    #     Q̃ = floor(Int, Q * L) / L
+    #     @error "Flipped the sign!!"
+    #     return J * (cos(2 * π * Q̃ * (x + y)) + cos(2 * π * Q̃ * (x - y)))
+    # elseif isnothing(L) || isnothing(θ)
+    #     @error "Flipped the sign!!"
+    #     return J * (cos(2 * π * Q * (x + y)) + cos(2 * π * Q * (x - y)))
+    # else
+    #     BSD = B(L=L, Q=Q, θ=θ)
+    #     return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y)) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y)))
+    # end
 end
 
 function fermi(ε::Real, T::Real)
@@ -136,7 +147,7 @@ function plot_potential(; L::Int, J::Real, Q::Real)
     potmat = zeros(L, L)
     for x in 1:L
         for y in 1:L
-            potmat[x, y] = aubry_andre(x, y; J=J, Q=Q)
+            potmat[x, y] = aubry_andre(x, y; L=L, J=J, Q=Q)
         end
     end
     h = heatmap(potmat)
