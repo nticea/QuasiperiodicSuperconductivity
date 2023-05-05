@@ -191,6 +191,7 @@ function dwave(T::Real; L, E, U, V0, V1)
     Uconj = conj.(U) # This is U*
 
     M = zeros(5 * N, 5 * N)
+    Mfast = Matrix{Matrix{Float64}}(undef, 5, 5)
 
     # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
     fs = fermi.(E, T)
@@ -203,11 +204,11 @@ function dwave(T::Real; L, E, U, V0, V1)
     P = (1 .- fnm) ./ Enm
 
     # the s-wave sector 
-    # @einsimd PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
-    # @einsimd UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
-    # PUU = reshape(PUU, N, N * N)
-    # UU = reshape(UU, N * N, N)
-    # M[4*N+1:end, 4*N+1:end] .= V0 * PUU * UU
+    @einsimd PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
+    @einsimd UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
+    PUU = reshape(PUU, N, N * N)
+    UU = reshape(UU, N * N, N)
+    Mfast[5, 5] = V0 * PUU * UU
 
     # the nearest-neighbour sites
     Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
@@ -221,7 +222,7 @@ function dwave(T::Real; L, E, U, V0, V1)
     end
     sites = [Rsites, Usites, Lsites, Dsites, onsites]
 
-    for (b, b_sites) in enumerate(sites)
+    @time for (b, b_sites) in enumerate(sites)
         for (d, d_sites) in enumerate(sites)
             b_idx_start = (b - 1) * N + 1
             b_idx_end = b * N
@@ -238,6 +239,68 @@ function dwave(T::Real; L, E, U, V0, V1)
         end
     end
 
-    return M
+    @time Threads.@threads for bd in CartesianIndices(Mfast)
+        (b, d) = Tuple(bd)
+        if d <= b && !(b == 5 && d == 5)
+            b_sites, d_sites = sites[b], sites[d]
 
+            if b == 5 || d == 5 # the on-site terms get potential V=V0
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N)
+            else
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
+            end
+
+            # fill in the matrix 
+            Mfast[b, d] = Mblock
+            # if off-diagonal, fill in the hermitian conjugate block
+            if d != b
+                Mfast[d, b] = Mblock'
+            end
+        end
+    end
+    Mfast = mortar(Mfast)
+
+    # Mfast = zeros(5 * N, 5 * N)
+    # @time for (b, b_sites) in enumerate(sites)
+    #     for (d, d_sites) in enumerate(sites)
+    #         if d <= b
+    #             b_idx_start = (b - 1) * N + 1
+    #             b_idx_end = b * N
+    #             d_idx_start = (d - 1) * N + 1
+    #             d_idx_end = d * N
+
+    #             if b == 5 || d == 5 # the on-site terms get potential V=V0
+    #                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N)
+    #             else
+    #                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
+    #             end
+
+    #             Mfast[b_idx_start:b_idx_end, d_idx_start:d_idx_end] .= Mblock
+
+    #             # if off-diagonal, fill in the hermitian conjugate block
+    #             if d != b
+    #                 Mfast[d_idx_start:d_idx_end, b_idx_start:b_idx_end] .= Mblock'
+    #             end
+    #         end
+    #     end
+    # end
+
+    return M, Mfast
+end
+
+function mortar(M::Matrix)
+    (n, _) = size(M)
+    (N, _) = size(M[1, 1])
+    new_M = zeros(n * N, n * N)
+    for b in 1:n
+        for d in 1:n
+            b_idx_start = (b - 1) * N + 1
+            b_idx_end = b * N
+            d_idx_start = (d - 1) * N + 1
+            d_idx_end = d * N
+
+            new_M[b_idx_start:b_idx_end, d_idx_start:d_idx_end] .= M[b, d]
+        end
+    end
+    return new_M
 end
