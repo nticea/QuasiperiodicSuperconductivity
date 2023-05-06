@@ -9,7 +9,7 @@ include("../src/meanfield.jl")
 # include("../src/BdG.jl")
 
 ## PARAMETERS ##
-L = 30 # the full system is L × L 
+L = 55 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -20,8 +20,6 @@ V0 = 1
 V1 = -1.5
 periodic = true
 
-@time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="s-wave")
-@time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 @time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="s-wave")
 @time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 
