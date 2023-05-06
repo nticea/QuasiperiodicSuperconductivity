@@ -123,7 +123,6 @@ end
 
 function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing)
     Q̃ = floor(Int, Q * L) / L
-    # @error "Flipped the sign!!"
     return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
     # if !isnothing(L) && isnothing(θ)
     #     Q̃ = floor(Int, Q * L) / L
