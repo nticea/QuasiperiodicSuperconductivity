@@ -144,8 +144,7 @@ function dwave(T::Real; L, E, U, V0, V1)
     end
     sites = [Rsites, Usites, Lsites, Dsites, onsites]
 
-    #Threads.@threads for bd in CartesianIndices(M)
-    for bd in CartesianIndices(M)
+    Threads.@threads for bd in CartesianIndices(M)
         (b, d) = Tuple(bd)
         @show (b, d)
         if d <= b && !(b == 5 && d == 5)
