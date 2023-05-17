@@ -122,8 +122,15 @@ function B(; L::Int, Q::Real, θ::Real)
 end
 
 function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing)
-    Q̃ = floor(Int, Q * L) / L
-    return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
+    if isnothing(θ)
+        Q̃ = floor(Int, Q * L) / L
+        return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
+    else
+        BSD = B(L=L, Q=Q, θ=θ)
+        return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y)) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y)))
+    end
+    # Q̃ = floor(Int, Q * L) / L
+    # return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
     # if !isnothing(L) && isnothing(θ)
     #     Q̃ = floor(Int, Q * L) / L
     #     @error "Flipped the sign!!"

@@ -15,6 +15,8 @@ function λmax(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=not
     # Construct the non-interacting Hamiltonian matrix
     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, periodic=periodic)
 
+    @assert 1 == 0
+
     # Diagonalize this Hamiltonian
     E, U = diagonalize_hamiltonian(H0)
 
@@ -185,4 +187,21 @@ function mortar(M::Matrix)
         end
     end
     return new_M
+end
+
+function calculate_λ_Δ(M)
+    # perform the decomposition 
+    decomp, _ = partialschur(Hermitian(M), nev=1, tol=1e-6, which=LM())
+
+    # extract the maximum eigenvector/value pair 
+    maxev = decomp.Q[:, 1]
+    λ = decomp.R[1]
+
+    evs = zeros(5, L, L)
+    for (n, i) in enumerate(1:(L*L):(5*L*L))
+        evi = maxev[i:(i+L*L-1)]
+        evs[n, :, :] = reshape(evi, L, L)
+    end
+
+    return λ, evs
 end

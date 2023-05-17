@@ -47,6 +47,11 @@ function update_results!(df::DataFrame; L, λ, J, V0, T)
     append!(df, df2)
 end
 
+function update_results!(df::DataFrame; L, λ, J, V0, T, Δ)
+    df2 = DataFrame(L=[L], λ=[λ], J=[J], V0=[V0], T=[T], Δ=[Δ])
+    append!(df, df2)
+end
+
 function already_calculated(df::DataFrame; L, J, V0, T)
     sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.T.==T), :]
     return size(sub)[1] > 0
@@ -57,7 +62,7 @@ function load_dataframe(path)
         return DataFrame(CSV.File(path))
     catch error_reading_dataframe # if the file does not exist, create a new dataframe
         @show error_reading_dataframe
-        nodenames = ["L", "J", "V0", "T", "λ"]
+        nodenames = ["L", "J", "V0", "T", "λ", "Δ"]
         return DataFrame([name => [] for name in nodenames])
     end
 end

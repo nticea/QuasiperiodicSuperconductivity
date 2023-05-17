@@ -9,24 +9,28 @@ include("../src/meanfield.jl")
 # include("../src/BdG.jl")
 
 ## PARAMETERS ##
-L = 20 # the full system is L × L 
+L = 15 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = nothing
 J = 3
-T = 0.24
 V0 = 1
 V1 = -1.5
 periodic = true
 
+T = 0.24
 @time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="s-wave")
-@time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 
+@time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 @time decomp, _ = partialschur(Hermitian(M), nev=1, tol=1e-6, which=LM())
 maxev = decomp.Q
 λ = decomp.R[1]
 @show λ
+
+
+
+
 
 evs = zeros(5, L, L)
 for (n, i) in enumerate(1:(L*L):(5*L*L))
