@@ -42,27 +42,43 @@ function load_results(loadpath::String)
     return Results(d["L"], d["λs"], d["Js"], d["V0s"], d["Ts"])
 end
 
-function update_results!(df::DataFrame; L, λ, J, V0, T)
-    df2 = DataFrame(L=[L], λ=[λ], J=[J], V0=[V0], T=[T])
+# function update_results!(df::DataFrame; L, λ, J, V0, T)
+#     df2 = DataFrame(L=[L], λ=[λ], J=[J], V0=[V0], T=[T])
+#     append!(df, df2)
+# end
+
+function update_results!(df::DataFrame; L, λ, J, θ, V0, V1, T, Δ)
+    if isnothing(θ)
+        θ = 0
+    end
+    df2 = DataFrame(L=[L], λ=[λ], J=[J], θ=[θ], V0=[V0], V1=[V1], T=[T], Δ=[Δ])
     append!(df, df2)
 end
 
-function update_results!(df::DataFrame; L, λ, J, V0, T, Δ)
-    df2 = DataFrame(L=[L], λ=[λ], J=[J], V0=[V0], T=[T], Δ=[Δ])
-    append!(df, df2)
-end
-
-function already_calculated(df::DataFrame; L, J, V0, T)
-    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.T.==T), :]
+function already_calculated(df::DataFrame; L, J, θ, V0, V1, T)
+    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.T.==T), :]
     return size(sub)[1] > 0
 end
 
 function load_dataframe(path)
     try # try loading the DataFrames
-        return DataFrame(CSV.File(path))
+        df = DataFrame(CSV.File(path))
+
+        all_evs_new = []
+        for (i, evs) in enumerate(df.Δ)
+            # Split the string by multiple delimiters
+            result = split(chop(evs; head=1, tail=1), r",")
+            new_array = result[result.!=""]
+            evs_new = parse.(Float64, new_array)
+            push!(all_evs_new, evs_new)
+        end
+        dfcut = df[:, collect(1:size(df)[2]-1)]
+        dfcut.Δ = all_evs_new
+
+        return dfcut
     catch error_reading_dataframe # if the file does not exist, create a new dataframe
         @show error_reading_dataframe
-        nodenames = ["L", "J", "V0", "T", "λ", "Δ"]
+        nodenames = ["L", "J", "θ", "V0", "V1", "T", "λ", "Δ"]
         return DataFrame([name => [] for name in nodenames])
     end
 end
@@ -95,7 +111,7 @@ function find_Tc(df::DataFrame; interp_value::Real=1)
     L = df.L[1]
 
     # Make the new dataframe 
-    nodenames = ["L", "J", "V0", "Tc"]
+    nodenames = ["L", "J", "V0", "V1", "Tc"]
     Tc_df = DataFrame([name => [] for name in nodenames])
 
     # For each unique (J,V0) pair... extract the corresponding data across all Ts 
@@ -142,5 +158,17 @@ function plot_Tcs(results::Results)
     title!(p2, "Transition temperature for $(L)x$(L) square lattice")
     xlabel!(p2, "V")
     ylabel!(p2, "Tc")
+end
+
+function θ_to_π(θ)
+    if isnothing(θ)
+        return "Untilted"
+    end
+    for n in 1:10
+        if isapprox(n * θ, π)
+            return "π/$n"
+        end
+    end
+    return θ
 end
 

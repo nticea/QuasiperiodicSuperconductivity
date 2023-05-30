@@ -11,7 +11,7 @@ include("../src/model.jl")
 include("../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 35 # the full system is L × L 
+L = 55 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -37,14 +37,12 @@ iter = ProgressBar(1:length(Ts))
 for i in iter # iterate through all temperatures
     T = Ts[i]
     # check whether this particular (J,T,V0) combo has been already computed 
-    if !already_calculated(df; L=L, J=J, V0=V0, T=T)
+    if !already_calculated(df; L=L, J=J, V0=V0, V1=V1, T=T)
 
         # calculate M at a given (J,T,V0, V1)
-        @time M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
+        @time λ, Δ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 
-        λ, Δ = calculate_λ_Δ(M)
-
-        update_results!(df; L=L, λ=λ, J=J, V0=V0, T=T, Δ=Δ)
+        update_results!(df; L=L, λ=λ, J=J, V0=V0, V1=V1, T=T, Δ=Δ)
         CSV.write(savepath, df)
         flush(stdout)
     end

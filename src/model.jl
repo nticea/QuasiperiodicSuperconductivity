@@ -123,6 +123,7 @@ end
 
 function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing)
     if isnothing(θ)
+        # Q̃ /= √2
         Q̃ = floor(Int, Q * L) / L
         return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
     else
@@ -149,11 +150,11 @@ function fermi(ε::Real, T::Real)
     1 / (exp(ε / T) + 1)
 end
 
-function plot_potential(; L::Int, J::Real, Q::Real)
+function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing})
     potmat = zeros(L, L)
     for x in 1:L
         for y in 1:L
-            potmat[x, y] = aubry_andre(x, y; L=L, J=J, Q=Q)
+            potmat[x, y] = aubry_andre(x, y; L=L, J=J, Q=Q, θ=θ)
         end
     end
     h = heatmap(potmat)
@@ -161,7 +162,8 @@ function plot_potential(; L::Int, J::Real, Q::Real)
     yticks!(h, collect(1:2:L))
     xlabel!(h, "Site (x)")
     ylabel!(h, "Site (y)")
-    title!(h, "Potential for J=$J")
+    θ = θ_to_π(θ)
+    title!(h, "Potential for J=$J, θ=$θ")
 
     return h
 end

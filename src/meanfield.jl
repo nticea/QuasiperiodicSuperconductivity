@@ -46,7 +46,7 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
     E, U = diagonalize_hamiltonian(H0)
 
     # Construct the pairfield susceptibility
-    if symmetry == "s-wave" || symmetry == "d"
+    if symmetry == "s-wave" || symmetry == "s"
         M = swave(T, E=E, U=U, V0=V0)
     elseif symmetry == "d-wave" || symmetry == "d"
         M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
@@ -55,7 +55,9 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
         return
     end
 
-    return M
+    λ, Δ = calculate_λ_Δ(M)
+
+    return λ, Δ
 end
 
 function decomposition_M(M)
@@ -146,6 +148,8 @@ function dwave(T::Real; L, E, U, V0, V1)
     end
     sites = [Rsites, Usites, Lsites, Dsites, onsites]
 
+    println("here")
+
     # Threads.@threads for bd in CartesianIndices(M)
     for bd in CartesianIndices(M)
         (b, d) = Tuple(bd)
@@ -197,11 +201,7 @@ function calculate_λ_Δ(M)
     maxev = decomp.Q[:, 1]
     λ = decomp.R[1]
 
-    evs = zeros(5, L, L)
-    for (n, i) in enumerate(1:(L*L):(5*L*L))
-        evi = maxev[i:(i+L*L-1)]
-        evs[n, :, :] = reshape(evi, L, L)
-    end
+    @show λ
 
-    return λ, evs
+    return λ, maxev
 end
