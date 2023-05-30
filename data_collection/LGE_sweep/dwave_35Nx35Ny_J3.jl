@@ -11,7 +11,7 @@ include("../../src/model.jl")
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 17 # the full system is L × L 
+L = 35 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
