@@ -11,13 +11,13 @@ include("../../src/model.jl")
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 35 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
 J = 0
-V0 = 1
+V1 = -1
 periodic = true
 pairing_symmetry = "d-wave"
 
@@ -33,7 +33,7 @@ function LGE_sweep(Ts; α::Real)
     iter = ProgressBar(1:length(Ts))
 
     # Compute V1, holding the ratio α≡V0/V1 fixed 
-    V1 = V0 / α
+    V0 = V1 * α
 
     for i in iter # iterate through all temperatures
         T = Ts[i]
@@ -54,39 +54,39 @@ end
 Ts = [0.1, 0.12, 0.16, 0.18]
 LGE_sweep(Ts, α=α)
 
-α = 0.8
-Ts = [0.17, 0.18, 0.2, 0.22, 0.24]
-LGE_sweep(Ts, α=α)
+# α = 0.8
+# Ts = [0.17, 0.18, 0.2, 0.22, 0.24]
+# LGE_sweep(Ts, α=α)
 
-α = 0.6
-Ts = [0.22, 0.26, 0.3, 0.32, 0.38]
-LGE_sweep(Ts, α=α)
+# α = 0.6
+# Ts = [0.22, 0.26, 0.3, 0.32, 0.38]
+# LGE_sweep(Ts, α=α)
 
-α = 0.4
-Ts = [0.46, 0.5, 0.55, 0.6, 0.62]
-LGE_sweep(Ts, α=α)
+# α = 0.4
+# Ts = [0.46, 0.5, 0.55, 0.6, 0.62]
+# LGE_sweep(Ts, α=α)
 
-α = 0.2
-Ts = [1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35]
-LGE_sweep(Ts, α=α)
+# α = 0.2
+# Ts = [1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35]
+# LGE_sweep(Ts, α=α)
 
-α = 1.2
-Ts = [0.06, 0.08, 0.1, 0.12, 0.14]
-LGE_sweep(Ts, α=α)
+# α = 1.2
+# Ts = [0.06, 0.08, 0.1, 0.12, 0.14]
+# LGE_sweep(Ts, α=α)
 
-α = 1.4
-Ts = [0.05, 0.07, 0.09, 0.12]
-LGE_sweep(Ts, α=α)
+# α = 1.4
+# Ts = [0.05, 0.07, 0.09, 0.12]
+# LGE_sweep(Ts, α=α)
 
-α = 1.6
-Ts = [0.03, 0.04, 0.06, 0.08, 0.1]
-LGE_sweep(Ts, α=α)
+# α = 1.6
+# Ts = [0.03, 0.04, 0.06, 0.08, 0.1]
+# LGE_sweep(Ts, α=α)
 
-α = 1.8
-Ts = [0.01, 0.02, 0.04, 0.06]
-LGE_sweep(Ts, α=α)
+# α = 1.8
+# Ts = [0.01, 0.02, 0.04, 0.06]
+# LGE_sweep(Ts, α=α)
 
-α = 2
-Ts = [0.008, 0.01, 0.03, 0.05]
-LGE_sweep(Ts, α=α)
+# α = 2
+# Ts = [0.008, 0.01, 0.03, 0.05]
+# LGE_sweep(Ts, α=α)
 

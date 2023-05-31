@@ -1,49 +1,66 @@
 ## IMPORTS ##
 using Pkg
-Pkg.activate(joinpath(@__DIR__, ".."))
+Pkg.activate(joinpath(@__DIR__, "../.."))
 using LinearAlgebra, Arpack, Plots
 using Profile
 using ProgressBars
 using CSV
 using DataFrames
 
-include("../src/model.jl")
-include("../src/meanfield.jl")
+include("../../src/model.jl")
+include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 55 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-J = 3
+J = 0
+V1 = 0.5
 V0 = 1
-V1 = -1.5
 periodic = true
 pairing_symmetry = "d-wave"
 
-# temperature range 
-Ts = [0.24, 0.23, 0.22]
+T = 0.04
+M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=pairing_symmetry)
 
-# saving information 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.csv")
+# perform the decomposition 
+decomp, _ = partialschur(Hermitian(M), nev=1, tol=1e-6, which=LM())
+# extract the maximum eigenvector/value pair 
+maxev = decomp.Q[:, 1]
+λ = decomp.R[1]
+@show λ
 
-# load in the dataframe, if it exists. If not, make a new one
-df = load_dataframe(savepath)
+evs = zeros(5, L, L)
+for (n, i) in enumerate(1:(L*L):(5*L*L))
+    evi = maxev[i:(i+L*L-1)]
+    evs[n, :, :] = reshape(evi, L, L)
+end
 
-## RUNNING THE CODE ## 
-println("Running J=$(J)")
-iter = ProgressBar(1:length(Ts))
-for i in iter # iterate through all temperatures
-    T = Ts[i]
-    # check whether this particular (J,T,V0) combo has been already computed 
-    if !already_calculated(df; L=L, J=J, V0=V0, V1=V1, T=T)
+function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
+    cm = palette([:blue, :red], 2 * numpts + 1)
+    val = all_evs[x1, x2, x3]
+    max = maximum(abs.(all_evs))
+    idx = floor(Int, val / max * numpts + numpts + 1)
+    return cm[idx]
+end
 
-        # calculate M at a given (J,T,V0, V1)
-        @time λ, Δ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
+p = plot(xlims=(0, L + 1), ylims=(0, L + 1))
+# p = plot(xlims=(0, L + 1), ylims=(-L - 1, 0))
+for x in 1:L
+    for y in 1:L
+        # onsite dot 
+        scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
 
-        update_results!(df; L=L, λ=λ, J=J, V0=V0, V1=V1, T=T, Δ=Δ)
-        CSV.write(savepath, df)
-        flush(stdout)
+        # bonds 
+        plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[1, x, y]), alpha=10 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
+        plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
+        plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
+        plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
     end
 end
+xlabel!(p, "Site (x)")
+ylabel!(p, "Site, (y)")
+title!(p, "T=$T, λ=$(round(λ,digits=2)): Δ(J=$J, θ=$θ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=6)
+return p

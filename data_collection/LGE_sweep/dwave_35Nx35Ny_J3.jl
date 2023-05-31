@@ -17,7 +17,7 @@ Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
 J = 3
-V0 = 1
+V1 = -1
 periodic = true
 pairing_symmetry = "d-wave"
 
@@ -33,7 +33,7 @@ function LGE_sweep(Ts; α::Real)
     iter = ProgressBar(1:length(Ts))
 
     # Compute V1, holding the ratio α≡V0/V1 fixed 
-    V1 = V0 / α
+    V0 = V1 * α
 
     for i in iter # iterate through all temperatures
         T = Ts[i]

@@ -15,17 +15,15 @@ L = 31 # the full system is L × L
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
-θ = π / 4
+θ = π / 7
 J = 2
 V0 = 1
 V1 = -1.5
 periodic = true
 pairing_symmetry = "d-wave"
 
-@assert 1 == 0
-
 # temperature range 
-Ts = [0.2, 0.26, 0.28, 0.3, 0.34]
+Ts = [0.29]
 
 # saving information 
 savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_dwave_results.csv")

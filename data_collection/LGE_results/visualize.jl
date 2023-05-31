@@ -10,8 +10,8 @@ using DataFrames
 include("../../src/model.jl")
 include("../../src/meanfield.jl")
 
-loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/LGE_results/31Nx31Ny_dwave_results.csv"
-idx = 6
+loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/LGE_results/31Nx31Ny_dwave_results.csv"
+idx = 12
 
 df = load_dataframe(loadpath)
 L = df.L[idx]

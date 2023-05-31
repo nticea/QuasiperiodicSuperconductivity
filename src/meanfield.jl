@@ -11,33 +11,6 @@ using LoopVectorization
 include("../src/results.jl")
 include("../src/model.jl")
 
-function λmax(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, symmetry::String="s-wave")
-    # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, periodic=periodic)
-
-    @assert 1 == 0
-
-    # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
-
-    # Construct the pairfield susceptibility
-    if symmetry == "s-wave" || symmetry == "d"
-        M = swave(T, E=E, U=U, V0=V0)
-    elseif symmetry == "d-wave" || symmetry == "d"
-        M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
-    else
-        @error "Pairing symmetry not recognized"
-        return
-    end
-
-    # Calculate Tc by finding the eigenvalues of M
-    λs = decomposition_M(M)
-
-    ## TODO: DIAGONALIZE EACH BLOCK INDEPENDENTLY
-
-    return λs[1]
-end
-
 function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, symmetry::String="s-wave")
     # Construct the non-interacting Hamiltonian matrix
     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, periodic=periodic)
@@ -117,6 +90,7 @@ function dwave(T::Real; L, E, U, V0, V1)
     N = L^2
     Uconj = conj.(U) # This is U*
 
+    # Initialize the M matrix 
     M = Matrix{Matrix{Float64}}(undef, 5, 5)
 
     # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
@@ -129,17 +103,17 @@ function dwave(T::Real; L, E, U, V0, V1)
     end
     P = (1 .- fnm) ./ Enm
 
-    # the s-wave sector 
+    # the s-wave sector. This is in the (5,5) block of M matrix
     @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
     @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
     PUU = reshape(PUU, N, N * N)
     UU = reshape(UU, N * N, N)
     M[5, 5] = V0 * PUU * UU
 
-    # the nearest-neighbour sites
+    # make lists of the nearest-neighbour sites 
     Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
     for r in 1:N
-        nnr = [nearest_neighbours(r, L=L)...]
+        nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
         push!(Rsites, nnr[1])
         push!(Usites, nnr[2])
         push!(Lsites, nnr[3])
@@ -148,18 +122,19 @@ function dwave(T::Real; L, E, U, V0, V1)
     end
     sites = [Rsites, Usites, Lsites, Dsites, onsites]
 
-    println("here")
-
-    # Threads.@threads for bd in CartesianIndices(M)
+    # iterate through each of the 5×5 blocks
     for bd in CartesianIndices(M)
         (b, d) = Tuple(bd)
         @show (b, d)
+
+        # bc matrix is Hermitian, we only have to fill in lower diagonal
+        # also, don't do the s-wave component (we've done it already)
         if d <= b && !(b == 5 && d == 5)
             b_sites, d_sites = sites[b], sites[d]
 
             if b == 5 || d == 5 # the on-site terms get potential V=V0
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N)
-            else
+            else # bond terms have potential V1 
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
             end
 

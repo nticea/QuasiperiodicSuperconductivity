@@ -106,9 +106,10 @@ end
 
 function find_Tc(df::DataFrame; interp_value::Real=1)
 
-    # Get the unique Js, V0s from the dataframe 
-    Js, V0s = unique(df.J), unique(df.V0)
+    # Get the unique Js, V1s from the dataframe 
+    Js, V1s = unique(df.J), unique(df.V1)
     L = df.L[1]
+    V0 = df.V0[1]
 
     # Make the new dataframe 
     nodenames = ["L", "J", "V0", "V1", "Tc"]
@@ -116,10 +117,10 @@ function find_Tc(df::DataFrame; interp_value::Real=1)
 
     # For each unique (J,V0) pair... extract the corresponding data across all Ts 
     for J in Js
-        for V0 in V0s
+        for V1 in V1s
 
             # Extract the corresponding data across all Ts
-            dfsub = df[(df.J.==J).&(df.V0.==V0), :]
+            dfsub = df[(df.J.==J).&(df.V1.==V1), :]
             λs, Ts = dfsub.λ, dfsub.T
 
             # Compute the interpolated Tc for this (J,V0) pair
@@ -130,12 +131,12 @@ function find_Tc(df::DataFrame; interp_value::Real=1)
                     interp_linear = linear_interpolation(knots, reverse(Ts))
                     Tc = interp_linear(interp_value)
                     # Put it into a new dataframe indexed by (J,V0,Tc)
-                    df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0])
+                    df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
                     append!(Tc_df, df2)
                 catch e
                     Tc = NaN
                     # Put it into a new dataframe indexed by (J,V0,Tc)
-                    df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0])
+                    df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
                     append!(Tc_df, df2)
                 end
             end
@@ -170,5 +171,64 @@ function θ_to_π(θ)
         end
     end
     return θ
+end
+
+function plot_LGE_Δ(df; idx)
+    L = df.L[idx]
+    J = df.J[idx]
+    V0 = df.V0[idx]
+    V1 = df.V1[idx]
+    T = df.T[idx]
+    θ = θ_to_π(df.θ[idx])
+
+    if length(df.Δ[1]) == 5 * L^2
+        symmetry = "d-wave"
+    elseif length(df.Δ[1]) == L^2
+        symmetry = "s-wave"
+    else
+        @error "Symmetry not recognized"
+        @assert 1 == 0
+    end
+
+    maxev = df.Δ[idx]
+    λ = df.λ[idx]
+    if symmetry == "d-wave"
+        evs = zeros(5, L, L)
+        for (n, i) in enumerate(1:(L*L):(5*L*L))
+            evi = maxev[i:(i+L*L-1)]
+            evs[n, :, :] = reshape(evi, L, L)
+        end
+    elseif symmetry == "s-wave"
+        evs = reshape(maxev, L, L)
+    end
+
+    function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
+        cm = palette([:blue, :red], 2 * numpts + 1)
+        val = all_evs[x1, x2, x3]
+        max = maximum(abs.(all_evs))
+        idx = floor(Int, val / max * numpts + numpts + 1)
+        return cm[idx]
+    end
+
+    p = plot(xlims=(0, L + 1), ylims=(0, L + 1))
+    # p = plot(xlims=(0, L + 1), ylims=(-L - 1, 0))
+    for x in 1:L
+        for y in 1:L
+            # onsite dot 
+            if abs.(maximum(evs[5, x, y])) > 1e-9
+                scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
+            end
+
+            # bonds 
+            plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[1, x, y]), alpha=10 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
+            plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
+            plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
+            plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
+        end
+    end
+    xlabel!(p, "Site (x)")
+    ylabel!(p, "Site, (y)")
+    title!(p, "T=$T, λ=$(round(λ,digits=2)): Δ(J=$J, θ=$θ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=6)
+    return p
 end
 

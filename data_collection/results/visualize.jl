@@ -1,9 +1,9 @@
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
-include("../src/model.jl")
-include("../src/meanfield.jl")
-include("../src/results.jl")
+include("../../src/model.jl")
+include("../../src/meanfield.jl")
+include("../../src/results.jl")
 
 
 using Plots
