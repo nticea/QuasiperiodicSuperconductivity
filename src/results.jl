@@ -79,7 +79,9 @@ function load_dataframe(path)
     catch error_reading_dataframe # if the file does not exist, create a new dataframe
         @show error_reading_dataframe
         nodenames = ["L", "J", "θ", "V0", "V1", "T", "λ", "Δ"]
-        return DataFrame([name => [] for name in nodenames])
+        # return DataFrame([name => [] for name in nodenames])
+        return DataFrame(L=Int64[], J=Float64[], θ=Float64[], V0=Float64[], V1=Float64[],
+            T=Float64[], λ=Float64[], Δ=[])
     end
 end
 
@@ -210,25 +212,27 @@ function plot_LGE_Δ(df; idx)
         return cm[idx]
     end
 
-    p = plot(xlims=(0, L + 1), ylims=(0, L + 1))
+    p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
     # p = plot(xlims=(0, L + 1), ylims=(-L - 1, 0))
     for x in 1:L
         for y in 1:L
-            # onsite dot 
-            if abs.(maximum(evs[5, x, y])) > 1e-9
-                scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
-            end
 
             # bonds 
             plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[1, x, y]), alpha=10 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
             plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
             plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
             plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
+
+            # onsite dot 
+            if abs.(maximum(evs[5, x, y])) > 1e-6
+                scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
+            end
+
         end
     end
     xlabel!(p, "Site (x)")
     ylabel!(p, "Site, (y)")
-    title!(p, "T=$T, λ=$(round(λ,digits=2)): Δ(J=$J, θ=$θ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=6)
+    title!(p, "T=$T, λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$θ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=4)
     return p
 end
 

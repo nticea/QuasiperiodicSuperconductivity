@@ -16,11 +16,11 @@ loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/Quasiperiodi
 df = load_dataframe(loadpath)
 
 # for every unique V1, find the Δ with the λ closest to 0 
-V1s = unique(df.V1)
+V0s = unique(df.V0)
 global hmaps = []
-for V1 in V1s
+for V0 in V0s
     # get the corresponding data
-    subdf = df[(df.V1.==V1), :]
+    subdf = df[(df.V0.==V0), :]
     λs = subdf.λ
     idx = argmin(abs.(λs .- 1))
     @show λs

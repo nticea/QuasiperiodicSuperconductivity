@@ -11,7 +11,7 @@ include("../../src/model.jl")
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 17 # the full system is L × L 
+L = 35 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -50,43 +50,9 @@ function LGE_sweep(Ts; α::Real)
     end
 end
 
-α = 1
-Ts = [0.1, 0.12, 0.16, 0.18]
-LGE_sweep(Ts, α=α)
+αs = range(1.5, stop=1.8, length=9)
+Ts = [0.1, 0.12, 0.14, 0.16]
 
-# α = 0.8
-# Ts = [0.17, 0.18, 0.2, 0.22, 0.24]
-# LGE_sweep(Ts, α=α)
-
-# α = 0.6
-# Ts = [0.22, 0.26, 0.3, 0.32, 0.38]
-# LGE_sweep(Ts, α=α)
-
-# α = 0.4
-# Ts = [0.46, 0.5, 0.55, 0.6, 0.62]
-# LGE_sweep(Ts, α=α)
-
-# α = 0.2
-# Ts = [1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35]
-# LGE_sweep(Ts, α=α)
-
-# α = 1.2
-# Ts = [0.06, 0.08, 0.1, 0.12, 0.14]
-# LGE_sweep(Ts, α=α)
-
-# α = 1.4
-# Ts = [0.05, 0.07, 0.09, 0.12]
-# LGE_sweep(Ts, α=α)
-
-# α = 1.6
-# Ts = [0.03, 0.04, 0.06, 0.08, 0.1]
-# LGE_sweep(Ts, α=α)
-
-# α = 1.8
-# Ts = [0.01, 0.02, 0.04, 0.06]
-# LGE_sweep(Ts, α=α)
-
-# α = 2
-# Ts = [0.008, 0.01, 0.03, 0.05]
-# LGE_sweep(Ts, α=α)
-
+for α in αs
+    LGE_sweep(Ts, α=α)
+end
