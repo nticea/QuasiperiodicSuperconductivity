@@ -232,7 +232,7 @@ function plot_LGE_Δ(df; idx)
     end
     xlabel!(p, "Site (x)")
     ylabel!(p, "Site, (y)")
-    title!(p, "T=$T, λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$θ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=4)
+    title!(p, "T=$T, λ=$(round(abs(λ),digits=2)) \n Δ(J=$J, θ=$θ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=4)
     return p
 end
 

@@ -16,17 +16,17 @@ t = 1 # hopping
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-J = 0
-V1 = 0.5
-V0 = 1
+J = 3
+V1 = -1
+V0 = -1.05
 periodic = true
 pairing_symmetry = "d-wave"
 
-T = 0.04
+T = 0.23
 M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=pairing_symmetry)
 
 # perform the decomposition 
-decomp, _ = partialschur(Hermitian(M), nev=1, tol=1e-6, which=LM())
+decomp, _ = partialschur(Hermitian(M), nev=6, tol=1e-6, which=LM())
 # extract the maximum eigenvector/value pair 
 maxev = decomp.Q[:, 1]
 λ = decomp.R[1]

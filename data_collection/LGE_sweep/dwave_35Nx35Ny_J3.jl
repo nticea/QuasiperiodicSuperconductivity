@@ -50,39 +50,38 @@ function LGE_sweep(Ts; α::Real)
     end
 end
 
-α = 0.3
+α = -0.3
 Ts = [0.17, 0.19, 0.23, 0.26]
 LGE_sweep(Ts, α=α)
 
-α = 0.425
+α = -0.425
 LGE_sweep(Ts, α=α)
 
-α = 0.55
+α = -0.55
 LGE_sweep(Ts, α=α)
 
-α = 0.675
+α = -0.675
 LGE_sweep(Ts, α=α)
 
-α = 0.8
-Ts = [0.19, 0.22, 0.23, 0.26]
+α = -0.8
+Ts = [0.15, 0.17, 0.19, 0.23]
 LGE_sweep(Ts, α=α)
 
-α = 0.925
+α = -0.925
 LGE_sweep(Ts, α=α)
 
-α = 1.05
+α = -1.05
 LGE_sweep(Ts, α=α)
 
-α = 1.175
-Ts = [0.19, 0.22, 0.23, 0.26]
+α = -1.175
+Ts = [0.15, 0.17, 0.19, 0.23]
 LGE_sweep(Ts, α=α)
 
-α = 1.3
-Ts = [0.23, 0.26, 0.29, 0.33]
+α = -1.3
+Ts = [0.17, 0.19, 0.23, 0.26]
 LGE_sweep(Ts, α=α)
 
 # loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/LGE_sweep/17Nx17Ny_3J_dwave_results.csv"
-
 # df = load_dataframe(loadpath)
 
 # # for every unique V1, find the Δ with the λ closest to 0 

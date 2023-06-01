@@ -50,34 +50,50 @@ function LGE_sweep(Ts; α::Real)
     end
 end
 
-α = 0.3
+α = -0.3
 Ts = [0.1, 0.12, 0.15, 0.17]
 LGE_sweep(Ts, α=α)
 
-α = 0.425
+α = -0.425
 LGE_sweep(Ts, α=α)
 
-α = 0.55
+α = -0.55
 LGE_sweep(Ts, α=α)
 
-α = 0.675
+α = -0.675
 LGE_sweep(Ts, α=α)
 
-α = 0.8
+α = -0.8
 LGE_sweep(Ts, α=α)
 
-α = 0.925
+α = -0.925
 LGE_sweep(Ts, α=α)
 
-α = 1.05
+α = -1.05
+Ts = [0.1, 0.12, 0.15, 0.17]
+LGE_sweep(Ts, α=α)
+
+α = -1.175
+LGE_sweep(Ts, α=α)
+
+α = -1.3
 Ts = [0.12, 0.15, 0.17, 0.19]
 LGE_sweep(Ts, α=α)
 
-α = 1.175
-Ts = [0.12, 0.15, 0.17, 0.19]
-LGE_sweep(Ts, α=α)
+# loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/LGE_sweep/17Nx17Ny_1J_dwave_results.csv"
+# df = load_dataframe(loadpath)
 
-α = 1.3
-Ts = [0.15, 0.17, 0.19, 0.22]
-LGE_sweep(Ts, α=α)
-
+# # for every unique V1, find the Δ with the λ closest to 0 
+# V0s = unique(df.V0)
+# global hmaps = []
+# for V0 in V0s
+#     # get the corresponding data
+#     subdf = df[(df.V0.==V0), :]
+#     λs = subdf.λ
+#     idx = argmin(abs.(abs.(λs) .- 1))
+#     @show λs
+#     @show idx
+#     println("")
+#     push!(hmaps, plot_LGE_Δ(subdf; idx=idx))
+# end
+# p = plot(hmaps..., layout=Plots.grid(3, 3, widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1500), aspect_ratio=:equal)
