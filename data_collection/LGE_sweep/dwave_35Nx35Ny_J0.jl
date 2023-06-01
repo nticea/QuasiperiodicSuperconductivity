@@ -50,7 +50,7 @@ function LGE_sweep(Ts; α::Real)
     end
 end
 
-αs = range(-1.5, stop=-1.8, length=3)
+αs = range(-1.5, stop=-1.8, length=9)
 Ts = [0.1, 0.12, 0.14, 0.16]
 
 for α in αs
