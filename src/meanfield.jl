@@ -61,7 +61,7 @@ function swave(T::Real; E, U, V0)
     UU = reshape(UU, N * N, N)
     χ = PUU * UU
 
-    return V0 * χ
+    return -V0 * χ
 end
 
 function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int)
@@ -82,7 +82,7 @@ function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int)
     UU2 = reshape(UU2, N * N, N)
     χ2 = PUU * UU2
 
-    return V / 2 .* (χ1 .+ χ2)
+    return -V / 2 .* (χ1 .+ χ2)
 end
 
 function dwave(T::Real; L, E, U, V0, V1)
@@ -108,7 +108,7 @@ function dwave(T::Real; L, E, U, V0, V1)
     @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
     PUU = reshape(PUU, N, N * N)
     UU = reshape(UU, N * N, N)
-    M[5, 5] = V0 * PUU * UU
+    M[5, 5] = -V0 * PUU * UU
 
     # make lists of the nearest-neighbour sites 
     Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []

@@ -16,7 +16,7 @@ t = 1 # hopping
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-J = 0
+J = 0.5
 V1 = -1
 periodic = true
 pairing_symmetry = "d-wave"
@@ -50,8 +50,8 @@ function LGE_sweep(Ts; α::Real)
     end
 end
 
-αs = range(1.5, stop=1.8, length=9)
-Ts = [0.1, 0.12, 0.14, 0.16]
+αs = range(0.5, stop=1.3, length=9)
+Ts = [0.09, 0.13, 0.16, 0.19]
 
 for α in αs
     LGE_sweep(Ts, α=α)

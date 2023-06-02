@@ -16,7 +16,7 @@ t = 1 # hopping
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-J = 0
+J = 1.5
 V1 = -1
 periodic = true
 pairing_symmetry = "d-wave"
@@ -50,12 +50,34 @@ function LGE_sweep(Ts; α::Real)
     end
 end
 
-αs = range(1.5, stop=1.8, length=9)
-Ts = [0.1, 0.12, 0.14, 0.16]
+α = 0.3
+Ts = [0.1, 0.12, 0.15, 0.17]
+LGE_sweep(Ts, α=α)
 
-for α in αs
-    LGE_sweep(Ts, α=α)
-end
+α = 0.425
+LGE_sweep(Ts, α=α)
+
+α = 0.55
+LGE_sweep(Ts, α=α)
+
+α = 0.675
+LGE_sweep(Ts, α=α)
+
+α = 0.8
+Ts = [0.13, 0.16, 0.19, 0.22]
+LGE_sweep(Ts, α=α)
+
+α = 0.925
+LGE_sweep(Ts, α=α)
+
+α = 1.05
+LGE_sweep(Ts, α=α)
+
+α = 1.175
+LGE_sweep(Ts, α=α)
+
+α = 1.3
+LGE_sweep(Ts, α=α)
 
 loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/LGE_sweep/$(L)Nx$(L)Ny_$(J)J_dwave_results.csv"
 df = load_dataframe(loadpath)
