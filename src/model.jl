@@ -11,7 +11,8 @@ function expspace(start, stop, length)
     exp10.(range(start, stop, length=length))
 end
 
-function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool=true, θ::Union{Nothing,Real}=nothing)
+function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Real,
+    periodic::Bool=true, θ::Union{Nothing,Real}=nothing, ϕ::Real=0)
     # construct the kinetic part 
     Ht = square_lattice_kinetic(L=L, t=t, periodic=periodic)
 
@@ -20,7 +21,7 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
     for x in 1:L
         for y in 1:L
             n = coordinate_to_site(x, y, L=L)
-            U_xy = aubry_andre(x, y, J=J, Q=Q, L=L, θ=θ)
+            U_xy = aubry_andre(x, y, J=J, Q=Q, L=L, θ=θ, ϕ=ϕ)
             Hint[n] = -(U_xy + μ)
         end
     end
@@ -121,14 +122,14 @@ function B(; L::Int, Q::Real, θ::Real)
     return BSD
 end
 
-function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing)
+function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing, ϕ::Real=0)
     if isnothing(θ)
         # Q̃ /= √2
         Q̃ = floor(Int, Q * L) / L
-        return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
+        return J * (cos(2 * π * Q̃ * (x + y) + ϕ) - cos(2 * π * Q̃ * (x - y) + ϕ))
     else
         BSD = B(L=L, Q=Q, θ=θ)
-        return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y)) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y)))
+        return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕ) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕ))
     end
     # Q̃ = floor(Int, Q * L) / L
     # return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
