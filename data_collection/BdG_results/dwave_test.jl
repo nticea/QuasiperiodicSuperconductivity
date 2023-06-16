@@ -1,8 +1,8 @@
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
-include("../src/model.jl")
-include("../src/BdG_dwave.jl")
+include("../../src/model.jl")
+include("../../src/BdG_dwave.jl")
 
 using Plots
 using ProgressBars
@@ -10,19 +10,23 @@ using CSV
 using DataFrames
 
 ## PARAMETERS ##
-L = 55 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
-θ = nothing #π / 7
-μ = 0
-pairing_symmetry = "s-wave"
-tol = 1e-4
+μ = 1e-8
+θ = π / 7
+ϕx = 0.375
+ϕy = 0.29
+V0 = 1.5
+V1 = -1.5
+periodic = true
+pairing_symmetry = "d-wave"
 
 # saving information 
 savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_results.csv")
 
 # J, V0, T 
-Js = [0, 1, 2, 3]
+Js = [1]
 V0s = expspace(-0.8, 0.7, 20)
 Ts = expspace(-3, 0, 20)
 Δs = zeros(length(Js), length(V0s), length(Ts))

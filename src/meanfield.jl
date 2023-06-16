@@ -12,9 +12,9 @@ using ITensors
 include("../src/results.jl")
 include("../src/model.jl")
 
-function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕ::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, symmetry::String="s-wave")
+function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, symmetry::String="s-wave")
     # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕ=ϕ, periodic=periodic)
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
 
     # Diagonalize this Hamiltonian
     E, U = diagonalize_hamiltonian(H0)
@@ -138,6 +138,13 @@ function dwave(T::Real; L, E, U, V0, V1)
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
             end
 
+            # @error "TRYING SOMETHING DIFFERENT"
+            # if b == 5 || d == 5 # only δ=0 term gets V0, not δ'=0! 
+            #     Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=0, N=N)
+            # else # bond terms have potential V1 
+            #     Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
+            # end
+
             # fill in the matrix 
             M[b, d] = Mblock
         end
@@ -177,72 +184,72 @@ function calculate_λ_Δ(M)
     return λ, maxev
 end
 
-# function dwave_hermitian(T::Real; L, E, U, V0, V1)
-#     println("d-wave configuration")
-#     N = L^2
-#     Uconj = conj.(U) # This is U*
+function dwave_hermitian(T::Real; L, E, U, V0, V1)
+    println("d-wave configuration")
+    N = L^2
+    Uconj = conj.(U) # This is U*
 
-#     # Initialize the M matrix 
-#     M = Matrix{Matrix{Float64}}(undef, 5, 5)
+    # Initialize the M matrix 
+    M = Matrix{Matrix{Float64}}(undef, 5, 5)
 
-#     # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
-#     fs = fermi.(E, T)
-#     fnm = zeros(N, N)
-#     Enm = zeros(N, N)
-#     for i in 1:N
-#         fnm[:, i] = fs .+ fs[i]
-#         Enm[:, i] = E .+ E[i]
-#     end
-#     P = (1 .- fnm) ./ Enm
+    # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
+    fs = fermi.(E, T)
+    fnm = zeros(N, N)
+    Enm = zeros(N, N)
+    for i in 1:N
+        fnm[:, i] = fs .+ fs[i]
+        Enm[:, i] = E .+ E[i]
+    end
+    P = (1 .- fnm) ./ Enm
 
-#     # the s-wave sector. This is in the (5,5) block of M matrix
-#     @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
-#     @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
-#     PUU = reshape(PUU, N, N * N)
-#     UU = reshape(UU, N * N, N)
-#     M[5, 5] = -V0 * PUU * UU
+    # the s-wave sector. This is in the (5,5) block of M matrix
+    @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
+    @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
+    PUU = reshape(PUU, N, N * N)
+    UU = reshape(UU, N * N, N)
+    M[5, 5] = -V0 * PUU * UU
 
-#     # make lists of the nearest-neighbour sites 
-#     Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
-#     for r in 1:N
-#         nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
-#         push!(Rsites, nnr[1])
-#         push!(Usites, nnr[2])
-#         push!(Lsites, nnr[3])
-#         push!(Dsites, nnr[4])
-#         push!(onsites, r)
-#     end
-#     sites = [Rsites, Usites, Lsites, Dsites, onsites]
+    # make lists of the nearest-neighbour sites 
+    Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
+    for r in 1:N
+        nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
+        push!(Rsites, nnr[1])
+        push!(Usites, nnr[2])
+        push!(Lsites, nnr[3])
+        push!(Dsites, nnr[4])
+        push!(onsites, r)
+    end
+    sites = [Rsites, Usites, Lsites, Dsites, onsites]
 
-#     # iterate through each of the 5×5 blocks
-#     for bd in CartesianIndices(M)
-#         (b, d) = Tuple(bd)
-#         @show (b, d)
+    # iterate through each of the 5×5 blocks
+    for bd in CartesianIndices(M)
+        (b, d) = Tuple(bd)
+        @show (b, d)
 
-#         # bc matrix is Hermitian, we only have to fill in lower diagonal
-#         # also, don't do the s-wave component (we've done it already)
-#         if d <= b && !(b == 5 && d == 5)
-#             b_sites, d_sites = sites[b], sites[d]
+        # bc matrix is Hermitian, we only have to fill in lower diagonal
+        # also, don't do the s-wave component (we've done it already)
+        if d <= b && !(b == 5 && d == 5)
+            b_sites, d_sites = sites[b], sites[d]
 
-#             if b == 5 || d == 5 # the on-site terms get potential V=V0
-#                 @error "IT MIGHT JUST BE b==5, not both"
-#                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N)
-#             else # bond terms have potential V1 
-#                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
-#             end
+            if b == 5 || d == 5 # the on-site terms get potential V=V0
+                @error "IT MIGHT JUST BE b==5, not both"
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N)
+            else # bond terms have potential V1 
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
+            end
 
-#             # fill in the matrix 
-#             M[b, d] = Mblock
-#             # if off-diagonal, fill in the hermitian conjugate block
-#             if d != b
-#                 M[d, b] = Mblock'
-#             end
-#         end
-#     end
-#     M = mortar(M)
+            # fill in the matrix 
+            M[b, d] = Mblock
+            # if off-diagonal, fill in the hermitian conjugate block
+            if d != b
+                M[d, b] = Mblock'
+            end
+        end
+    end
+    M = mortar(M)
 
-#     return M
-# end
+    return M
+end
 
 # function dwave_old(T::Real; L, E, U, V0, V1)
 #     println("d-wave configuration")

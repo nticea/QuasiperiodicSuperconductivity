@@ -13,9 +13,9 @@ include("../../src/meanfield.jl")
 ## PARAMETERS 
 
 L = 17
-symmetry = "dwave"
+# symmetry = "dwave"
 
-## SCRIPT 
+# ## SCRIPT 
 
 # loadpath = "/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/LGE_sweep_J/$(L)Nx$(L)Ny_$(symmetry)_results.csv"
 # df = load_dataframe(loadpath)

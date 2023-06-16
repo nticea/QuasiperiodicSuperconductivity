@@ -12,7 +12,7 @@ function expspace(start, stop, length)
 end
 
 function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Real,
-    periodic::Bool=true, θ::Union{Nothing,Real}=nothing, ϕ::Real=0)
+    periodic::Bool=true, θ::Union{Nothing,Real}=nothing, ϕx::Real=0, ϕy::Real=0)
     # construct the kinetic part 
     Ht = square_lattice_kinetic(L=L, t=t, periodic=periodic)
 
@@ -21,7 +21,7 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
     for x in 1:L
         for y in 1:L
             n = coordinate_to_site(x, y, L=L)
-            U_xy = aubry_andre(x, y, J=J, Q=Q, L=L, θ=θ, ϕ=ϕ)
+            U_xy = aubry_andre(x, y, J=J, Q=Q, L=L, θ=θ, ϕx=ϕx, ϕy=ϕy)
             Hint[n] = -(U_xy + μ)
         end
     end
@@ -122,14 +122,14 @@ function B(; L::Int, Q::Real, θ::Real)
     return BSD
 end
 
-function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing, ϕ::Real=0)
+function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0)
     if isnothing(θ)
         # Q̃ /= √2
         Q̃ = floor(Int, Q * L) / L
-        return J * (cos(2 * π * Q̃ * (x + y) + ϕ) - cos(2 * π * Q̃ * (x - y) + ϕ))
+        return J * (cos(2 * π * Q̃ * (x + y) + ϕx) - cos(2 * π * Q̃ * (x - y) + ϕy))
     else
         BSD = B(L=L, Q=Q, θ=θ)
-        return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕ) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕ))
+        return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕx) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕy))
     end
     # Q̃ = floor(Int, Q * L) / L
     # return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
@@ -151,11 +151,11 @@ function fermi(ε::Real, T::Real)
     1 / (exp(ε / T) + 1)
 end
 
-function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing})
+function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx::Real=0, ϕy::Real=0)
     potmat = zeros(L, L)
     for x in 1:L
         for y in 1:L
-            potmat[x, y] = aubry_andre(x, y; L=L, J=J, Q=Q, θ=θ)
+            potmat[x, y] = aubry_andre(x, y; L=L, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy)
         end
     end
     h = heatmap(potmat)
@@ -164,7 +164,10 @@ function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing})
     xlabel!(h, "Site (x)")
     ylabel!(h, "Site (y)")
     θ = θ_to_π(θ)
-    title!(h, "Potential for J=$J, θ=$θ")
+    ϕx = θ_to_π(ϕx)
+    ϕy = θ_to_π(ϕy)
+
+    title!(h, "Potential for J=$J, θ=$θ, ϕx=$ϕx, ϕy=$ϕy")
 
     return h
 end

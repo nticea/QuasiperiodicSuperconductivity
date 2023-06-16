@@ -1,15 +1,15 @@
 using DataFrames
 
-function update_results!(df::DataFrame; L, λ, J, θ, ϕ, V0, V1, T, Δ)
+function update_results!(df::DataFrame; L, λ, J, θ, ϕx, ϕy, V0, V1, T, Δ)
     if isnothing(θ)
         θ = 0
     end
-    df2 = DataFrame(L=[L], λ=[λ], J=[J], θ=[θ], ϕ=[ϕ], V0=[V0], V1=[V1], T=[T], Δ=[Δ])
+    df2 = DataFrame(L=[L], λ=[λ], J=[J], θ=[θ], ϕx=[ϕx], ϕy=[ϕy], V0=[V0], V1=[V1], T=[T], Δ=[Δ])
     append!(df, df2)
 end
 
-function already_calculated(df::DataFrame; L, J, θ, ϕ, V0, V1, T)
-    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕ.==ϕ).&(df.T.==T), :]
+function already_calculated(df::DataFrame; L, J, θ, ϕx, ϕy, V0, V1, T)
+    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.T.==T), :]
     return size(sub)[1] > 0
 end
 
@@ -31,9 +31,9 @@ function load_dataframe(path)
         return dfcut
     catch error_reading_dataframe # if the file does not exist, create a new dataframe
         @show error_reading_dataframe
-        nodenames = ["L", "J", "θ", "ϕ", "V0", "V1", "T", "λ", "Δ"]
+        nodenames = ["L", "J", "θ", "ϕx", "ϕy", "V0", "V1", "T", "λ", "Δ"]
         # return DataFrame([name => [] for name in nodenames])
-        return DataFrame(L=Int64[], J=Float64[], θ=Float64[], ϕ=Float64[], V0=Float64[], V1=Float64[],
+        return DataFrame(L=Int64[], J=Float64[], θ=Float64[], ϕx=Float64[], ϕy=Float64[], V0=Float64[], V1=Float64[],
             T=Float64[], λ=Float64[], Δ=[])
     end
 end
@@ -99,7 +99,8 @@ function plot_LGE_Δ(df; idx)
     V1 = df.V1[idx]
     T = df.T[idx]
     θ = θ_to_π(df.θ[idx])
-    ϕ = θ_to_π(df.ϕ[idx])
+    ϕx = θ_to_π(df.ϕx[idx])
+    ϕy = θ_to_π(df.ϕy[idx])
 
     if length(df.Δ[1]) == 5 * L^2
         symmetry = "d-wave"
@@ -164,7 +165,7 @@ function plot_LGE_Δ(df; idx)
 
     xlabel!(p, "Site (x)")
     ylabel!(p, "Site, (y)")
-    title!(p, "T=$(round(T,digits=4)), λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$θ, ϕ=$ϕ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=4)
+    title!(p, "T=$(round(T,digits=4)), λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$θ, ϕx=$ϕx, ϕy=$ϕy, \n V0=$V0, V1=$(round(V1,digits=2)))", fontsize=4)
     return p
 end
 
