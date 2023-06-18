@@ -189,8 +189,10 @@ function compute_Δ_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, period
         Δij_prev1 = copy(Δij)
     end
 
-    Δij_prev = (Δij_prev1 + Δij_prev2) ./ 2
-    return Δij_prev, max_Δ # return the converged value for Δij and convergence history 
+    Δij = (Δij_prev1 + Δij_prev2) ./ 2
+    Δij = ΔBdG_to_ΔLGE_flat(Δij, L=L)
+
+    return Δij, max_Δ # return the converged value for Δij and convergence history 
 end
 
 function BdG_iteration_dwave(M::Matrix{Float64}, Δij; Vij, T::Real)
