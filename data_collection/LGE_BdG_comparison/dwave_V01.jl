@@ -12,7 +12,7 @@ include("../../src/meanfield.jl")
 include("../../src/BdG_dwave.jl")
 
 ## PARAMETERS ##
-L = 11 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
