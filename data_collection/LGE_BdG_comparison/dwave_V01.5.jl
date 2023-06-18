@@ -42,7 +42,7 @@ function LGE_sweep(Ts; J::Real)
     for i in iter # iterate through all temperatures
         T = Ts[i]
         # check whether this particular (J,T,V0) combo has been already computed 
-        if !already_calculated(df; L=L, J=J, θ=θ, V0=V0, V1=V1, T=T, ϕx=ϕx, ϕy=ϕy)
+        if !already_calculated(df_LGE; L=L, J=J, θ=θ, V0=V0, V1=V1, T=T, ϕx=ϕx, ϕy=ϕy)
 
             # calculate the LGE result 
             @time λ, Δ_LGE = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=pairing_symmetry)
@@ -52,13 +52,16 @@ function LGE_sweep(Ts; J::Real)
             CSV.write(savepath_LGE, df_LGE)
             flush(stdout)
 
-            # calculate the BdG result 
-            @time Δ_BdG, BdG_hist = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol)
+            if !already_calculated(df_BdG; L=L, J=J, θ=θ, V0=V0, V1=V1, T=T, ϕx=ϕx, ϕy=ϕy)
 
-            # save the BdG results 
-            update_results!(df_BdG; L=L, λ=λ, J=J, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, T=T, Δ=Δ_BdG)
-            CSV.write(savepath_BdG, df_BdG)
-            flush(stdout)
+                # calculate the BdG result 
+                @time Δ_BdG, BdG_hist = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol)
+
+                # save the BdG results 
+                update_results!(df_BdG; L=L, λ=λ, J=J, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, T=T, Δ=Δ_BdG)
+                CSV.write(savepath_BdG, df_BdG)
+                flush(stdout)
+            end
         end
     end
 end
