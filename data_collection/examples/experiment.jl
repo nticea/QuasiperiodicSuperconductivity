@@ -13,13 +13,13 @@ include("../../src/BdG_dwave.jl")
 include("../../src/BdG.jl")
 
 ## PARAMETERS ##
-L = 9 # the full system is L × L 
+L = 11 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = nothing#π / 7
-ϕx = 0#0.375
-ϕy = 0#0.29
+ϕx = 0.375
+ϕy = 0.29
 V0 = 1
 V1 = -1
 J = 1
@@ -27,13 +27,12 @@ periodic = true
 niter = 500
 tol = 1e-10
 pairing_symmetry = "d-wave"
-noise = 0#1e-3 # looks like adding noise is not helping anything 
 
-# T = 0.06
+# T = 0.1
 # λ, Δ_LGE = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 # @assert 1 == 0
 
-Ts = LinRange(0.008, 0.15, 50)
+Ts = LinRange(0.008, 0.15, 25)
 
 global λs = []
 global Δs = []
@@ -43,9 +42,9 @@ global max_Δs_list = []
 
 for T in Ts
     λ, Δ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
-    Δij, max_Δ = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol, noise=noise)
+    Δij, max_Δ = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol, Δ_init=Δ)
     if pairing_symmetry == "s-wave"
-        Δij_swave, max_Δ_swave = compute_Δ(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, periodic=periodic, niter=niter, tol=tol, noise=noise)
+        Δij_swave, max_Δ_swave = compute_Δ(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, periodic=periodic, niter=niter, tol=tol)
         push!(Δijs_swave, Δij_swave)
     end
 

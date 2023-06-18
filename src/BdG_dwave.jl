@@ -141,7 +141,7 @@ include("../src/meanfield.jl")
 include("../src/model.jl")
 
 function compute_Δ_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0)
+    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
 
     # size of the BdG matrix is 2N × 2N
     N = L * L
@@ -156,12 +156,18 @@ function compute_Δ_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, period
     Vij = make_interaction(L=L, V0=V0, V1=V1, periodic=periodic)
 
     # make an initial guess for the gap parameter -- finite-size Δ gap 
-    Δij_prev = initialize_Δ_dwave(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+    Δij_prev1 = initialize_Δ_dwave(L=L, Δ_init=Δ_init)
+    Δij_prev2 = copy(Δij_prev1)
 
     ## ITERATE ## 
     max_Δ = [] # keep track of convergence history 
     for n in 1:niter
         print(n, "-")
+
+        # take the average of the previous 2 iterations 
+        Δij_prev = (Δij_prev1 + Δij_prev2) ./ 2
+
+        # Compute the BdG iteration 
         Δij = BdG_iteration_dwave(M, Δij_prev; Vij=Vij, T=T) # perform one BdG iteration and get the new Δij 
 
         # check for convergence 
@@ -178,9 +184,12 @@ function compute_Δ_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, period
         # keep track of convergence over time 
         push!(max_Δ, maximum(Δij))
 
-        Δij_prev = copy(Δij)
+        # Update the history 
+        Δij_prev2 = copy(Δij_prev1)
+        Δij_prev1 = copy(Δij)
     end
 
+    Δij_prev = (Δij_prev1 + Δij_prev2) ./ 2
     return Δij_prev, max_Δ # return the converged value for Δij and convergence history 
 end
 
@@ -205,27 +214,14 @@ function BdG_iteration_dwave(M::Matrix{Float64}, Δij; Vij, T::Real)
     return Δnew
 end
 
-function initialize_Δ_dwave(; L::Int, t::Real, Q::Real, μ::Real, θ::Union{Real,Nothing}, ϕx::Real, ϕy::Real, periodic::Bool=true)
-
-    # # make an initial guess for the gap parameter -- size of fs gap 
-    # fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic))
-
-    # # construct the adjacency matrix for the nearest-neighbours 
-    # g = Graphs.SimpleGraphs.grid((L, L), periodic=periodic)
-    # Δij = Graphs.LinAlg.adjacency_matrix(g)
-    # Δij = Matrix(Δij) # temporarily make it a dense matrix 
-    # Δij = convert(Matrix{Float64}, Δij)
-
-    # # the off-diagonals (nearest-neighbours) are fsgap size 
-    # Δij .*= 0.05#fsgap
-
-    # # the diagonals (on-site) are zero
-    # #Δij[diagind(Δij)] .= fsgap
-
-    # return Δij
-    N = L * L
-    d = Uniform(0, 0.05)
-    Δij = rand.(d, N, N)
+function initialize_Δ_dwave(; L::Int, Δ_init=nothing)
+    if isnothing(Δ_init)
+        d = Uniform(0, 0.05)
+        return rand.(d, L * L, L * L)
+    else
+        @assert size(Δ_init) == (5 * L * L,)
+        return ΔLGE_to_ΔBdG(Δ_init, L=L)
+    end
 end
 
 function make_interaction(; L::Int, periodic::Bool, V0::Real, V1::Real)
@@ -250,4 +246,65 @@ function finite_size_gap(; L::Int, t::Real, Q::Real, μ::Real, θ::Union{Real,No
     E, _ = diagonalize_hamiltonian(H0)
     sort!(E)
     ΔE = [E[i+1] - E[i] for i in 1:(length(E)-1)]
+end
+
+function ΔLGE_to_ΔBdG(Δ_LGE; L::Int)
+    evs = zeros(5, L, L)
+    for (n, i) in enumerate(1:(L*L):(5*L*L))
+        evi = Δ_LGE[i:(i+L*L-1)]
+        evs[n, :, :] = reshape(evi, L, L)
+    end
+
+    Δ_BdG = zeros(L * L, L * L)
+    for x in 1:L
+        for y in 1:L
+            # coordinate 
+            r = coordinate_to_site(x, y, L=L)
+
+            # get the nearest neighbours 
+            rL, rU, rR, rD = nearest_neighbours(r, L=L)
+
+            # fill in the Δ matrix 
+            Δ_BdG[r, rL] = evs[1, x, y] # left 
+            Δ_BdG[r, rU] = evs[2, x, y] # up 
+            Δ_BdG[r, rR] = evs[3, x, y] # right
+            Δ_BdG[r, rD] = evs[4, x, y] # down
+            Δ_BdG[r, r] = evs[5, x, y] # on-site 
+        end
+    end
+
+    return Δ_BdG
+end
+
+function ΔBdG_to_ΔLGE(Δ_BdG; L::Int)
+    # and now, go backwards 
+    evs_rec = zeros(5, L, L)
+
+    for r in 1:(L*L)
+        # coordinates
+        x, y = site_to_coordinate(r, L=L)
+
+        # get the nearest neighbours 
+        rL, rU, rR, rD = nearest_neighbours(r, L=L)
+
+        evs_rec[1, x, y] = Δ_BdG[r, rL] # left 
+        evs_rec[2, x, y] = Δ_BdG[r, rU]# up 
+        evs_rec[3, x, y] = Δ_BdG[r, rR] # right
+        evs_rec[4, x, y] = Δ_BdG[r, rD] # down
+        evs_rec[5, x, y] = Δ_BdG[r, r] # on-site 
+    end
+
+    return evs_rec
+end
+
+function ΔBdG_to_ΔLGE_flat(Δ_BdG; L::Int)
+    evs_rec = ΔBdG_to_ΔLGE(Δ_BdG, L=L)
+
+    evs_flat = zeros(5 * L * L)
+    for (n, i) in enumerate(1:(L*L):(5*L*L))
+        evi = evs_rec[n, :, :]
+        evs_flat[i:(i+L*L-1)] = reshape(evi, L * L)
+    end
+
+    return evs_flat
 end
