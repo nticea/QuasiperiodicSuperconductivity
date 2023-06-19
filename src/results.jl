@@ -20,7 +20,7 @@ function load_dataframe(path)
         all_evs_new = []
         for (i, evs) in enumerate(df.Δ)
             # Split the string by multiple delimiters
-            result = split(chop(evs; head=1, tail=1), r",")
+            result = split(chop(evs; head=1, tail=1), r"[,; ]")
             new_array = result[result.!=""]
             evs_new = parse.(Float64, new_array)
             push!(all_evs_new, evs_new)
@@ -38,12 +38,11 @@ function load_dataframe(path)
     end
 end
 
-function find_Tc(df::DataFrame; interp_value::Real=1)
+function find_Tc_LGE(df::DataFrame; interp_value::Real=1)
 
     # Get the unique Js, V1s from the dataframe 
-    Js, V0s = unique(df.J), unique(df.V0)
+    Js, V0s, V1s = unique(df.J), unique(df.V0), unique(df.V1)
     L = df.L[1]
-    V1 = df.V1[1]
 
     # Make the new dataframe 
     nodenames = ["L", "J", "V0", "V1", "Tc"]
@@ -52,27 +51,72 @@ function find_Tc(df::DataFrame; interp_value::Real=1)
     # For each unique (J,V0) pair... extract the corresponding data across all Ts 
     for J in Js
         for V0 in V0s
+            for V1 in V1s
 
-            # Extract the corresponding data across all Ts
-            dfsub = df[(df.J.==J).&(df.V0.==V0), :]
-            λs, Ts = dfsub.λ, dfsub.T
+                # Extract the corresponding data across all Ts
+                dfsub = df[(df.J.==J).&(df.V0.==V0).&(df.V1.==V1), :]
+                λs, Ts = dfsub.λ, dfsub.T
 
-            # Compute the interpolated Tc for this (J,V0) pair
-            idxlist = sortperm(λs)
-            knots = λs[idxlist]
-            if length(knots) > 1
-                Interpolations.deduplicate_knots!(knots, move_knots=true)
-                try
-                    interp_linear = linear_interpolation(knots, Ts[idxlist])
-                    Tc = interp_linear(interp_value)
-                    # Put it into a new dataframe indexed by (J,V0,Tc)
-                    df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
-                    append!(Tc_df, df2)
-                catch e
-                    Tc = NaN
-                    # Put it into a new dataframe indexed by (J,V0,Tc)
-                    df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
-                    append!(Tc_df, df2)
+                # Compute the interpolated Tc for this (J,V0) pair
+                idxlist = sortperm(λs)
+                knots = λs[idxlist]
+                if length(knots) > 1
+                    Interpolations.deduplicate_knots!(knots, move_knots=true)
+                    try
+                        interp_linear = linear_interpolation(knots, Ts[idxlist])
+                        Tc = interp_linear(interp_value)
+                        # Put it into a new dataframe indexed by (J,V0,Tc)
+                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
+                        append!(Tc_df, df2)
+                    catch e
+                        Tc = NaN
+                        # Put it into a new dataframe indexed by (J,V0,Tc)
+                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
+                        append!(Tc_df, df2)
+                    end
+                end
+            end
+        end
+    end
+    return Tc_df
+end
+
+function find_Tc_BdG(df::DataFrame; interp_value::Real=1)
+
+    # Get the unique Js, V1s from the dataframe 
+    Js, V0s, V1s = unique(df.J), unique(df.V0), unique(df.V1)
+    L = df.L[1]
+
+    # Make the new dataframe 
+    nodenames = ["L", "J", "V0", "V1", "Tc"]
+    Tc_df = DataFrame([name => [] for name in nodenames])
+
+    # For each unique (J,V0) pair... extract the corresponding data across all Ts 
+    for J in Js
+        for V0 in V0s
+            for V1 in V1s
+
+                # Extract the corresponding data across all Ts
+                dfsub = df[(df.J.==J).&(df.V0.==V0).&(df.V1.==V1), :]
+                Δs, Ts = maximum.(dfsub.Δ), dfsub.T
+
+                # Compute the interpolated Tc for this (J,V0) pair
+                idxlist = sortperm(Δs)
+                knots = Δs[idxlist]
+                if length(knots) > 1
+                    Interpolations.deduplicate_knots!(knots, move_knots=true)
+                    try
+                        interp_linear = linear_interpolation(knots, Ts[idxlist])
+                        Tc = interp_linear(interp_value)
+                        # Put it into a new dataframe indexed by (J,V0,Tc)
+                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
+                        append!(Tc_df, df2)
+                    catch e
+                        Tc = NaN
+                        # Put it into a new dataframe indexed by (J,V0,Tc)
+                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
+                        append!(Tc_df, df2)
+                    end
                 end
             end
         end

@@ -55,7 +55,7 @@ function LGE_sweep(Ts; J::Real)
             if !already_calculated(df_BdG; L=L, J=J, θ=θ, V0=V0, V1=V1, T=T, ϕx=ϕx, ϕy=ϕy)
 
                 # calculate the BdG result 
-                @time Δ_BdG, BdG_hist = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol)
+                @time Δ_BdG, BdG_hist = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol, Δ_init=Δ_LGE)
 
                 # save the BdG results 
                 update_results!(df_BdG; L=L, λ=λ, J=J, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, T=T, Δ=Δ_BdG)
