@@ -93,12 +93,14 @@ function kinetic_term(sites; U, V, E, f, t)
     return K
 end
 
-function current_current_term(sites, coords; U, V, E, f, qtol=1e-9)
+function current_current_term(sites, coords; U, V, E, f)
     N, _ = size(U)
+    qtol = 0
+    @error "Need to do a finite size extrapolation"
+
     i_sites = sites[5] # these are the on-sites 
 
-    # the diagonals have 0 energy difference,
-    # which causes the current-current correlator to blow up
+    # the diagonals have ΔE=0, which causes divergence 
     @einsimd En1n2[n1, n2] := (E[n1] - E[n2])
     En1n2[diagind(En1n2)] .= Inf
 

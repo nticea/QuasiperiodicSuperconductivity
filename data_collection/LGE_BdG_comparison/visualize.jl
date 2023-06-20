@@ -14,7 +14,7 @@ include("../../src/BdG_dwave.jl")
 ## PARAMETERS 
 
 L = 17
-V0 = 1
+V0 = 1.5
 V1 = -1
 
 ## SCRIPT 
@@ -30,6 +30,7 @@ df_LGE = load_dataframe("/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic
 # end
 
 # global hmaps = []
+# Js = unique(df_LGE.J)
 
 # for J in Js
 #     print(J, "-")
@@ -68,11 +69,12 @@ df_LGE = load_dataframe("/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic
 #         ϕy = θ_to_π(subdf_LGE.ϕy[idx])
 
 #         function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
-#             cm = palette([:blue, :red], 2 * numpts + 1)
 #             val = all_evs[x1, x2, x3]
-#             max = maximum(abs.(all_evs))
-#             idx = floor(Int, val / max * numpts + numpts + 1)
-#             return cm[idx]
+#             if val < 0
+#                 return "blue"
+#             else
+#                 return "red"
+#             end
 #         end
 
 #         evs = Δ_LGE
@@ -126,7 +128,7 @@ df_LGE = load_dataframe("/Users/nicole/Dropbox/Grad school/Trithep/quasiperiodic
 #     end
 # end
 
-Tc_BdG = find_Tc_BdG(df_BdG, interp_value=1e-8)
+Tc_BdG = find_Tc_BdG(df_BdG, interp_value=1e-6)
 Tc_LGE = find_Tc_LGE(df_LGE, interp_value=1)
 
 plot(Tc_BdG.J, Tc_BdG.Tc, label=nothing, c="blue")
@@ -135,29 +137,29 @@ plot!(Tc_LGE.J, Tc_LGE.Tc, label=nothing, c="red")
 scatter!(Tc_LGE.J, Tc_LGE.Tc, label="LGE soln", c="red")
 title!("Comparing BdG and LGE solutions \n L=$L, V0=$V0, V1=$V1")
 
-# Js = unique(df.J)
-# p = plot()
-# for (i, J) in enumerate(Js[1])
+Js = unique(df_LGE.J)
+p = plot()
+for (i, J) in enumerate(Js[13])
 
-#     # Get the BdG data 
-#     dfsub_BdG = df_BdG[(df_BdG.J.==J).&(df_BdG.V0.==V0).&(df_BdG.V1.==V1), :]
-#     Δs, Ts = dfsub_BdG.Δ, dfsub_BdG.T
+    # Get the BdG data 
+    dfsub_BdG = df_BdG[(df_BdG.J.==J).&(df_BdG.V0.==V0).&(df_BdG.V1.==V1), :]
+    Δs, Ts = dfsub_BdG.Δ, dfsub_BdG.T
 
-#     max_Δ = []
-#     for Δ in Δs
-#         push!(max_Δ, maximum(Δ))
-#     end
+    max_Δ = []
+    for Δ in Δs
+        push!(max_Δ, maximum(Δ))
+    end
 
-#     plot!(p, Ts, max_Δ, label=nothing, c="blue", yaxis=:log10)
-#     scatter!(p, Ts, max_Δ, label="J=$J", c="blue", yaxis=:log10)
+    plot!(p, Ts, max_Δ, label=nothing, c="blue", yaxis=:log10)
+    scatter!(p, Ts, max_Δ, label="J=$J", c="blue", yaxis=:log10)
 
-#     # Get the LGE data 
-#     dfsub_LGE = df_LGE[(df_LGE.J.==J).&(df_LGE.V0.==V0).&(df_LGE.V1.==V1), :]
-#     Tc = find_Tc_LGE(dfsub_LGE).Tc
+    # Get the LGE data 
+    dfsub_LGE = df_LGE[(df_LGE.J.==J).&(df_LGE.V0.==V0).&(df_LGE.V1.==V1), :]
+    Tc = find_Tc_LGE(dfsub_LGE).Tc
 
-#     vline!(p, [Tc], label="LGE Tc", c="red")
-# end
-# title!(p, "BdG and LGE comparison")
-# xlabel!(p, "T")
-# ylabel!(p, "Maximum Δ")
-# plot(p)
+    vline!(p, [Tc], label="LGE Tc", c="red")
+end
+title!(p, "BdG and LGE comparison")
+xlabel!(p, "T")
+ylabel!(p, "Maximum Δ")
+plot(p)

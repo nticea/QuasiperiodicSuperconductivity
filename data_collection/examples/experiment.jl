@@ -13,24 +13,42 @@ include("../../src/BdG_dwave.jl")
 include("../../src/BdG.jl")
 
 ## PARAMETERS ##
-L = 11 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
-θ = nothing#π / 7
-ϕx = 0.375
-ϕy = 0.29
-V0 = 1
+θ = π / 7
+ϕx = 0
+ϕy = 0
+V0 = 1.5
 V1 = -1
-J = 1
+J = 1.3
 periodic = true
-niter = 500
-tol = 1e-10
+niter = 1000
+tol = 1e-12
 pairing_symmetry = "d-wave"
 
-# T = 0.1
-# λ, Δ_LGE = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 # @assert 1 == 0
+T = 0.128
+M = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
+
+@assert 1 == 0
+Δ_BdG_LGEinit, BdG_hist_LGEinit = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol, Δ_init=Δ_LGE)
+Δ_BdG_randinit, BdG_hist_randinit = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol)
+
+Δ_BdG_LGE_scaled = Δ_BdG_LGEinit .* (Δ_LGE[1] / Δ_BdG_LGEinit[1])
+Δ_BdG_rand_scaled = Δ_BdG_randinit .* (Δ_LGE[1] / Δ_BdG_randinit[1])
+
+title = "LGE solution, T=$T, λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$(θ_to_π(θ)), V0=$V0, V1=$V1)"
+plot_spatial_profile(Δ_LGE, L=L, title=title)
+
+title = "BdG with LGE initialization, T=$T, λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$(θ_to_π(θ)), V0=$V0, V1=$V1)"
+plot_spatial_profile(Δ_BdG_LGE_scaled, L=L, title=title)
+
+title = "BdG with rand initialization, T=$T, λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$(θ_to_π(θ)), V0=$V0, V1=$V1)"
+plot_spatial_profile(Δ_BdG_rand_scaled, L=L, title=title)
+
+@assert 1 == 0
 
 Ts = LinRange(0.008, 0.15, 25)
 
@@ -86,8 +104,8 @@ end
 plot(Ts, max_Δs, label="BdG Δ d-wave", color="blue", yaxis=:log10)
 scatter!(Ts, max_Δs, label=nothing, color="blue", yaxis=:log10)
 if pairing_symmetry == "s-wave"
-    plot!(Ts, max_Δs_swave, label="BdG Δ s-wave", color="red")#, yaxis=:log10)
-    scatter!(Ts, max_Δs_swave, label=nothing, color="red")#, yaxis=:log10)
+    plot!(Ts, max_Δs_swave, label="BdG Δ s-wave", color="red")
+    scatter!(Ts, max_Δs_swave, label=nothing, color="red")
 end
 vline!([Tc], label="LGE Tc", color="orange")
 title!("L=$L, V0=$V0, V1=$V1, J=$J")

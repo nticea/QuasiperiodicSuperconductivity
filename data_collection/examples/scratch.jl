@@ -1,3 +1,4 @@
+
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "../.."))
@@ -9,65 +10,52 @@ using DataFrames
 
 include("../../src/model.jl")
 include("../../src/meanfield.jl")
+include("../../src/BdG_dwave.jl")
+include("../../src/BdG.jl")
 
 ## PARAMETERS ##
-L = 9 # the full system is L × L 
+L = 11 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-J = 0.5
-V1 = -1
-V0 = 1.5
+ϕx = 0.239
+ϕy = 0.547
+V0 = 1
+V1 = -1.5
+J = 1
 periodic = true
-pairing_symmetry = "d-wave"
+niter = 500
+tol = 1e-12
 
-T = 0.12
-λ_h, Δ_h = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=pairing_symmetry)
-λ_nh, Δ_nh = pairfield_correlation_nonhermitian(T, L=L, t=t, J=J, Q=Q, θ=θ, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=pairing_symmetry)
+T = 0.1
+λ_LGE, Δ_LGE = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry="d-wave")
 
-maxev = Δ_nh
-λ = λ_nh
-θ = θ_to_π(θ)
+# p_BdG = plot_spatial_profile(Δ_BdG ./ (γ * λ_LGE); L, title="BdG Δ after one iteration")
+# p_LGE = plot_spatial_profile(Δ_LGE; L, title="LGE Δ (initial)")
+# p = plot(p_LGE, p_BdG, layout=Plots.grid(1, 2, widths=[1 / 2, 1 / 2]), size=(1500, 1000), aspect_ratio=:equal)
 
-if pairing_symmetry == "d-wave"
-    evs = zeros(5, L, L)
-    for (n, i) in enumerate(1:(L*L):(5*L*L))
-        evi = maxev[i:(i+L*L-1)]
-        evs[n, :, :] = reshape(evi, L, L)
-    end
-elseif pairing_symmetry == "s-wave"
-    evs = reshape(maxev, L, L)
+#@assert 1 == 0
+
+γs = LinRange(1e-9, 1, 50)
+# max_ΔBdG = []
+# max_ΔLGE = []
+diff = []
+for (n, γ) in enumerate(γs)
+    print(n, "-")
+    Δ_BdG, Δmax = Δ_dwave_debug(T, γ, λ_LGE; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol, Δ_init=Δ_LGE)
+    push!(diff, norm(Δ_BdG - λ_LGE * γ * Δ_LGE))
+    # push!(max_ΔBdG, maximum(abs.(Δ_BdG)) / γ)
+    # push!(max_ΔLGE, maximum(abs.(Δ_LGE)) * λ_LGE)
+    #push!(maxs, Δmax)
 end
 
-function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
-    cm = palette([:blue, :red], 2 * numpts + 1)
-    val = all_evs[x1, x2, x3]
-    max = maximum(abs.(all_evs))
-    idx = floor(Int, val / max * numpts + numpts + 1)
-    return cm[idx]
-end
+# plot(γs, maxs, label=nothing, c="blue")
+# scatter!(γs, maxs, label=nothing, c="blue")
+# hline!([λ_LGE], label="λ LGE")
 
-p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
-if λ > 0
-    for x in 1:L
-        for y in 1:L
-
-            # bonds 
-            plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[1, x, y]), alpha=10 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
-            plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
-            plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
-            plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
-
-            # onsite dot 
-            if abs.(maximum(evs[5, x, y])) > 1e-6
-                scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
-            end
-
-        end
-    end
-end
-xlabel!(p, "Site (x)")
-ylabel!(p, "Site, (y)")
-title!(p, "T=$T, λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$θ, V0=$V0, V1=$(round(V1,digits=2)))", fontsize=4)
-plot(p)
+plot(γs, diff, c="blue")
+#plot!(γs, max_ΔLGE, label="LGE × λ_LGE", c="red")
+xaxis!("γ")
+#yaxis!("||Δ' - γ×λ×ΔLGE||/γ")
+#title!("Checking BdG")
