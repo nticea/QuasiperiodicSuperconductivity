@@ -12,7 +12,7 @@ include("../../src/meanfield.jl")
 
 ## PARAMETERS 
 
-L = 17
+L = 11
 # symmetry = "dwave"
 
 # ## SCRIPT 
@@ -53,7 +53,7 @@ for f in files
     if startswith(f, "$(L)Nx$(L)Ny_$(symmetry)") && endswith(f, "csv")
         @show f
         df = load_dataframe(joinpath(@__DIR__, f))
-        Tc_df = find_Tc(df, interp_value=1)
+        Tc_df = find_Tc_LGE(df, interp_value=1)
         Tc_df = sort(Tc_df, :J)
         append!(Tc_dfs, Tc_df)
     end
@@ -75,7 +75,7 @@ for f in files
     if startswith(f, "$(L)Nx$(L)Ny_$(symmetry)") && endswith(f, "csv")
         @show f
         df = load_dataframe(joinpath(@__DIR__, f))
-        Tc_df = find_Tc(df, interp_value=1)
+        Tc_df = find_Tc_LGE(df, interp_value=1)
         Tc_df = sort(Tc_df, :J)
         append!(Tc_dfs, Tc_df)
     end

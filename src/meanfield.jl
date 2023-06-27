@@ -7,7 +7,6 @@ using Tullio
 using Einsum
 using Interpolations
 using LoopVectorization
-using ITensors
 
 include("../src/results.jl")
 include("../src/model.jl")
@@ -138,13 +137,6 @@ function dwave(T::Real; L, E, U, V0, V1)
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
             end
 
-            # @error "TRYING SOMETHING DIFFERENT"
-            # if b == 5 || d == 5 # only δ=0 term gets V0, not δ'=0! 
-            #     Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=0, N=N)
-            # else # bond terms have potential V1 
-            #     Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
-            # end
-
             # fill in the matrix 
             M[b, d] = Mblock
         end
@@ -173,7 +165,7 @@ end
 
 function calculate_λ_Δ(M)
     # perform the decomposition 
-    decomp, _ = partialschur(Hermitian(M), nev=1, tol=1e-6, which=LR())
+    decomp, _ = partialschur(M, nev=1, tol=1e-6, which=LR())
 
     # extract the maximum eigenvector/value pair 
     maxev = decomp.Q[:, 1]

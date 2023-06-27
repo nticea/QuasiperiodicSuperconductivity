@@ -149,13 +149,20 @@ function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
     end
 end
 
-
-function plot_spatial_profile(maxev; L, title=nothing)
-
+function spatial_profile(maxev; L)
     evs = zeros(5, L, L)
     for (n, i) in enumerate(1:(L*L):(5*L*L))
         evi = maxev[i:(i+L*L-1)]
         evs[n, :, :] = reshape(evi, L, L)
+    end
+    return evs
+end
+
+
+function plot_spatial_profile(evs; L, title=nothing)
+
+    if ndims(evs) != 3
+        evs = spatial_profile(evs, L=L)
     end
 
     p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
@@ -176,6 +183,32 @@ function plot_spatial_profile(maxev; L, title=nothing)
 
     xlabel!(p, "Site (x)")
     ylabel!(p, "Site, (y)")
+    if !isnothing(title)
+        title!(p, title)
+    end
+    return p
+end
+
+function plot_in_config_space(toplot; L::Int, Q::Real, θ::Union{Real,Nothing}, title::Union{String,Nothing})
+
+    @assert ndims(toplot) == 2
+
+    p = plot(xlims=(0, 2 * π), ylims=(0, 2 * π), grid=false, aspect_ratio=true)
+    for x in 1:L
+        for y in 1:L
+            ϕ1, ϕ2 = coordinate_to_configuration_space(x, y, L=L, Q=Q, θ=θ)
+            if toplot[x, y] < 0
+                col = "blue"
+            else
+                col = "red"
+            end
+
+            scatter!(p, [ϕ1], [ϕ2], ms=100 * abs(toplot[x, y]), c=col, legend=:false)
+        end
+    end
+
+    xlabel!(p, "ϕ₁")
+    ylabel!(p, "ϕ₂")
     if !isnothing(title)
         title!(p, title)
     end

@@ -102,7 +102,7 @@ function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, θ
     return Δi, max_Δ
 end
 
-function BdG_coefficients(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, θ::Union{Real,Nothing},
+function BdG_coefficients_swave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, θ::Union{Real,Nothing},
     ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0)
 
     fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic))

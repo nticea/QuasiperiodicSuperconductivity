@@ -8,9 +8,9 @@ function superfluid_stiffness(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, pe
 
     # get the BdG coefficients 
     if V1 == 0
-        U, V, E = BdG_coefficients(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
+        U, V, E = BdG_coefficients_swave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
     else
-        @error "V1 ≂̸ 0 Not implemented yet"
+        U, V, E = BdG_coefficients_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
     end
 
     # number of sites (L × L)

@@ -21,7 +21,8 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
     for x in 1:L
         for y in 1:L
             n = coordinate_to_site(x, y, L=L)
-            U_xy = aubry_andre(x, y, J=J, Q=Q, L=L, θ=θ, ϕx=ϕx, ϕy=ϕy)
+            # U_xy = aubry_andre(x, y, J=J, Q=Q, L=L, θ=θ, ϕx=ϕx, ϕy=ϕy)
+            U_xy = aubry_andre(x + floor(Int, L / 2), y + floor(Int, L / 2), J=J, Q=Q, L=L, θ=θ, ϕx=ϕx, ϕy=ϕy)
             Hint[n] = -(U_xy + μ)
         end
     end
@@ -105,16 +106,36 @@ function site_to_coordinate(r; L::Int)
     return vec[r]
 end
 
+function coordinate_to_configuration_space(x, y; L::Int, Q::Real, θ::Union{Real,Nothing})
+    # prepare the vectors 
+    r = [x + floor(Int, L / 2); y + floor(Int, L / 2)]
+    ϕ = [ϕx; ϕy]
+
+    # make the B matrix 
+    BSD = B(L=L, Q=Q, θ=θ)
+    Binv = inv(BSD)
+
+    # compute the new ϕ
+    r̃ = r + Binv * ϕ # re-parameterize r as distance between r and nearest potential min
+    ϕ̃ = 2π * BSD * r̃ # find the corresponding ϕ̃
+    ϕ̃ = mod.(ϕ̃, 2π)  # make ϕ periodic in 2π
+end
+
+function site_to_configuration_space(r; L::Int, Q::Real, θ::Union{Real,Nothing})
+    x, y = site_to_coordinate(r, L=L)
+    coordinate_to_configuration_space(x, y, L=L, Q=Q, θ=θ)
+end
+
 function B(; L::Int, Q::Real, θ::Real)
     # First, construct R(θ) in 2D
     c, s = cos(θ), sin(θ)
     Rθ = [c s; s -c]
 
     # Multiply by Q (the irrational number) to get B 
-    B = Q * Rθ
+    Bmat = Q * Rθ
 
     # Make periodic in L 
-    BSD = round.(Int, B .* L) / L
+    BSD = round.(Int, Bmat .* L) / L
 
     # Perform checks
     @assert gcd(round(Int, det(L .* BSD)), L) == 1
