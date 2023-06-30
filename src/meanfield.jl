@@ -7,6 +7,7 @@ using Tullio
 using Einsum
 using Interpolations
 using LoopVectorization
+using Polynomials
 
 include("../src/results.jl")
 include("../src/model.jl")
@@ -125,7 +126,6 @@ function dwave(T::Real; L, E, U, V0, V1)
     # iterate through each of the 5×5 blocks
     for bd in CartesianIndices(M)
         (b, d) = Tuple(bd)
-        @show (b, d)
 
         # don't do the s-wave component (we've done it already)
         if !(b == 5 && d == 5)
@@ -172,7 +172,6 @@ function calculate_λ_Δ(M)
     λ = decomp.R[1]
 
     @show λ
-
     return λ, maxev
 end
 
@@ -216,7 +215,6 @@ function dwave_hermitian(T::Real; L, E, U, V0, V1)
     # iterate through each of the 5×5 blocks
     for bd in CartesianIndices(M)
         (b, d) = Tuple(bd)
-        @show (b, d)
 
         # bc matrix is Hermitian, we only have to fill in lower diagonal
         # also, don't do the s-wave component (we've done it already)
@@ -242,6 +240,148 @@ function dwave_hermitian(T::Real; L, E, U, V0, V1)
 
     return M
 end
+
+function LGE_spectrum(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, symmetry::String="s-wave")
+    # Construct the non-interacting Hamiltonian matrix
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+    # Diagonalize this Hamiltonian
+    E, U = diagonalize_hamiltonian(H0)
+
+    # Construct the pairfield susceptibility
+    if symmetry == "s-wave" || symmetry == "s"
+        M = swave(T, E=E, U=U, V0=V0)
+    elseif symmetry == "d-wave" || symmetry == "d"
+        M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
+    else
+        @error "Pairing symmetry not recognized"
+        return
+    end
+
+    # diagonalize M fully
+    vals, vecs = eigen(M)
+
+    @assert maximum(imag.(vals)) < 1e-14
+    vals = real.(vals)
+
+    # sort the eigenvalues
+    sort!(vals)
+
+    return vals
+end
+
+function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, symmetry::String="s-wave", min=0, max=1, npts=5, tol=1e-4, niter=10)
+    λ0, _ = pairfield_correlation(0, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=symmetry)
+    if λ0 < 1
+        return NaN
+    end
+
+    # else, we know that a value for Tc must exist 
+    Tc = NaN
+    for n in 1:niter
+        Ts = LinRange(min, max, npts)
+        λs = []
+        for T in Ts
+            # find λ at this temperature 
+            λ, _ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=symmetry)
+
+            # If λ is close enough to 0, return T as Tc 
+            if abs.(λ - 1) < tol
+                return T
+            end
+
+            # if not, keep iterating 
+            push!(λs, λ)
+        end
+
+        # find Tc 
+        idxlist = sortperm(λs)
+        knots = λs[idxlist]
+
+        Tc = NaN
+        if length(knots) > 1
+            Interpolations.deduplicate_knots!(knots, move_knots=true)
+            try
+                interp_linear = linear_interpolation(knots, Ts[idxlist])
+                Tc = interp_linear(1)
+            catch e
+                if minimum(λs) > 1
+                    max = 2 * max
+                elseif maximum(λs) < 1
+                    min = min / 2
+                else
+                    return NaN
+                end
+
+                continue
+            end
+        end
+
+        # find λ at this temperature 
+        λ, _ = pairfield_correlation(Tc, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=symmetry)
+
+        # If λ is close enough to 0, return T as Tc 
+        if abs.(λ - 1) < tol
+            return Tc
+        end
+
+        # else, keep iterating 
+        min = Tc - 0.5 / n * Tc
+        max = Tc + 0.5 / n * Tc
+    end
+
+    return Tc
+end
+
+# function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, symmetry::String="s-wave", min=0, max=1, niter=5, tree_depth=1, tol=1e-4, max_tree_depth=5)
+#     Ts = LinRange(min, max, niter)
+#     λs = []
+#     for T in Ts
+#         try
+#             @show T
+#             λ, _ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=symmetry)
+
+#             # If λ is close enough to 0, return T as Tc 
+#             if abs.(λ - 1) < tol
+#                 return T
+#             end
+
+#             # also, check if a solution even exists in this case 
+#             if T == 0 && λ < 1
+#                 @error "No Tc exists in this case"
+#                 return NaN
+#             end
+
+#             push!(λs, λ)
+#         catch e
+#             @show e
+#             return NaN
+#         end
+#     end
+
+#     # find Tc 
+#     idxlist = sortperm(λs)
+#     knots = λs[idxlist]
+
+#     Tc = NaN
+#     if length(knots) > 1
+#         Interpolations.deduplicate_knots!(knots, move_knots=true)
+#         try
+#             interp_linear = linear_interpolation(knots, Ts[idxlist])
+#             Tc = interp_linear(1)
+#         catch e
+#             LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=symmetry, min=min, max=max * 2, niter=niter, tree_depth=tree_depth, tol=tol, max_tree_depth=max_tree_depth)
+#         end
+#     end
+
+#     if tree_depth > max_tree_depth
+#         return Tc
+#     end
+
+#     min = Tc - 0.5 / tree_depth * Tc
+#     max = Tc + 0.5 / tree_depth * Tc
+#     LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=symmetry, min=min, max=max, niter=niter, tree_depth=tree_depth + 1, tol=tol, max_tree_depth=max_tree_depth)
+# end
 
 # function dwave_old(T::Real; L, E, U, V0, V1)
 #     println("d-wave configuration")

@@ -28,6 +28,8 @@ function converge_BdG_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, peri
     Δij_prev1 = initialize_Δ_dwave(L=L, Δ_init=Δ_init)
     Δij_prev2 = copy(Δij_prev1)
 
+    U, V, E = nothing, nothing, nothing
+
     ## ITERATE ## 
     hist = [] # keep track of convergence history
     for n in 1:niter

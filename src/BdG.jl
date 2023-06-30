@@ -112,28 +112,3 @@ function BdG_coefficients_swave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, 
 
     return U, V, E
 end
-
-function Δ_swave_debug(T, γ, λ; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
-
-    # size of the BdG matrix is 2N × 2N
-    N = L * L
-
-    # make the BdG matrix (fill in just the diagonals with H0 for now)
-    M = zeros(2 * N, 2 * N)
-    hij = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-    M[1:N, 1:N] .= hij
-    M[(N+1):end, (N+1):end] .= -conj.(hij)
-
-    # make the interaction matrix 
-    Vij = make_interaction(L=L, V0=V0, V1=V1, periodic=periodic)
-
-    # make an initial guess for the gap parameter -- finite-size Δ gap 
-    Δij_init = initialize_Δ(L=L, Δ_init=Δ_init)
-
-    # Compute the BdG iteration 
-    Δij = BdG_iteration_dwave(M, Δij_init * γ; Vij=Vij, T=T) # perform one BdG iteration and get the new Δij 
-
-    conv = norm(Δij .- γ * λ * Δij_init) / γ
-    return ΔBdG_to_ΔLGE_flat(Δij, L=L), conv
-end

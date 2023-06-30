@@ -30,7 +30,8 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
     H0 = Ht + Hint
 
     # scale the Hamiltonian
-    H0 = 1 / (1 + J / 2) .* H0
+    #@error "I am using the J-scaled version of H"
+    #H0 = 1 / (1 + J / 2) .* H0
 
     return H0
 end

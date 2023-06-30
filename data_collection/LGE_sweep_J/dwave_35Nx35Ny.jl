@@ -7,13 +7,12 @@ using ProgressBars
 using CSV
 using DataFrames
 
-include("../../src/model.jl")
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
 L = 11 # the full system is L × L 
 t = 1 # hopping 
-Q = 2 * (√5 - 1)
+Q = 1 / 2 * (√5 - 1)
 μ = 1e-8
 θ = π / 7
 ϕx = 0.375
@@ -24,7 +23,7 @@ periodic = true
 pairing_symmetry = "d-wave"
 
 # saving information 
-savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_swave_results.csv")
+savepath = joinpath(@__DIR__, "$(L)Nx$(L)Ny_dwave_results.csv")
 
 # load in the dataframe, if it exists. If not, make a new one
 df = load_dataframe(savepath)

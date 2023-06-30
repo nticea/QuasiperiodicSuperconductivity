@@ -2,8 +2,9 @@ include("BdG.jl")
 include("BdG_dwave.jl")
 
 using Interpolations
+using Polynomials
 
-function superfluid_stiffness(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
+function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
     ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0)
 
     # get the BdG coefficients 
@@ -42,7 +43,30 @@ function superfluid_stiffness(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, pe
     Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f)
 
     return K, Π
+end
 
+function superfluid_stiffness(; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
+    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, npts::Int=5)
+
+    Ts = expspace(-1, -9, npts)
+    Ds = zeros(npts, 4)
+    # collect data points at various T 
+    for (i, T) in enumerate(Ts)
+        print(i, "-")
+        K, Π = superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
+        @show K, Π
+        @show -K + Π
+        Ds[i, :] = -K + Π
+    end
+
+    # perform extrapolation T → 0
+    Ds_extrapolated = []
+    for x in 1:4
+        model = Polynomials.fit(Ts, Ds[:, x], npts)
+        push!(Ds_extrapolated, model(0))
+    end
+
+    return Ds_extrapolated
 end
 
 function ij_blocks(i_sites, j_sites, A, Aconj)
@@ -60,9 +84,6 @@ function ij_blocks(i_sites, j_sites, A, Aconj)
 end
 
 function kinetic_term(sites; U, V, E, f, t)
-
-    @error "I might be missing a factor of 2 from the spin σ"
-    @error "Check that I should be taking only positive eigenvalues"
 
     N, _ = size(U)
     i_sites = sites[5] # these are the on-sites 
@@ -85,7 +106,7 @@ function kinetic_term(sites; U, V, E, f, t)
         @einsimd t3 := (1 .- f[n]) * V_j[r, n] * Vconj_i[r, n]
         @einsimd t4 := (1 .- f[n]) * V_i[r, n] * Vconj_j[r, n]
 
-        Kx = -t / N * (t1 + t2 + t3 + t4)
+        Kx = -2 * t / N * (t1 + t2 + t3 + t4) # factor of 2 from spin 
 
         push!(K, Kx)
     end
@@ -93,26 +114,61 @@ function kinetic_term(sites; U, V, E, f, t)
     return K
 end
 
-function current_current_term(sites, coords; U, V, E, f)
+function current_current_term(sites, coords; U, V, E, f, npts=5)
     N, _ = size(U)
-    qtol = 0
-    @error "Need to do a finite size extrapolation"
+    L = √N
+    # the minimum q I can consider is 1/L
+    qs = 1 / L * collect(1:npts)
+    Πs = zeros(npts, 4)
 
+    # perform extrapolation q → 0
+    for (i, q) in enumerate(qs)
+        print(i, "-")
+        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, E=E, f=f, q=q))
+        @show Πs[i, :]
+    end
+
+    Πs_extrapolated = []
+    for x in 1:4
+        Πxx = Πs[:, x]
+        model = Polynomials.fit(qs, Πxx, npts)
+        push!(Πs_extrapolated, model(0))
+    end
+
+    return Πs_extrapolated
+end
+
+function Πq(sites, coords; U, V, E, f, q)
+    N, _ = size(U)
     i_sites = sites[5] # these are the on-sites 
 
     # the diagonals have ΔE=0, which causes divergence 
     @einsimd En1n2[n1, n2] := (E[n1] - E[n2])
-    En1n2[diagind(En1n2)] .= Inf
+    indices = findall(isequal(0), En1n2)
+    En1n2[indices] .= Inf
+
+    # get the fermi energies
+    @einsimd fn1n2[n1, n2] := f[n1] - f[n2]
 
     Π = []
-    for j_sites in sites[1:4]
-        A = Aq((qtol, qtol), i_sites, j_sites, coords, U=U)
-        D = Dq((-qtol, -qtol), i_sites, j_sites, coords, V=V)
+    for j in 1:4
+        j_sites = sites[j]
 
+        if j == 1 || j == 3
+            # For Πxx, we set qx = 0 and take qy → 0
+            qx = 0
+            qy = q
+        else
+            # For Πyy, we set qy = 0 and take qx → 0
+            qx = q
+            qy = 0
+        end
+
+        A = Aq((qx, qy), i_sites, j_sites, coords, U=U)
+        D = Dq((-qx, -qy), i_sites, j_sites, coords, V=V)
         Aconj = conj.(A)
 
-        @einsum Πxx := 1 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (f[n1] - f[n2]) / En1n2[n1, n2])
-
+        @einsum Πxx := 1 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
         push!(Π, Πxx)
     end
 
@@ -127,9 +183,11 @@ function Aq(q, i_sites, j_sites, coords; U)
     # make the blocks of i sites and j sites 
     Uconj_i, U_i, Uconj_j, U_j = ij_blocks(i_sites, j_sites, U, conj.(U))
 
-    # make the term 
+    # make the exponential prefactor 
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
-    @einsimd A[n1, n2] := exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
+
+    # factor of 2 is for the spin 
+    @einsimd A[n1, n2] := 2 * exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
 
     return A
 end
@@ -143,9 +201,11 @@ function Dq(q, i_sites, j_sites, coords; V)
     # make the blocks of i sites and j sites 
     Vconj_i, V_i, Vconj_j, V_j = ij_blocks(i_sites, j_sites, V, conj.(V))
 
-    # make the term 
+    # make the exponential prefactor
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
-    @einsimd D[n1, n2] := exp_pf[r] * (V_j[r, n1] * Vconj_i[r, n2] - V_i[r, n1] * Vconj_j[r, n2])
+
+    # factor of 2 is for the spin
+    @einsimd D[n1, n2] := 2 * exp_pf[r] * (V_j[r, n1] * Vconj_i[r, n2] - V_i[r, n1] * Vconj_j[r, n2])
 
     return D
 end
