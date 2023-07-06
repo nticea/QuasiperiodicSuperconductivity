@@ -5,13 +5,13 @@ using Interpolations
 using Polynomials
 
 function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0)
+    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init)
 
     # get the BdG coefficients 
     if V1 == 0
-        U, V, E = BdG_coefficients_swave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
+        U, V, E = BdG_coefficients_swave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
     else
-        U, V, E = BdG_coefficients_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
+        U, V, E = BdG_coefficients_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
     end
 
     # number of sites (L × L)
@@ -40,20 +40,20 @@ function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::
     coords = [xcoords, ycoords]
 
     K = kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
-    Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f)
+    Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, t=t)
 
     return K, Π
 end
 
 function superfluid_stiffness(; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, npts::Int=5)
+    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, npts::Int=5, Δ_init)
 
     Ts = expspace(-1, -9, npts)
     Ds = zeros(npts, 4)
     # collect data points at various T 
     for (i, T) in enumerate(Ts)
         print(i, "-")
-        K, Π = superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
+        K, Π = superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
         @show K, Π
         @show -K + Π
         Ds[i, :] = -K + Π
@@ -114,17 +114,18 @@ function kinetic_term(sites; U, V, E, f, t)
     return K
 end
 
-function current_current_term(sites, coords; U, V, E, f, npts=5)
+function current_current_term(sites, coords; U, V, E, f, t, npts=5)
+
     N, _ = size(U)
     L = √N
     # the minimum q I can consider is 1/L
-    qs = 1 / L * collect(1:npts)
+    qs = 2π / L * collect(1:npts)
     Πs = zeros(npts, 4)
 
     # perform extrapolation q → 0
     for (i, q) in enumerate(qs)
         print(i, "-")
-        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, E=E, f=f, q=q))
+        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, E=E, f=f, t=t, q=q))
         @show Πs[i, :]
     end
 
@@ -138,12 +139,12 @@ function current_current_term(sites, coords; U, V, E, f, npts=5)
     return Πs_extrapolated
 end
 
-function Πq(sites, coords; U, V, E, f, q)
+function Πq(sites, coords; U, V, E, f, t, q, δ=1e-8)
     N, _ = size(U)
     i_sites = sites[5] # these are the on-sites 
 
     # the diagonals have ΔE=0, which causes divergence 
-    @einsimd En1n2[n1, n2] := (E[n1] - E[n2])
+    @einsimd En1n2[n1, n2] := E[n1] - E[n2] + δ * 1im
     indices = findall(isequal(0), En1n2)
     En1n2[indices] .= Inf
 
@@ -168,7 +169,8 @@ function Πq(sites, coords; U, V, E, f, q)
         D = Dq((-qx, -qy), i_sites, j_sites, coords, V=V)
         Aconj = conj.(A)
 
-        @einsum Πxx := 1 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
+        @einsimd Πxx := 2 * t^2 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
+        Πxx = real.(Πxx)
         push!(Π, Πxx)
     end
 
@@ -186,8 +188,8 @@ function Aq(q, i_sites, j_sites, coords; U)
     # make the exponential prefactor 
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
 
-    # factor of 2 is for the spin 
-    @einsimd A[n1, n2] := 2 * exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
+    # factor of 2 is for the spin ??
+    @einsimd A[n1, n2] := exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
 
     return A
 end
@@ -204,8 +206,8 @@ function Dq(q, i_sites, j_sites, coords; V)
     # make the exponential prefactor
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
 
-    # factor of 2 is for the spin
-    @einsimd D[n1, n2] := 2 * exp_pf[r] * (V_j[r, n1] * Vconj_i[r, n2] - V_i[r, n1] * Vconj_j[r, n2])
+    # factor of 2 is for the spin ??
+    @einsimd D[n1, n2] := exp_pf[r] * (V_j[r, n1] * Vconj_i[r, n2] - V_i[r, n1] * Vconj_j[r, n2])
 
     return D
 end

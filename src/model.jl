@@ -194,3 +194,9 @@ function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx
     return h
 end
 
+function finite_size_gap(; L::Int, t::Real, Q::Real, μ::Real, periodic::Bool=true, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0)
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+    E, _ = diagonalize_hamiltonian(H0)
+    sort!(E)
+    ΔE = [E[i+1] - E[i] for i in 1:(length(E)-1)]
+end

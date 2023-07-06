@@ -10,13 +10,7 @@ using Distributions
 
 include("../src/meanfield.jl")
 include("../src/model.jl")
-
-function finite_size_gap(; L::Int, t::Real, Q::Real, μ::Real, periodic::Bool=true, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0)
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-    E, _ = diagonalize_hamiltonian(H0)
-    sort!(E)
-    ΔE = [E[i+1] - E[i] for i in 1:(length(E)-1)]
-end
+include("../src/results.jl")
 
 function BdG_iteration(M::Matrix{Float64}, Δi; V0::Real, T::Real)
     M = copy(M)
@@ -42,9 +36,28 @@ function rms(a, b)
     norm(a - b) / prod(size(a))
 end
 
+function initialize_Δ_swave(; L::Int, Δ_init=nothing)
+    # N = L * L
+    # if isnothing(Δ_init)
+    #     Δi = Matrix(I, (N, N))
+    #     d = Uniform(0, 0.05)
+    #     Δi[diagind(Δi)] = rand.(d, L * L)
+    #     return Δi
+    # else
+    #     @assert size(Δ_init) == (5 * L * L,)
+    #     return ΔLGE_to_ΔBdG(Δ_init, L=L)
+    # end
+    N = L * L
+    Δi = Matrix(I, (N, N))
+    # d = Uniform(0, 0.05)
+    # Δi[diagind(Δi)] = rand.(d, L * L)
+    return Δi .* 0.05
+end
+
 function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool,
     V0::Real, θ::Union{Real,Nothing}, ϕx::Real=0, ϕy::Real=0, niter::Int=100,
-    tol::Union{Real,Nothing}=nothing, fsgap::Union{Real,Nothing}=nothing, noise::Real=0)
+    tol::Union{Real,Nothing}=nothing, fsgap::Union{Real,Nothing}=nothing, noise::Real=0,
+    Δ_init=nothing)
 
     N = L * L
 
@@ -59,7 +72,8 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
     end
 
     # initial gues for Δ_i
-    Δi = fsgap * Matrix(I, (N, N))
+    Δi = initialize_Δ_swave(L=L, Δ_init=Δ_init)
+
     Δi_diag_prev = diag(Δi)
     U_prev = zeros(N, 2 * N)
     V_prev = zeros(N, 2 * N)
@@ -103,12 +117,13 @@ function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, θ
 end
 
 function BdG_coefficients_swave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0)
+    ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
 
     fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic))
 
     # converge the BdG 
-    Δi, U, V, E, max_Δ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, fsgap=fsgap, noise=noise)
+    Δi, U, V, E, max_Δ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol,
+        θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, fsgap=fsgap, noise=noise, Δ_init=Δ_init)
 
     return U, V, E
 end

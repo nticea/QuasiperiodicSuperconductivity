@@ -306,3 +306,93 @@ function plot_all_Δs(loadpath)
     end
     p = plot(hmaps..., layout=Plots.grid(3, 3, widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1500), aspect_ratio=:equal)
 end
+
+function ΔLGE_to_ΔBdG(Δ_LGE; L::Int)
+    evs = zeros(5, L, L)
+    for (n, i) in enumerate(1:(L*L):(5*L*L))
+        evi = Δ_LGE[i:(i+L*L-1)]
+        evs[n, :, :] = reshape(evi, L, L)
+    end
+
+    Δ_BdG = zeros(L * L, L * L)
+    for x in 1:L
+        for y in 1:L
+            # coordinate 
+            r = coordinate_to_site(x, y, L=L)
+
+            # get the nearest neighbours 
+            rL, rU, rR, rD = nearest_neighbours(r, L=L)
+
+            # fill in the Δ matrix 
+            Δ_BdG[r, rL] = evs[1, x, y] # left 
+            Δ_BdG[r, rU] = evs[2, x, y] # up 
+            Δ_BdG[r, rR] = evs[3, x, y] # right
+            Δ_BdG[r, rD] = evs[4, x, y] # down
+            Δ_BdG[r, r] = evs[5, x, y] # on-site 
+        end
+    end
+
+    return Δ_BdG
+end
+
+function ΔBdG_to_ΔLGE(Δ_BdG; L::Int)
+    # and now, go backwards 
+    evs_rec = zeros(5, L, L)
+
+    for r in 1:(L*L)
+        # coordinates
+        x, y = site_to_coordinate(r, L=L)
+
+        # get the nearest neighbours 
+        rL, rU, rR, rD = nearest_neighbours(r, L=L)
+
+        evs_rec[1, x, y] = Δ_BdG[r, rL] # left 
+        evs_rec[2, x, y] = Δ_BdG[r, rU]# up 
+        evs_rec[3, x, y] = Δ_BdG[r, rR] # right
+        evs_rec[4, x, y] = Δ_BdG[r, rD] # down
+        evs_rec[5, x, y] = Δ_BdG[r, r] # on-site 
+    end
+
+    return evs_rec
+end
+
+function ΔBdG_to_ΔLGE_flat(Δ_BdG; L::Int)
+    evs_rec = ΔBdG_to_ΔLGE(Δ_BdG, L=L)
+
+    evs_flat = zeros(5 * L * L)
+    for (n, i) in enumerate(1:(L*L):(5*L*L))
+        evi = evs_rec[n, :, :]
+        evs_flat[i:(i+L*L-1)] = reshape(evi, L * L)
+    end
+
+    return evs_flat
+end
+
+function symmetry_character(Δ; L::Int)
+    if ndims(Δ) == 1
+        Δ = spatial_profile(Δ, L=L)
+    end
+
+    # normalize 
+    Δ ./= norm(Δ)
+
+    Δrot = zeros(size(Δ)...)
+    for x in 1:L
+        for y in 1:L
+            for n in 1:5
+                x̃ = -y + L + 1
+                ỹ = x
+                Δrot[n, x̃, ỹ] = Δ[n, x, y]
+            end
+        end
+    end
+
+    # on-site terms
+    os = dot(Δ[5, :, :], Δrot[5, :, :])
+
+    # now for the bonds
+    bds = dot(Δrot[2, :, :], Δ[1, :, :]) + dot(Δrot[3, :, :], Δ[2, :, :]) + dot(Δrot[4, :, :], Δ[3, :, :]) + dot(Δrot[1, :, :], Δ[4, :, :])
+
+    return os + bds
+
+end

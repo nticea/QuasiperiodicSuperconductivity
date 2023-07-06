@@ -8,6 +8,7 @@ using Distributions
 
 include("../src/meanfield.jl")
 include("../src/model.jl")
+include("../src/results.jl")
 
 function converge_BdG_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
     ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
@@ -77,10 +78,10 @@ end
 
 
 function BdG_coefficients_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, V1::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0)
+    ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
 
     # converge the BdG 
-    _, U, V, E, _ = converge_BdG_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
+    _, U, V, E, _ = converge_BdG_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
 
     return U, V, E
 end
@@ -131,72 +132,4 @@ function make_interaction(; L::Int, periodic::Bool, V0::Real, V1::Real)
     Vij[diagind(Vij)] .= V0
 
     return Vij
-end
-
-function finite_size_gap(; L::Int, t::Real, Q::Real, μ::Real, θ::Union{Real,Nothing}, ϕx::Real, ϕy::Real, periodic::Bool)
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-    E, _ = diagonalize_hamiltonian(H0)
-    sort!(E)
-    ΔE = [E[i+1] - E[i] for i in 1:(length(E)-1)]
-end
-
-function ΔLGE_to_ΔBdG(Δ_LGE; L::Int)
-    evs = zeros(5, L, L)
-    for (n, i) in enumerate(1:(L*L):(5*L*L))
-        evi = Δ_LGE[i:(i+L*L-1)]
-        evs[n, :, :] = reshape(evi, L, L)
-    end
-
-    Δ_BdG = zeros(L * L, L * L)
-    for x in 1:L
-        for y in 1:L
-            # coordinate 
-            r = coordinate_to_site(x, y, L=L)
-
-            # get the nearest neighbours 
-            rL, rU, rR, rD = nearest_neighbours(r, L=L)
-
-            # fill in the Δ matrix 
-            Δ_BdG[r, rL] = evs[1, x, y] # left 
-            Δ_BdG[r, rU] = evs[2, x, y] # up 
-            Δ_BdG[r, rR] = evs[3, x, y] # right
-            Δ_BdG[r, rD] = evs[4, x, y] # down
-            Δ_BdG[r, r] = evs[5, x, y] # on-site 
-        end
-    end
-
-    return Δ_BdG
-end
-
-function ΔBdG_to_ΔLGE(Δ_BdG; L::Int)
-    # and now, go backwards 
-    evs_rec = zeros(5, L, L)
-
-    for r in 1:(L*L)
-        # coordinates
-        x, y = site_to_coordinate(r, L=L)
-
-        # get the nearest neighbours 
-        rL, rU, rR, rD = nearest_neighbours(r, L=L)
-
-        evs_rec[1, x, y] = Δ_BdG[r, rL] # left 
-        evs_rec[2, x, y] = Δ_BdG[r, rU]# up 
-        evs_rec[3, x, y] = Δ_BdG[r, rR] # right
-        evs_rec[4, x, y] = Δ_BdG[r, rD] # down
-        evs_rec[5, x, y] = Δ_BdG[r, r] # on-site 
-    end
-
-    return evs_rec
-end
-
-function ΔBdG_to_ΔLGE_flat(Δ_BdG; L::Int)
-    evs_rec = ΔBdG_to_ΔLGE(Δ_BdG, L=L)
-
-    evs_flat = zeros(5 * L * L)
-    for (n, i) in enumerate(1:(L*L):(5*L*L))
-        evi = evs_rec[n, :, :]
-        evs_flat[i:(i+L*L-1)] = reshape(evi, L * L)
-    end
-
-    return evs_flat
 end

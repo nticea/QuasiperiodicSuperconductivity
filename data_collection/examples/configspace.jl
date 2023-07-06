@@ -21,15 +21,13 @@ Q = (√5 - 1) / 2
 ϕy = 0
 V0 = 1.5
 V1 = -1
-J = 1.5
+J = 0
 periodic = true
 pairing_symmetry = "d-wave"
 niter = 500
 tol = 1e-12
 
-plot_potential(L=L, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy)
-
-T = 0
+T = 0.1
 λ, Δ_LGE = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, symmetry=pairing_symmetry)
 Δ_BdG, hist = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol, Δ_init=Δ_LGE)
 
