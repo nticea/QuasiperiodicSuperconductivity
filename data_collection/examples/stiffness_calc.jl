@@ -41,7 +41,13 @@ for (j, J) in enumerate(Js)
     Πs[j, :] = Π
 end
 
-Ds = -Ks + Πs
+Js = collect(0:0.1:2)
+Tcs_dwave = zeros(length(Js))
+for (j, J) in enumerate(Js)
+    Tcs_dwave[j] = LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=1e-3)
+end
+
+Ds = (-Ks + Πs) / π
 
 p = plot()
 dirs = ["x̂", "ŷ", "-x̂", "-ŷ"]
@@ -53,6 +59,9 @@ for i in 1:4
 end
 title!(p, "Superfluid stiffness for \n Δ(V0=$V0, V1=$V1, θ=$(θ_to_π(θ)),ϕx=$ϕx,ϕy=$ϕy) \n $L × $L lattice at T=$(round(T,digits=2))")
 xlabel!("J")
-ylabel!("Dₛ")
+ylabel!("Tc")
+
+plot!(Js, Tcs_dwave, label=nothing, c="blue")
+scatter!(Js, Tcs_dwave, label="LGE soln", c="blue")
 
 

@@ -22,7 +22,13 @@ V1 = -1.5
 periodic = true
 
 Js = collect(0:0.1:2)
+Tcs_dwave = zeros(length(Js))
+for (j, J) in enumerate(Js)
+    Tcs_dwave[j] = LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=1e-3)
+end
 
+plot!(Js, Tcs_dwave, label=nothing, c= "blue")
+scatter!(Js, Tcs_dwave, label="LGE soln", c= "blue")
 
 # α = 1.5
 # V0s = LinRange(0.1, 2, 10)
