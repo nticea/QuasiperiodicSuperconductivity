@@ -39,7 +39,7 @@ function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::
     sites = [Rsites, Usites, Lsites, Dsites, onsites]
     coords = [xcoords, ycoords]
 
-    K = @time kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
+    K = kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
     Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, t=t)
 
     return K, Π
@@ -94,8 +94,10 @@ function kinetic_term(sites; U, V, E, f, t)
     V = V[:, En_idx]
     f = f[En_idx]
 
-    K = []
-    for j_sites in sites[1:4] #iterate through the nearest neighbours in all directions 
+    K = zeros(4)
+    for j in 1:2 #iterate through the nearest neighbours in all directions 
+        j_sites = sites[j]
+
         # make the blocks of i sites and j sites 
         Uconj_i, U_i, Uconj_j, U_j = ij_blocks(i_sites, j_sites, U, conj.(U))
         Vconj_i, V_i, Vconj_j, V_j = ij_blocks(i_sites, j_sites, V, conj.(V))
@@ -108,8 +110,10 @@ function kinetic_term(sites; U, V, E, f, t)
 
         Kx = -2 * t / N * (t1 + t2 + t3 + t4) # factor of 2 from spin 
 
-        push!(K, Kx)
+        K[j] = Kx
     end
+    K[3] = copy(K[1])
+    K[4] = copy(K[2])
 
     return K
 end
@@ -133,9 +137,8 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8)
     @einsimd pf[n1, n2] := fn1n2[n1, n2] / En1n2[n1, n2]
 
     # perform extrapolation q → 0
-    for (i, q) in enumerate(qs)
-        print(i, "-")
-        Πs[i, :] = @time real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
+    Threads.@threads for (i, q) in collect(enumerate(qs))
+        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
     end
 
     Πs_extrapolated = []
@@ -152,8 +155,8 @@ function Πq(sites, coords; U, V, pf, t, q)
     N, _ = size(U)
     i_sites = sites[5] # these are the on-sites 
 
-    Π = []
-    for j in 1:4
+    Π = zeros(4)
+    Threads.@threads for j in 1:2#1:4
         j_sites = sites[j]
 
         if j == 1 || j == 3
@@ -174,8 +177,10 @@ function Πq(sites, coords; U, V, pf, t, q)
         AplusD = Aconj + D
         @einsimd Πxx := 2 * t^2 / N * A[n1, n2] * AplusD[n1, n2] * pf[n1, n2]
         Πxx = real.(Πxx)
-        push!(Π, Πxx)
+        Π[j] = Πxx
     end
+    Π[3] = copy(Π[1])
+    Π[4] = copy(Π[2])
 
     return Π
 end
