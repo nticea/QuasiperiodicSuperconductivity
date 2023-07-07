@@ -31,7 +31,7 @@ savepath_LGE = joinpath(@__DIR__, "LGE_results.csv")
 df_BdG = load_dataframe(savepath_BdG)
 df_LGE = load_dataframe(savepath_LGE)
 
-Js = collect(0:0.1:2)
+Js = collect(0:0.1:4)
 ϕxs = LinRange(0, π, 5)
 ϕys = LinRange(0, π, 5)
 
