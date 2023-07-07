@@ -39,7 +39,7 @@ function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::
     sites = [Rsites, Usites, Lsites, Dsites, onsites]
     coords = [xcoords, ycoords]
 
-    K = kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
+    K = @time kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
     Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, t=t)
 
     return K, Π
@@ -114,19 +114,28 @@ function kinetic_term(sites; U, V, E, f, t)
     return K
 end
 
-function current_current_term(sites, coords; U, V, E, f, t, npts=5)
-
+function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8)
+    # the minimum q I can consider is 1/L
     N, _ = size(U)
     L = √N
-    # the minimum q I can consider is 1/L
     qs = 2π / L * collect(1:npts)
     Πs = zeros(npts, 4)
+
+    # the diagonals have ΔE=0, which causes divergence 
+    @einsimd En1n2[n1, n2] := E[n1] - E[n2] + δ * 1im
+    indices = findall(isequal(0), En1n2)
+    En1n2[indices] .= Inf
+
+    # get the fermi energies
+    @einsimd fn1n2[n1, n2] := f[n1] - f[n2]
+
+    # compute the prefactor
+    @einsimd pf[n1, n2] := fn1n2[n1, n2] / En1n2[n1, n2]
 
     # perform extrapolation q → 0
     for (i, q) in enumerate(qs)
         print(i, "-")
-        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, E=E, f=f, t=t, q=q))
-        @show Πs[i, :]
+        Πs[i, :] = @time real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
     end
 
     Πs_extrapolated = []
@@ -139,17 +148,9 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5)
     return Πs_extrapolated
 end
 
-function Πq(sites, coords; U, V, E, f, t, q, δ=1e-8)
+function Πq(sites, coords; U, V, pf, t, q)
     N, _ = size(U)
     i_sites = sites[5] # these are the on-sites 
-
-    # the diagonals have ΔE=0, which causes divergence 
-    @einsimd En1n2[n1, n2] := E[n1] - E[n2] + δ * 1im
-    indices = findall(isequal(0), En1n2)
-    En1n2[indices] .= Inf
-
-    # get the fermi energies
-    @einsimd fn1n2[n1, n2] := f[n1] - f[n2]
 
     Π = []
     for j in 1:4
@@ -169,7 +170,9 @@ function Πq(sites, coords; U, V, E, f, t, q, δ=1e-8)
         D = Dq((-qx, -qy), i_sites, j_sites, coords, V=V)
         Aconj = conj.(A)
 
-        @einsimd Πxx := 2 * t^2 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
+        # @einsimd Πxx := 2 * t^2 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
+        AplusD = Aconj + D
+        @einsimd Πxx := 2 * t^2 / N * A[n1, n2] * AplusD[n1, n2] * pf[n1, n2]
         Πxx = real.(Πxx)
         push!(Π, Πxx)
     end
@@ -188,7 +191,6 @@ function Aq(q, i_sites, j_sites, coords; U)
     # make the exponential prefactor 
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
 
-    # factor of 2 is for the spin ??
     @einsimd A[n1, n2] := exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
 
     return A
