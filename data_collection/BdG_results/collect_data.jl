@@ -11,7 +11,7 @@ include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 7 # the full system is L × L 
+L = 11 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 0
@@ -32,8 +32,8 @@ df_BdG = load_dataframe(savepath_BdG)
 df_LGE = load_dataframe(savepath_LGE)
 
 Js = collect(0:0.1:2)
-ϕxs = LinRange(0, 2 * π, 5)
-ϕys = LinRange(0, 2 * π, 5)
+ϕxs = LinRange(0, π, 5)
+ϕys = LinRange(0, π, 5)
 
 ## RUNNING THE CODE ## 
 for J in Js # iterate through all J values

@@ -267,9 +267,9 @@ function LGE_spectrum(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothi
 end
 
 function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, min=0, max=1, npts=5, tol=1e-4, niter=10)
-    λ0, _ = pairfield_correlation(0, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+    λ0, Δ0 = pairfield_correlation(0, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
     if λ0 < 1
-        return NaN
+        return NaN, λ0, Δ0
     end
 
     # else, we know that a value for Tc must exist 
@@ -279,11 +279,11 @@ function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing
         λs = []
         for T in Ts
             # find λ at this temperature 
-            λ, _ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+            λ, Δ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
 
             # If λ is close enough to 0, return T as Tc 
             if abs.(λ - 1) < tol
-                return T
+                return T, λ, Δ
             end
 
             # if not, keep iterating 
@@ -306,7 +306,7 @@ function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing
                 elseif maximum(λs) < 1
                     min = min / 2
                 else
-                    return NaN
+                    return NaN, λ0, Δ0
                 end
 
                 continue
@@ -314,11 +314,11 @@ function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing
         end
 
         # find λ at this temperature 
-        λ, _ = pairfield_correlation(Tc, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+        λ, Δ = pairfield_correlation(Tc, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
 
         # If λ is close enough to 0, return T as Tc 
         if abs.(λ - 1) < tol
-            return Tc
+            return Tc, λ, Δ
         end
 
         # else, keep iterating 
@@ -326,7 +326,7 @@ function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing
         max = Tc + 0.5 / n * Tc
     end
 
-    return Tc
+    return Tc, λ0, Δ0
 end
 
 # function dwave_old(T::Real; L, E, U, V0, V1)

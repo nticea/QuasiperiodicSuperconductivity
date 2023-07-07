@@ -13,6 +13,12 @@ function already_calculated(df::DataFrame; L, J, θ, ϕx, ϕy, V0, V1, T)
     return size(sub)[1] > 0
 end
 
+# same as above, but without T (this is for finding Tc using LGE method)
+function already_calculated(df::DataFrame; L, J, θ, ϕx, ϕy, V0, V1)
+    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy), :]
+    return size(sub)[1] > 0
+end
+
 function load_dataframe(path)
     try # try loading the DataFrames
         df = DataFrame(CSV.File(path))
