@@ -47,5 +47,5 @@ function submit_job(params::ModelParams, filepath, job_prefix; nodes=1, ntasks=1
     open("slurmfiles/$(name).slurm", "w") do io
         write(io, filestr)
     end
-    run("sbatch slurmfiles/$(name).slurm")
+    run(`sbatch slurmfiles/$(name).slurm`)
 end
