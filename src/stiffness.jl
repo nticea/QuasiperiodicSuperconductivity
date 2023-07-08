@@ -94,8 +94,10 @@ function kinetic_term(sites; U, V, E, f, t)
     V = V[:, En_idx]
     f = f[En_idx]
 
-    K = []
-    for j_sites in sites[1:4] #iterate through the nearest neighbours in all directions 
+    K = zeros(4)
+    for j in 1:2 #iterate through the nearest neighbours in all directions 
+        j_sites = sites[j]
+
         # make the blocks of i sites and j sites 
         Uconj_i, U_i, Uconj_j, U_j = ij_blocks(i_sites, j_sites, U, conj.(U))
         Vconj_i, V_i, Vconj_j, V_j = ij_blocks(i_sites, j_sites, V, conj.(V))
@@ -108,25 +110,35 @@ function kinetic_term(sites; U, V, E, f, t)
 
         Kx = -2 * t / N * (t1 + t2 + t3 + t4) # factor of 2 from spin 
 
-        push!(K, Kx)
+        K[j] = Kx
     end
+    K[3] = copy(K[1])
+    K[4] = copy(K[2])
 
     return K
 end
 
-function current_current_term(sites, coords; U, V, E, f, t, npts=5)
-
+function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8)
+    # the minimum q I can consider is 1/L
     N, _ = size(U)
     L = √N
-    # the minimum q I can consider is 1/L
     qs = 2π / L * collect(1:npts)
     Πs = zeros(npts, 4)
 
+    # the diagonals have ΔE=0, which causes divergence 
+    @einsimd En1n2[n1, n2] := E[n1] - E[n2] + δ * 1im
+    indices = findall(isequal(0), En1n2)
+    En1n2[indices] .= Inf
+
+    # get the fermi energies
+    @einsimd fn1n2[n1, n2] := f[n1] - f[n2]
+
+    # compute the prefactor
+    @einsimd pf[n1, n2] := fn1n2[n1, n2] / En1n2[n1, n2]
+
     # perform extrapolation q → 0
-    for (i, q) in enumerate(qs)
-        print(i, "-")
-        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, E=E, f=f, t=t, q=q))
-        @show Πs[i, :]
+    Threads.@threads for (i, q) in collect(enumerate(qs))
+        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
     end
 
     Πs_extrapolated = []
@@ -139,20 +151,12 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5)
     return Πs_extrapolated
 end
 
-function Πq(sites, coords; U, V, E, f, t, q, δ=1e-8)
+function Πq(sites, coords; U, V, pf, t, q)
     N, _ = size(U)
     i_sites = sites[5] # these are the on-sites 
 
-    # the diagonals have ΔE=0, which causes divergence 
-    @einsimd En1n2[n1, n2] := E[n1] - E[n2] + δ * 1im
-    indices = findall(isequal(0), En1n2)
-    En1n2[indices] .= Inf
-
-    # get the fermi energies
-    @einsimd fn1n2[n1, n2] := f[n1] - f[n2]
-
-    Π = []
-    for j in 1:4
+    Π = zeros(4)
+    Threads.@threads for j in 1:2#1:4
         j_sites = sites[j]
 
         if j == 1 || j == 3
@@ -169,10 +173,14 @@ function Πq(sites, coords; U, V, E, f, t, q, δ=1e-8)
         D = Dq((-qx, -qy), i_sites, j_sites, coords, V=V)
         Aconj = conj.(A)
 
-        @einsimd Πxx := 2 * t^2 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
+        # @einsimd Πxx := 2 * t^2 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
+        AplusD = Aconj + D
+        @einsimd Πxx := 2 * t^2 / N * A[n1, n2] * AplusD[n1, n2] * pf[n1, n2]
         Πxx = real.(Πxx)
-        push!(Π, Πxx)
+        Π[j] = Πxx
     end
+    Π[3] = copy(Π[1])
+    Π[4] = copy(Π[2])
 
     return Π
 end
@@ -188,7 +196,6 @@ function Aq(q, i_sites, j_sites, coords; U)
     # make the exponential prefactor 
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
 
-    # factor of 2 is for the spin ??
     @einsimd A[n1, n2] := exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
 
     return A

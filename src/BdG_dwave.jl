@@ -53,9 +53,9 @@ function converge_BdG_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, peri
         push!(hist, ΔΔ)
 
         # add noise if desired, scaled by the largest Δij in the previous iteration (noise is set to 0 by default)
-        d = Normal(0.0, maximum(Δij) * noise)
-        ε = rand.(d, size(Δij)...)
-        Δij .+= ε
+        # d = Normal(0.0, maximum(Δij) * noise)
+        # ε = rand.(d, size(Δij)...)
+        # Δij .+= ε
 
         # Update the history 
         Δij_prev2 = copy(Δij_prev1)
