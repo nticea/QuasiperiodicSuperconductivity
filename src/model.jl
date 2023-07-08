@@ -7,6 +7,24 @@ using Tullio
 using Einsum
 using Interpolations
 
+struct ModelParams
+    L::Int
+    t::Real
+    Q::Real
+    μ::Real
+    θ::Real
+    ϕx::Real
+    ϕy::Real
+    V0::Real
+    V1::Real
+    J::Real
+    periodic::Bool
+end
+
+function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic)
+    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic)
+end
+
 function expspace(start, stop, length)
     exp10.(range(start, stop, length=length))
 end

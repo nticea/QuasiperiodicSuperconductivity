@@ -266,7 +266,20 @@ function LGE_spectrum(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothi
     return vals
 end
 
-function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, min=0, max=1, npts=5, tol=1e-4, niter=10)
+function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, npts=5, tol=1e-4, niter=10, L̃::Int=11)
+    # find the min and max values based on the Tc of a smaller system 
+    Tc0, λ0, Δ0 = _LGE_find_Tc(L=L̃, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, npts=npts, tol=tol)
+    if Tc0 == NaN
+        _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=0, max=1, npts=npts, tol=tol)
+    end
+
+    println("I've returned")
+    min = Tc0 - 0.2 * Tc0
+    max = Tc0 + 0.4 * Tc0
+    _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=min, max=max, npts=npts, tol=tol)
+end
+
+function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx::Real, ϕy::Real, μ::Real, V0::Real, V1::Real, periodic::Bool=true, min=0, max=1, npts=5, tol=1e-4, niter=10)
     λ0, Δ0 = pairfield_correlation(0, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
     if λ0 < 1
         return NaN, λ0, Δ0
@@ -281,13 +294,18 @@ function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing
             # find λ at this temperature 
             λ, Δ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
 
-            # If λ is close enough to 0, return T as Tc 
+            @show T, λ
+            # If λ is close enough to 1, return T as Tc 
             if abs.(λ - 1) < tol
                 return T, λ, Δ
             end
 
             # if not, keep iterating 
             push!(λs, λ)
+
+            if λ < 1
+                break
+            end
         end
 
         # find Tc 
@@ -316,14 +334,14 @@ function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing
         # find λ at this temperature 
         λ, Δ = pairfield_correlation(Tc, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
 
-        # If λ is close enough to 0, return T as Tc 
+        # If λ is close enough to 1, return T as Tc 
         if abs.(λ - 1) < tol
             return Tc, λ, Δ
         end
 
         # else, keep iterating 
-        min = Tc - 0.5 / n * Tc
-        max = Tc + 0.5 / n * Tc
+        min = Tc - 0.3 / n * Tc
+        max = Tc + 0.3 / n * Tc
     end
 
     return Tc, λ0, Δ0

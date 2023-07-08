@@ -8,14 +8,33 @@ function update_results!(df::DataFrame; L, λ, J, θ, ϕx, ϕy, V0, V1, T, Δ)
     append!(df, df2)
 end
 
+function update_results!(df::DataFrame; L, λ, J, Q, θ, ϕx, ϕy, V0, V1, T, Δ, K=zeros(4), Π=zeros(4))
+    if isnothing(θ)
+        θ = 0
+    end
+    df2 = DataFrame(L=[L], λ=[λ], J=[J], Q=[Q], θ=[θ], ϕx=[ϕx], ϕy=[ϕy], V0=[V0], V1=[V1], T=[T], Δ=[Δ], K=[K], Π=[Π])
+    append!(df, df2)
+end
+
 function already_calculated(df::DataFrame; L, J, θ, ϕx, ϕy, V0, V1, T)
     sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.T.==T), :]
+    return size(sub)[1] > 0
+end
+
+function already_calculated(df::DataFrame; L, J, Q, θ, ϕx, ϕy, V0, V1, T)
+    sub = df[(df.L.==L).&(df.J.==J).&(df.Q.==Q).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.T.==T), :]
     return size(sub)[1] > 0
 end
 
 # same as above, but without T (this is for finding Tc using LGE method)
 function already_calculated(df::DataFrame; L, J, θ, ϕx, ϕy, V0, V1)
     sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy), :]
+    return size(sub)[1] > 0
+end
+
+# same as above, but without T (this is for finding Tc using LGE method)
+function already_calculated(df::DataFrame; L, J, Q, θ, ϕx, ϕy, V0, V1)
+    sub = df[(df.L.==L).&(df.J.==J).&(df.Q.==Q).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy), :]
     return size(sub)[1] > 0
 end
 
@@ -37,10 +56,9 @@ function load_dataframe(path)
         return dfcut
     catch error_reading_dataframe # if the file does not exist, create a new dataframe
         @show error_reading_dataframe
-        nodenames = ["L", "J", "θ", "ϕx", "ϕy", "V0", "V1", "T", "λ", "Δ"]
-        # return DataFrame([name => [] for name in nodenames])
-        return DataFrame(L=Int64[], J=Float64[], θ=Float64[], ϕx=Float64[], ϕy=Float64[], V0=Float64[], V1=Float64[],
-            T=Float64[], λ=Float64[], Δ=[])
+        return DataFrame(L=Int64[], J=Float64[], Q=Float64[], θ=Float64[],
+            ϕx=Float64[], ϕy=Float64[], V0=Float64[], V1=Float64[],
+            T=Float64[], λ=Float64[], Δ=[], K=[], Π=[])
     end
 end
 
