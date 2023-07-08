@@ -42,7 +42,7 @@ function submit_job(params::ModelParams, filepath, job_prefix; nodes=1, ntasks=1
     J=$(params.J)
     periodic=$(params.periodic)
 
-    include($filepath)"""
+    include("$filepath")"""
 
     open("slurmfiles/$(name).slurm", "w") do io
         write(io, filestr)
