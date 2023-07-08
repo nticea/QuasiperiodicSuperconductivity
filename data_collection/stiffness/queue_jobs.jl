@@ -15,7 +15,7 @@ periodic = true
 
 Js = [0.2] #collect(0:0.1:4)
 ϕxs, ϕys = LinRange(0, π, 3), LinRange(0, π, 3)
-filepath = joinpath(@__DIR__, "collect_data.jl")
+filepath = joinpath(@__DIR__, "test.jl")
 job_prefix = "sweep"
 
 for J in Js
