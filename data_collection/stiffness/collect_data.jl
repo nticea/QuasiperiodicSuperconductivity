@@ -18,7 +18,7 @@ niter = 500
 BdG_tol = 1e-15
 LGE_tol = 1e-2
 
-λ, Δ_LGE = @time pairfield_correlation(0; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+λ, Δ_LGE = @time pairfield_correlation(0; L=L, t=t, J=J, Q=Q, θ=theta, ϕx=phi_x, ϕy=phi_y, μ=mu, V0=V0, V1=V1, periodic=periodic)
 
 ## SAVING ##  
 timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
