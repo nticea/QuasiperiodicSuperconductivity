@@ -11,7 +11,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 V0 = 1
 V1 = -1.5
-periodic = true
+periodic = 1
 
 Js = collect(0:0.1:4)
 ϕxs, ϕys = LinRange(0, π, 3), LinRange(0, π, 3)

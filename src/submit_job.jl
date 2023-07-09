@@ -16,8 +16,8 @@ function submit_job(params::ModelParams, filepath, job_prefix; nodes=1, ntasks=1
     #SBATCH --mem=$(mem)G
     #SBATCH --mail-type=BEGIN,FAIL,END
     #SBATCH --mail-user=nticea@stanford.edu
-    #SBATCH --output=$(job_prefix*"_"*name)_output.txt
-    #SBATCH --error=$(job_prefix*"_"*name)_error.txt
+    #SBATCH --output=out/$(job_prefix*"_"*name)_output.txt
+    #SBATCH --error=out/$(job_prefix*"_"*name)_error.txt
     #SBATCH --open-mode=append
 
     # load Julia module
@@ -26,21 +26,8 @@ function submit_job(params::ModelParams, filepath, job_prefix; nodes=1, ntasks=1
     # multithreading
     export JULIA_NUM_THREADS=\$SLURM_CPUS_ON_NODE
 
-    # load in the parameters
-    L=$(params.L)
-    t=$(params.t)
-    Q=$(params.Q)
-    mu=$(params.μ)
-    theta=$(params.θ)
-    phi_x=$(params.ϕx)
-    phi_y=$(params.ϕy)
-    V0=$(params.V0)
-    V1=$(params.V1)
-    J=$(params.J)
-    periodic=$(params.periodic)
-
-    # run the Julia application
-    julia $filepath"""
+    # run the script
+    julia $filepath $(params.L) $(params.t) $(params.Q) $(params.μ) $(params.θ) $(params.ϕx) $(params.ϕy) $(params.V0) $(params.V1) $(params.J) $(params.periodic)"""
 
     open("slurmfiles/$(name).slurm", "w") do io
         write(io, filestr)

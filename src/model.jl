@@ -18,7 +18,7 @@ struct ModelParams
     V0::Real
     V1::Real
     J::Real
-    periodic::Bool
+    periodic::Real
 end
 
 function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic)
