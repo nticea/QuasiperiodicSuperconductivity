@@ -26,9 +26,6 @@ function submit_job(params::ModelParams, filepath, job_prefix; nodes=1, ntasks=1
     # multithreading
     export JULIA_NUM_THREADS=\$SLURM_CPUS_ON_NODE
 
-    # run the Julia application
-    julia
-
     # load in the parameters
     L=$(params.L)
     t=$(params.t)
@@ -42,7 +39,8 @@ function submit_job(params::ModelParams, filepath, job_prefix; nodes=1, ntasks=1
     J=$(params.J)
     periodic=$(params.periodic)
 
-    include("$filepath")"""
+    # run the Julia application
+    julia $filepath"""
 
     open("slurmfiles/$(name).slurm", "w") do io
         write(io, filestr)
