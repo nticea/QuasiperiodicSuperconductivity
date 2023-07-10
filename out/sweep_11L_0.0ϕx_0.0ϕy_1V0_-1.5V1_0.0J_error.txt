@@ -1,0 +1,157 @@
+┌ Warning: Module LogExpFunctions with build ID fafbfcfd-40f1-e8b5-0001-e1c261ff3de5 is missing from the cache.
+│ This may mean LogExpFunctions [2ab3a3ac-af41-5b50-aa03-7779005ae688] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module SpecialFunctions with build ID fafbfcfd-47df-4711-0001-e1c24c2cb8a3 is missing from the cache.
+│ This may mean SpecialFunctions [276daf66-3868-5448-9aa4-cd146d93841b] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Compat with build ID fafbfcfd-baf1-7a8d-0001-e1cbd0b1697c is missing from the cache.
+│ This may mean Compat [34da2185-b29b-5c13-b0c7-acf172513d20] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module ChainRulesCore with build ID fafbfcfd-5a77-7dbd-0001-e210ba37c994 is missing from the cache.
+│ This may mean ChainRulesCore [d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StatsBase with build ID fafbfcfd-2693-3a78-0001-e1cba83895b8 is missing from the cache.
+│ This may mean StatsBase [2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module SpecialFunctions with build ID fafbfcfd-47df-4711-0001-e1c24c2cb8a3 is missing from the cache.
+│ This may mean SpecialFunctions [276daf66-3868-5448-9aa4-cd146d93841b] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module SpecialFunctions with build ID fafbfcfd-47df-4711-0001-e1c24c2cb8a3 is missing from the cache.
+│ This may mean SpecialFunctions [276daf66-3868-5448-9aa4-cd146d93841b] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module SpecialFunctions with build ID fafbfcfd-47df-4711-0001-e1c24c2cb8a3 is missing from the cache.
+│ This may mean SpecialFunctions [276daf66-3868-5448-9aa4-cd146d93841b] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module SpecialFunctions with build ID fafbfcfd-47df-4711-0001-e1c24c2cb8a3 is missing from the cache.
+│ This may mean SpecialFunctions [276daf66-3868-5448-9aa4-cd146d93841b] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StatsFuns with build ID ffffffff-ffff-ffff-0001-e21610e1e183 is missing from the cache.
+│ This may mean StatsFuns [4c63d2b9-4356-54db-8cca-17b64c39e42c] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module DataStructures with build ID fafbfcfd-be5c-3473-0001-e1cbbb8688ef is missing from the cache.
+│ This may mean DataStructures [864edb3b-99cc-5e75-8d2d-829cb0a9cfe8] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Distributions with build ID ffffffff-ffff-ffff-0001-e215f4d232bf is missing from the cache.
+│ This may mean Distributions [31c24e10-a181-5473-b8eb-7969acd0382f] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Static with build ID fafbfcfd-f9f5-1187-0001-e2196d098ea8 is missing from the cache.
+│ This may mean Static [aedffcd0-7271-4cad-89d0-dc628f76c6d3] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Static with build ID fafbfcfd-f9f5-1187-0001-e2196d098ea8 is missing from the cache.
+│ This may mean Static [aedffcd0-7271-4cad-89d0-dc628f76c6d3] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Static with build ID fafbfcfd-f9f5-1187-0001-e2196d098ea8 is missing from the cache.
+│ This may mean Static [aedffcd0-7271-4cad-89d0-dc628f76c6d3] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Compat with build ID fafbfcfd-baf1-7a8d-0001-e1cbd0b1697c is missing from the cache.
+│ This may mean Compat [34da2185-b29b-5c13-b0c7-acf172513d20] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Compat with build ID fafbfcfd-baf1-7a8d-0001-e1cbd0b1697c is missing from the cache.
+│ This may mean Compat [34da2185-b29b-5c13-b0c7-acf172513d20] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Compat with build ID fafbfcfd-baf1-7a8d-0001-e1cbd0b1697c is missing from the cache.
+│ This may mean Compat [34da2185-b29b-5c13-b0c7-acf172513d20] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Compat with build ID fafbfcfd-baf1-7a8d-0001-e1cbd0b1697c is missing from the cache.
+│ This may mean Compat [34da2185-b29b-5c13-b0c7-acf172513d20] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrayInterface with build ID ffffffff-ffff-ffff-0001-e21aa301da64 is missing from the cache.
+│ This may mean StaticArrayInterface [0d7ed370-da01-4f52-bd93-41d350b8b718] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrayInterface with build ID ffffffff-ffff-ffff-0001-e21aa301da64 is missing from the cache.
+│ This may mean StaticArrayInterface [0d7ed370-da01-4f52-bd93-41d350b8b718] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrayInterface with build ID ffffffff-ffff-ffff-0001-e21aa301da64 is missing from the cache.
+│ This may mean StaticArrayInterface [0d7ed370-da01-4f52-bd93-41d350b8b718] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module PrecompileTools with build ID fafbfcfd-f87d-51d2-0001-e1c1175fdc43 is missing from the cache.
+│ This may mean PrecompileTools [aea7be01-6a6a-4083-8856-8a6e6704d82a] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module VectorizationBase with build ID ffffffff-ffff-ffff-0001-e21a8556e074 is missing from the cache.
+│ This may mean VectorizationBase [3d5dd08c-fd9d-11e8-17fa-ed2836048c2f] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module CPUSummary with build ID ffffffff-ffff-ffff-0001-e21b7d7f16cc is missing from the cache.
+│ This may mean CPUSummary [2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrayInterface with build ID ffffffff-ffff-ffff-0001-e21aa301da64 is missing from the cache.
+│ This may mean StaticArrayInterface [0d7ed370-da01-4f52-bd93-41d350b8b718] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module SpecialFunctions with build ID fafbfcfd-47df-4711-0001-e1c24c2cb8a3 is missing from the cache.
+│ This may mean SpecialFunctions [276daf66-3868-5448-9aa4-cd146d93841b] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module RecipesBase with build ID fafbfcfd-36d4-087d-0001-e1c1497fa43d is missing from the cache.
+│ This may mean RecipesBase [3cdcf5f2-1ef4-517c-9805-6587b60abb01] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module Polynomials with build ID ffffffff-ffff-ffff-0001-e222a46c4985 is missing from the cache.
+│ This may mean Polynomials [f27b6e38-b328-58d1-80ce-0feddd5e7a45] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Arpack [7d9fca2a-8960-54d3-9f78-7d1dccf2cb97]
+│   exception = Required dependency Arpack_jll [68821587-b530-5797-8361-c406ea357684] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for HostCPUFeatures [3e5b6fbb-0976-4d2c-9146-d79de83f2fb0]
+│   exception = Required dependency BitTwiddlingConvenienceFunctions [62783981-4cbd-42fc-bca8-16325de8dc4b] failed to load from a cache file.
+└ @ Base loading.jl:1783
+ERROR: LoadError: MethodError: no method matching transposeshuffle(::Int64, ::Int64, ::Bool)
+The applicable method may be too new: running in world age 43460, while current world is 49364.
+
+Closest candidates are:
+  transposeshuffle(::Any, ::Any, ::Bool) (method too new to be called from this world context.)
+   @ VectorizationBase ~/.julia/packages/VectorizationBase/0dXyA/src/vecunroll/memory.jl:2990
+
+Stacktrace:
+  [1] transpose_vecunroll_quote_W_smaller(N::Int64, W::Int64)
+    @ VectorizationBase ~/.julia/packages/VectorizationBase/0dXyA/src/llvm_intrin/vector_ops.jl:369
+  [2] #s2603#304
+    @ ~/.julia/packages/VectorizationBase/0dXyA/src/llvm_intrin/vector_ops.jl:413 [inlined]
+  [3] var"#s2603#304"(N::Any, W::Any, ::Any, vu::Any)
+    @ VectorizationBase ./none:0
+  [4] (::Core.GeneratedFunctionStub)(::Any, ::Vararg{Any})
+    @ Core ./boot.jl:602
+  [5] macro expansion
+    @ ~/.julia/packages/VectorizationBase/0dXyA/src/vecunroll/memory.jl:610 [inlined]
+  [6] _vload_unroll
+    @ ~/.julia/packages/VectorizationBase/0dXyA/src/vecunroll/memory.jl:610 [inlined]
+  [7] _vload
+    @ ~/.julia/packages/VectorizationBase/0dXyA/src/vecunroll/memory.jl:771 [inlined]
+  [8] macro expansion
+    @ ~/.julia/packages/LoopVectorization/91gMc/src/reconstruct_loopset.jl:1107 [inlined]
+  [9] _turbo_!(::Val{(false, 0, 0, 0, false, 8, 64, 32, 64, 0x0000000000000001, 1, true)}, ::Val{(:LoopVectorization, :getindex, LoopVectorization.OperationStruct(0x00000000000000000000000000000032, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, LoopVectorization.memload, 0x0001, 0x0001), :LoopVectorization, :getindex, LoopVectorization.OperationStruct(0x00000000000000000000000000000021, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, LoopVectorization.memload, 0x0002, 0x0002), :LoopVectorization, :mul_fast, LoopVectorization.OperationStruct(0x00000000000000000000000000000321, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000010002, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, LoopVectorization.compute, 0x0003, 0x0000), :LoopVectorization, :getindex, LoopVectorization.OperationStruct(0x00000000000000000000000000000031, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, LoopVectorization.memload, 0x0004, 0x0003), :LoopVectorization, :mul_fast, LoopVectorization.OperationStruct(0x00000000000000000000000000000321, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000030004, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, LoopVectorization.compute, 0x0005, 0x0000), :LoopVectorization, :setindex!, LoopVectorization.OperationStruct(0x00000000000000000000000000000321, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000005, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, 0x00000000000000000000000000000000, LoopVectorization.memstore, 0x0006, 0x0004))}, ::Val{(LoopVectorization.ArrayRefStruct{:Uconj, Symbol("##vptr##_Uconj")}(0x00000000000000000000000000000101, 0x00000000000000000000000000000302, 0x00000000000000000000000000000000, 0x00000000000000000000000000000101), LoopVectorization.ArrayRefStruct{:P, Symbol("##vptr##_P")}(0x00000000000000000000000000000101, 0x00000000000000000000000000000201, 0x00000000000000000000000000000000, 0x00000000000000000000000000000101), LoopVectorization.ArrayRefStruct{:Uconjb, Symbol("##vptr##_Uconjb")}(0x00000000000000000000000000000101, 0x00000000000000000000000000000301, 0x00000000000000000000000000000000, 0x00000000000000000000000000000101), LoopVectorization.ArrayRefStruct{:ℛ, Symbol("##vptr##_ℛ")}(0x00000000000000000000000000010101, 0x00000000000000000000000000030201, 0x00000000000000000000000000000000, 0x00000000000000000000000000010101))}, ::Val{(0, (), (), (), (), (), ())}, ::Val{(:m, :n, :r)}, ::Val{Tuple{Tuple{Static.OptionallyStaticUnitRange{Static.StaticInt{0}, Int64}, Static.OptionallyStaticUnitRange{Static.StaticInt{0}, Int64}, Static.OptionallyStaticUnitRange{Static.StaticInt{0}, Int64}}, Tuple{LayoutPointers.GroupedStridedPointers{NTuple{4, Ptr{Float64}}, (1, 1, 2, 1), (0, 0, 0, 0), ((1, 2), (1, 2), (2, 1), (1, 2, 3)), ((1, 2), (3, 4), (5, 6), (7, 8, 9)), Tuple{Static.StaticInt{8}, Int64, Static.StaticInt{8}, Int64, Int64, Static.StaticInt{8}, Static.StaticInt{8}, Int64, Int64}, NTuple{9, Static.StaticInt{0}}}}}}, ::Int64, ::Int64, ::Int64, ::Ptr{Float64}, ::Ptr{Float64}, ::Ptr{Float64}, ::Ptr{Float64}, ::Int64, ::Int64, ::Int64, ::Int64, ::Int64)
+    @ LoopVectorization ~/.julia/packages/LoopVectorization/91gMc/src/reconstruct_loopset.jl:1107
+ [10] 𝒜𝒸𝓉!
+    @ ~/.julia/packages/Tullio/NGyNM/src/macro.jl:1093 [inlined]
+ [11] tile_halves(fun!::var"#𝒜𝒸𝓉!#329", ::Type{Array{Float64}}, As::Tuple{Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Transpose{Float64, Matrix{Float64}}}, Is::Tuple{UnitRange{Int64}, UnitRange{Int64}, UnitRange{Int64}}, Js::Tuple{}, keep::Nothing, final::Bool)
+    @ Tullio ~/.julia/packages/Tullio/NGyNM/src/threads.jl:139
+ [12] tile_halves(fun!::var"#𝒜𝒸𝓉!#329", ::Type{Array{Float64}}, As::Tuple{Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Transpose{Float64, Matrix{Float64}}}, Is::Tuple{UnitRange{Int64}, UnitRange{Int64}, UnitRange{Int64}}, Js::Tuple{}, keep::Nothing, final::Bool)
+    @ Tullio ~/.julia/packages/Tullio/NGyNM/src/threads.jl:142
+ [13] tile_halves
+    @ ~/.julia/packages/Tullio/NGyNM/src/threads.jl:136 [inlined]
+ [14] thread_halves(fun!::var"#𝒜𝒸𝓉!#329", ::Type{Array{Float64}}, As::Tuple{Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Transpose{Float64, Matrix{Float64}}}, Is::Tuple{UnitRange{Int64}, UnitRange{Int64}, UnitRange{Int64}}, Js::Tuple{}, threads::Int64, keep::Nothing)
+    @ Tullio ~/.julia/packages/Tullio/NGyNM/src/threads.jl:128
+ [15] thread_halves(fun!::var"#𝒜𝒸𝓉!#329", ::Type{Array{Float64}}, As::Tuple{Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Transpose{Float64, Matrix{Float64}}}, Is::Tuple{UnitRange{Int64}, UnitRange{Int64}, UnitRange{Int64}}, Js::Tuple{}, threads::Int64, keep::Nothing)
+    @ Tullio ~/.julia/packages/Tullio/NGyNM/src/threads.jl:117
+ [16] thread_halves(fun!::var"#𝒜𝒸𝓉!#329", ::Type{Array{Float64}}, As::Tuple{Array{Float64, 3}, Matrix{Float64}, Matrix{Float64}, Transpose{Float64, Matrix{Float64}}}, Is::Tuple{UnitRange{Int64}, UnitRange{Int64}, UnitRange{Int64}}, Js::Tuple{}, threads::Int64, keep::Nothing)
+    @ Tullio ~/.julia/packages/Tullio/NGyNM/src/threads.jl:125
+ [17] threader
+    @ ~/.julia/packages/Tullio/NGyNM/src/threads.jl:63 [inlined]
+ [18] (::var"#ℳ𝒶𝓀ℯ#332"{var"#𝒜𝒸𝓉!#329"})(Uconj::Matrix{Float64}, P::Matrix{Float64}, Uconjb::Transpose{Float64, Matrix{Float64}})
+    @ Main ~/.julia/packages/Tullio/NGyNM/src/macro.jl:807
+ [19] (::Tullio.Eval{var"#ℳ𝒶𝓀ℯ#332"{var"#𝒜𝒸𝓉!#329"}, var"#5733#∇ℳ𝒶𝓀ℯ#331"{var"#∇𝒜𝒸𝓉!#330"}})(::Matrix{Float64}, ::Vararg{Any})
+    @ Tullio ~/.julia/packages/Tullio/NGyNM/src/eval.jl:20
+ [20] macro expansion
+    @ ~/.julia/packages/Tullio/NGyNM/src/macro.jl:976 [inlined]
+ [21] dwave_blocks(b_sites::Vector{Any}, d_sites::Vector{Any}; P::Matrix{Float64}, U::Matrix{Float64}, Uconj::Matrix{Float64}, V::Float64, N::Int64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:74
+ [22] dwave_blocks
+    @ ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:67 [inlined]
+ [23] dwave(T::Int64; L::Int64, E::Vector{Float64}, U::Matrix{Float64}, V0::Float64, V1::Float64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:136
+ [24] dwave
+    @ ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:88 [inlined]
+ [25] pairfield_correlation(T::Int64; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:28
+ [26] top-level scope
+    @ ./timing.jl:273 [inlined]
+ [27] top-level scope
+    @ ~/code/QuasiperiodicSuperconductivity/data_collection/stiffness/collect_data.jl:0
+in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/stiffness/collect_data.jl:26

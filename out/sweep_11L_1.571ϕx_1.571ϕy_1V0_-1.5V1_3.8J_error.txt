@@ -1,0 +1,26 @@
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+ERROR: LoadError: "QR algorithm did not converge"
+Stacktrace:
+  [1] local_schurfact!(H::SubArray{Float64, 2, Matrix{Float64}, Tuple{Base.OneTo{Int64}, Base.Slice{Base.OneTo{Int64}}}, false}, start::Int64, to::Int64, Q::Matrix{Float64}, tol::Float64, maxiter::Int64)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/schurfact.jl:320
+  [2] local_schurfact!
+    @ ~/.julia/packages/ArnoldiMethod/JdEiw/src/schurfact.jl:314 [inlined]
+  [3] _partialschur(A::Matrix{Float64}, #unused#::Type{Float64}, mindim::Int64, maxdim::Int64, nev::Int64, tol::Float64, restarts::Int64, which::LR)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:199
+  [4] partialschur(A::Matrix{Float64}; nev::Int64, which::LR, tol::Float64, mindim::Int64, maxdim::Int64, restarts::Int64)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:106
+  [5] partialschur
+    @ ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:94 [inlined]
+  [6] calculate_λ_Δ(M::Matrix{Float64})
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:167
+  [7] pairfield_correlation(T::Float64; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:31
+  [8] _LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, min::Int64, max::Int64, npts::Int64, tol::Float64, niter::Int64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:335
+  [9] _LGE_find_Tc
+    @ ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:282 [inlined]
+ [10] LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, npts::Int64, tol::Float64, niter::Int64, L̃::Int64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:271
+ [11] top-level scope
+    @ ~/code/QuasiperiodicSuperconductivity/data_collection/stiffness/collect_data.jl:37
+in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/stiffness/collect_data.jl:37

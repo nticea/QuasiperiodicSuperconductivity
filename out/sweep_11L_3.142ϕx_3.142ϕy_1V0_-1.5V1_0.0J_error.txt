@@ -1,0 +1,28 @@
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Xorg_libxcb_jll [c7cfdc94-dc32-55de-ac96-5a1b8d977c5b]
+│   exception = Required dependency Xorg_libXau_jll [0c0b7dd1-d40b-584c-a123-a41640f87eec] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Xorg_libX11_jll [4f6342f7-b3d2-589e-9d20-edeb45f2b2bc]
+│   exception = Required dependency Xorg_xtrans_jll [c5fb5394-a638-5e4d-96e5-b29de1b5cf10] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: Module Xorg_libX11_jll with build ID fafbfcfd-1b12-11d0-0001-f5cc151339e7 is missing from the cache.
+│ This may mean Xorg_libX11_jll [4f6342f7-b3d2-589e-9d20-edeb45f2b2bc] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Cairo_jll [83423d85-b0ee-5818-9007-b63ccbeb887a]
+│   exception = Required dependency Xorg_libX11_jll [4f6342f7-b3d2-589e-9d20-edeb45f2b2bc] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for libass_jll [0ac62f75-1d6f-5e53-bd7c-93b484bb37c0]
+│   exception = Required dependency Cairo_jll [83423d85-b0ee-5818-9007-b63ccbeb887a] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for FFMPEG_jll [b22a6f82-2f65-5046-a5b2-351ab43fb4e5]
+│   exception = Invalid input in module list: expected Cairo_jll.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for PlotThemes [ccf2f8ad-2431-5c83-bf29-c5338b663b6a]
+│   exception = Required dependency PlotUtils [995b91a9-d308-5afd-9ec6-746e21dbc043] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for FFMPEG [c87230d0-a227-11e9-1b43-d7ebe4e7570a]
+│   exception = Required dependency libass_jll [0ac62f75-1d6f-5e53-bd7c-93b484bb37c0] failed to load from a cache file.
+└ @ Base loading.jl:1783
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Plots [91a5bcdd-55d7-5caf-9e0b-520d859cae80]
+│   exception = Required dependency RecipesPipeline [01d81517-befc-4cb6-b9ec-a95719d0359c] failed to load from a cache file.
+└ @ Base loading.jl:1783

@@ -1,0 +1,112 @@
+┌ Warning: Module FreeType2_jll with build ID fafbfcfd-0053-53bb-0001-f69c75edb273 is missing from the cache.
+│ This may mean FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module FreeType2_jll with build ID fafbfcfd-0053-53bb-0001-f69c75edb273 is missing from the cache.
+│ This may mean FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module FreeType2_jll with build ID fafbfcfd-0053-53bb-0001-f69c75edb273 is missing from the cache.
+│ This may mean FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module FreeType2_jll with build ID fafbfcfd-0053-53bb-0001-f69c75edb273 is missing from the cache.
+│ This may mean FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module FreeType2_jll with build ID fafbfcfd-0053-53bb-0001-f69c75edb273 is missing from the cache.
+│ This may mean FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module FreeType2_jll with build ID fafbfcfd-0053-53bb-0001-f69c75edb273 is missing from the cache.
+│ This may mean FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module FreeType2_jll with build ID fafbfcfd-0053-53bb-0001-f69c75edb273 is missing from the cache.
+│ This may mean FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for libass_jll [0ac62f75-1d6f-5e53-bd7c-93b484bb37c0]
+│   exception = Required dependency FreeType2_jll [d7e528f0-a631-5988-bf34-fe36492bcfd7] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for FFMPEG_jll [b22a6f82-2f65-5046-a5b2-351ab43fb4e5]
+│   exception = Required dependency HarfBuzz_jll [2e76f6c2-a576-52d4-95c1-20adfe4de566] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: Module FFMPEG_jll with build ID fafbfcfd-7dd6-4d2f-0001-f6a04a3e9811 is missing from the cache.
+│ This may mean FFMPEG_jll [b22a6f82-2f65-5046-a5b2-351ab43fb4e5] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+
+WARNING: detected unclosed module: GR_jll
+  ** incremental compilation may be broken for this module **
+
+┌ Warning: Module FFMPEG_jll with build ID fafbfcfd-7dd6-4d2f-0001-f6a04a3e9811 is missing from the cache.
+│ This may mean FFMPEG_jll [b22a6f82-2f65-5046-a5b2-351ab43fb4e5] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for JSON [682c06a0-de6a-54ab-a142-c8b1cf79cde6]
+│   exception = Required dependency Parsers [69de0a69-1ddd-5017-9359-2bf0b02dc9f0] failed to load from a cache file.
+└ @ Base loading.jl:1783
+ERROR: LoadError: InitError: UndefVarError: `GR_jll` not defined
+Stacktrace:
+  [1] __init__()
+    @ GR.GRPreferences ~/.julia/packages/GR/hbmas/src/preferences.jl:64
+  [2] register_restored_modules(sv::Core.SimpleVector, pkg::Base.PkgId, path::String)
+    @ Base ./loading.jl:1074
+  [3] _include_from_serialized(pkg::Base.PkgId, path::String, ocachepath::String, depmods::Vector{Any})
+    @ Base ./loading.jl:1020
+  [4] _tryrequire_from_serialized(pkg::Base.PkgId, path::String, ocachepath::String)
+    @ Base ./loading.jl:1407
+  [5] _require(pkg::Base.PkgId, env::String)
+    @ Base ./loading.jl:1781
+  [6] _require_prelocked(uuidkey::Base.PkgId, env::String)
+    @ Base ./loading.jl:1625
+  [7] macro expansion
+    @ ./loading.jl:1613 [inlined]
+  [8] macro expansion
+    @ ./lock.jl:267 [inlined]
+  [9] require(into::Module, mod::Symbol)
+    @ Base ./loading.jl:1576
+ [10] top-level scope
+    @ ~/.julia/packages/Plots/rz1WP/src/backends.jl:402
+ [11] eval
+    @ ./boot.jl:370 [inlined]
+ [12] _initialize_backend(pkg::Plots.GRBackend)
+    @ Plots ~/.julia/packages/Plots/rz1WP/src/backends.jl:401
+ [13] backend(pkg::Plots.GRBackend)
+    @ Plots ~/.julia/packages/Plots/rz1WP/src/backends.jl:266
+ [14] backend(sym::Symbol)
+    @ Plots ~/.julia/packages/Plots/rz1WP/src/backends.jl:276
+ [15] load_default_backend()
+    @ Plots ~/.julia/packages/Plots/rz1WP/src/backends.jl:207
+ [16] backend()
+    @ Plots ~/.julia/packages/Plots/rz1WP/src/backends.jl:254
+ [17] top-level scope
+    @ ~/.julia/packages/Plots/rz1WP/src/init.jl:83
+ [18] include(mod::Module, _path::String)
+    @ Base ./Base.jl:457
+ [19] include(x::String)
+    @ Plots ~/.julia/packages/Plots/rz1WP/src/Plots.jl:1
+ [20] top-level scope
+    @ ~/.julia/packages/Plots/rz1WP/src/Plots.jl:176
+ [21] include
+    @ ./Base.jl:457 [inlined]
+ [22] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt128}}, source::String)
+    @ Base ./loading.jl:2010
+ [23] top-level scope
+    @ stdin:2
+during initialization of module GRPreferences
+in expression starting at /home/users/nticea/.julia/packages/Plots/rz1WP/src/init.jl:83
+in expression starting at /home/users/nticea/.julia/packages/Plots/rz1WP/src/Plots.jl:1
+in expression starting at stdin:2
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+ERROR: LoadError: Failed to precompile Plots [91a5bcdd-55d7-5caf-9e0b-520d859cae80] to "/home/users/nticea/.julia/compiled/v1.9/Plots/jl_2kY0wn".
+Stacktrace:
+ [1] error(s::String)
+   @ Base ./error.jl:35
+ [2] compilecache(pkg::Base.PkgId, path::String, internal_stderr::IO, internal_stdout::IO, keep_loaded_modules::Bool)
+   @ Base ./loading.jl:2260
+ [3] compilecache
+   @ ./loading.jl:2127 [inlined]
+ [4] _require(pkg::Base.PkgId, env::String)
+   @ Base ./loading.jl:1770
+ [5] _require_prelocked(uuidkey::Base.PkgId, env::String)
+   @ Base ./loading.jl:1625
+ [6] macro expansion
+   @ ./loading.jl:1613 [inlined]
+ [7] macro expansion
+   @ ./lock.jl:267 [inlined]
+ [8] require(into::Module, mod::Symbol)
+   @ Base ./loading.jl:1576
+in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/stiffness/collect_data.jl:4
