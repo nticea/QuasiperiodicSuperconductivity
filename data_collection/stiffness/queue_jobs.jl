@@ -4,7 +4,7 @@ Pkg.activate(joinpath(@__DIR__, "../.."))
 include("../../src/model.jl")
 include("../../src/submit_job.jl")
 
-L = 11 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -14,7 +14,7 @@ V1 = -1.5
 periodic = 1
 
 Js = collect(0:0.1:4)
-ϕxs, ϕys = LinRange(0, π, 3), LinRange(0, π, 3)
+ϕxs, ϕys = LinRange(0, 3, 3), LinRange(0, 3, 3)
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "sweep"
 

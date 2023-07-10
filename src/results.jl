@@ -38,6 +38,22 @@ function already_calculated(df::DataFrame; L, J, Q, θ, ϕx, ϕy, V0, V1)
     return size(sub)[1] > 0
 end
 
+function convert_df_arrays(df::DataFrame, col_name::String, delims=r"[,; ]")
+    all_arrs = []
+    for (i, arr) in enumerate(df[!, Symbol(col_name)])
+        cleaned_string = replace(arr, r"Any|\[|\]" => "")
+        # Split the string by multiple delimiters
+        result = split(cleaned_string, delims)
+        new_array = result[result.!=""]
+        arrs_new = parse.(Float64, new_array)
+        push!(all_arrs, arrs_new)
+    end
+    dfcut = copy(df)#df[:, collect(1:size(df)[2]-1)]
+    dfcut[!, Symbol(col_name)] = all_arrs
+
+    return dfcut
+end
+
 function load_dataframe(path)
     try # try loading the DataFrames
         df = DataFrame(CSV.File(path))
@@ -201,7 +217,6 @@ function plot_spatial_profile(evs; L, title=nothing)
 
             # onsite dot 
             scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
-
         end
     end
 
