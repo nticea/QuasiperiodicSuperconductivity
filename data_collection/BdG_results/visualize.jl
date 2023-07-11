@@ -1,96 +1,70 @@
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "../.."))
-using LinearAlgebra, Arpack, Plots
-using Profile
-using ProgressBars
+using Plots
 using CSV
 using DataFrames
+using StatsPlots
 
-include("../../src/stiffness.jl")
+include("../../src/model.jl")
+include("../../src/BdG_dwave.jl")
 include("../../src/meanfield.jl")
+include("../../src/results.jl")
 
-## PARAMETERS ##
-t = 1 # hopping 
+## PARAMETERS ## 
+
+L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
-μ = 0
-periodic = true
-T = 0
-tol = 1e-15
+θ = π / 7
+V0 = 1
+V1 = -1.5
 
-# load in the data 
-savepath_BdG = joinpath(@__DIR__, "BdG_results.csv")
-savepath_LGE = joinpath(@__DIR__, "LGE_Tc.csv")
-df = load_dataframe(savepath_BdG)
-Tc_df = load_dataframe(savepath_LGE)
-
-# Get the unique Js, V1s from the dataframe 
-Ls, θs, Js, V0s, V1s = unique(df.L), unique(df.θ), unique(df.J), unique(df.V0), unique(df.V1)
-
-function convert_df_arrays(df::DataFrame, col_name::String, delims=r"[,; ]")
-    all_arrs = []
-    for (i, arr) in enumerate(df[!, Symbol(col_name)])
-        # Split the string by multiple delimiters
-        result = split(chop(arr; head=1, tail=1), delims)
-        new_array = result[result.!=""]
-        arrs_new = parse.(Float64, new_array)
-        push!(all_arrs, arrs_new)
-    end
-    dfcut = copy(df)#df[:, collect(1:size(df)[2]-1)]
-    dfcut[!, Symbol(col_name)] = all_arrs
-
-    return dfcut
-end
-
-df = convert_df_arrays(df, "K")
-df = convert_df_arrays(dfnew, "Π")
-
-# Make the new dataframe 
-nodenames = ["L", "θ", "J", "V0", "V1", "K", "Π", "Tc"]
-df_avg = DataFrame([name => [] for name in nodenames])
-
-# For each unique (J,V0) pair... extract the corresponding data across all Ts 
-for L in Ls
-    for θ in θs
-        for J in Js
-            for V0 in V0s
-                for V1 in V1s
-                    # Extract the corresponding data
-                    dfsub = df[(df.L.==L).&(df.θ.==θ).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1), :]
-                    dfsub_Tc = Tc_df[(Tc_df.L.==L).&(Tc_df.θ.==θ).&(Tc_df.J.==J).&(Tc_df.V0.==V0).&(Tc_df.V1.==V1), :]
-                    Ks, Πs = dfsub.K, dfsub.Π
-                    Ks, Πs = hcat(Ks...), hcat(Πs...)
-                    Ts = dfsub_Tc.T
-
-                    # take the mean 
-                    Ks, Πs = mean(Ks, dims=2)[:, 1], mean(Πs, dims=2)[:, 1]
-                    Ts = mean(Ts)
-
-                    df2 = DataFrame(L=[L], θ=[θ], J=[J], V0=[V0], V1=[V1], K=[Ks], Π=[Πs], Tc=[Ts])
-                    append!(df_avg, df2)
-                end
-            end
+# read files 
+files = readdir(joinpath(@__DIR__, "data"))
+df_BdG = DataFrame(L=Int64[], J=Float64[], Q=Float64[], θ=Float64[],
+    ϕx=Float64[], ϕy=Float64[], V0=Float64[], V1=Float64[],
+    T=Float64[], λ=Float64[], Δ=[], K=[], Π=[])
+df_LGE = copy(df_BdG)
+for f in files
+    if endswith(f, ".csv")
+        dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+        # process all of the arrays 
+        dfi = convert_df_arrays(dfi, "Δ")
+        dfi = convert_df_arrays(dfi, "K")
+        dfi = convert_df_arrays(dfi, "Π")
+        if contains(f, "BdG")
+            append!(df_BdG, dfi)
+        elseif contains(f, "LGE")
+            append!(df_LGE, dfi)
         end
     end
 end
 
-# now it is time to plot 
-Js, Ks, Πs, Tcs = df_avg.J, df_avg.K, df_avg.Π, df_avg.Tc
-Ds = (-Ks + Πs)
-Ds = hcat(Ds...)
+# extract only the parameters we are interested in 
+df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.V0.==V0).&(df_LGE.V1.==V1), :]
+df_BdG = df_BdG[(df_BdG.L.==L).&(df_BdG.θ.==θ).&(df_BdG.Q.==Q).&(df_BdG.V0.==V0).&(df_BdG.V1.==V1), :]
 
-L, θ, V0, V1 = df_avg.L[1], df_avg.θ[1], df_avg.V0[1], df_avg.V1[1]
+## FIGURES ##
+# Comparing Tc from LGE and from BdG 
+df_LGE_Tc = df_LGE[df_LGE.T.>0, :]
+df_BdG_Tc = df_BdG[df_BdG.T.>0, :]
 
-p = plot()
-dirs = ["x̂", "ŷ", "-x̂", "-ŷ"]
-cmap = cgrad(:matter, 4, categorical=true)
+# Spatial profiles of LGE and BdG solns at Tc (real space and configuration space)
+ϕx, ϕy = 0.123, 0.987
+J = 2.5
+dfsub = df_LGE_Tc[(df_LGE_Tc.L.==L).&(df_LGE_Tc.J.==J).&(df_LGE_Tc.θ.==θ).&(df_LGE_Tc.ϕx.==ϕx).&(df_LGE_Tc.ϕy.==ϕy).&(df_LGE_Tc.Q.==Q).&(df_LGE_Tc.V0.==V0).&(df_LGE_Tc.V1.==V1), :]
+Δ_LGE = dfsub.Δ[1]
+χ = symmetry_character(Δ_LGE, L=L)
+Tc = dfsub.T[1]
+Δ = spatial_profile(Δ_LGE, L=L)
+p0 = plot_spatial_profile(Δ, L=L, title="Real space, symmetry=$(round(χ,digits=2))")
+p1 = plot_in_config_space(Δ[5, :, :], L=L, Q=Q, θ=θ, title="On-site")
+p2 = plot_in_config_space(Δ[1, :, :], L=L, Q=Q, θ=θ, title="-x̂ bond")
+p3 = plot_in_config_space(Δ[2, :, :], L=L, Q=Q, θ=θ, title="+ŷ bond")
+p4 = plot_in_config_space(Δ[3, :, :], L=L, Q=Q, θ=θ, title="x̂ bond")
+p5 = plot_in_config_space(Δ[4, :, :], L=L, Q=Q, θ=θ, title="-ŷ bond")
+p = plot(p1, p2, p3, p4, p5, p0, layout=Plots.grid(2, 3,
+        widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), aspect_ratio=:equal, plot_title=" LGE Δ(J=$J, V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice at Tc=$(round(Tc,digits=2))")
+#savefig(p, joinpath(@__DIR__, "figures", "spatial_profile_J$J.pdf"))
 
-for i in 1:4
-    plot!(p, Js, Ds[i, :], label=nothing, c=cmap[i])
-    scatter!(p, Js, Ds[i, :], label=dirs[i], c=cmap[i])
-end
-plot!(Js, Tcs, color="blue", label=nothing)
-scatter!(Js, Tcs, color="blue", label="LGE soln")
-title!(p, "Superfluid stiffness for \n Δ(V0=$V0, V1=$V1, θ=$(θ_to_π(θ))) \n $L × $L lattice at T=0")
-xlabel!("J")
-ylabel!("Tc")
+h = plot_potential(L=L, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy)

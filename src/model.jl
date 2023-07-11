@@ -39,7 +39,6 @@ function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Rea
     for x in 1:L
         for y in 1:L
             n = coordinate_to_site(x, y, L=L)
-            # U_xy = aubry_andre(x, y, J=J, Q=Q, L=L, θ=θ, ϕx=ϕx, ϕy=ϕy)
             U_xy = aubry_andre(x + floor(Int, L / 2), y + floor(Int, L / 2), J=J, Q=Q, L=L, θ=θ, ϕx=ϕx, ϕy=ϕy)
             Hint[n] = -(U_xy + μ)
         end
@@ -164,7 +163,6 @@ end
 
 function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0)
     if isnothing(θ)
-        # Q̃ /= √2
         Q̃ = floor(Int, Q * L) / L
         return J * (cos(2 * π * Q̃ * (x + y) + ϕx) - cos(2 * π * Q̃ * (x - y) + ϕy))
     else
@@ -198,7 +196,31 @@ function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx
             potmat[x, y] = aubry_andre(x + floor(Int, L / 2), y + floor(Int, L / 2); L=L, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy)
         end
     end
-    h = heatmap(potmat)
+
+    numpts = 10
+    cm = cgrad(:bwr, 2 * numpts + 1, categorical=true)
+
+    function colour_gradient(x1::Int, x2::Int; arr)
+        val = arr[x1, x2]
+        max = 2 * J
+        idx = floor(Int, val / max * numpts + numpts + 1)
+        return cm[idx]
+    end
+
+    plot(xaxis=" ", yaxis=" ", legend=false)
+    heatmap([-2*J 2; 3 2*J], color=cm, visible=false)  # Dummy heatmap to generate colorbar
+
+    # Create the colorbar
+
+    h = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
+    for x in 1:L
+        for y in 1:L
+            # onsite dot 
+            scatter!(h, [x], [y], ms=10, c=colour_gradient(x, y, arr=potmat), legend=:false, aspect_ratio=:equal)
+        end
+    end
+    #h = heatmap(reverse(potmat, dims=1), yflip=false, clims=(-2 * J, 2 * J), aspect_ratio=:equal)
+
     xticks!(h, collect(1:2:L))
     yticks!(h, collect(1:2:L))
     xlabel!(h, "Site (x)")

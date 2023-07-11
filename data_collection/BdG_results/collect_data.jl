@@ -6,53 +6,69 @@ using Profile
 using ProgressBars
 using CSV
 using DataFrames
+using Dates
 
 include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
 
-## PARAMETERS ##
-L = 11 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
-μ = 0
+μ = 1e-8
 θ = π / 7
 V0 = 1
 V1 = -1.5
 periodic = true
+J = 2.5
+ϕx = 0.123
+ϕy = 0.987
+
+## SIMULATION PARAMETERS ## 
 niter = 500
-tol = 1e-15
-T = 0
+BdG_tol = 1e-15
+LGE_tol = 1e-2
 
-# saving information 
-savepath_BdG = joinpath(@__DIR__, "BdG_results.csv")
-savepath_LGE = joinpath(@__DIR__, "LGE_results.csv")
+λ, Δ_LGE = @time pairfield_correlation(0; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
 
-# load in the dataframe, if it exists. If not, make a new one
+## SAVING ##  
+timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
+savepath_BdG = joinpath(@__DIR__, "data", "$(L)L_ΦQ_BdG_" * timestamp * ".csv")
+savepath_LGE = joinpath(@__DIR__, "data", "$(L)L_ΦQ_LGE_" * timestamp * ".csv")
 df_BdG = load_dataframe(savepath_BdG)
 df_LGE = load_dataframe(savepath_LGE)
 
-Js = collect(0:0.1:4)
-ϕxs = LinRange(0, π, 5)
-ϕys = LinRange(0, π, 5)
+## Tc using LGE ##
+println("Finding Tc using LGE")
+Tc, λ, Δ_LGE = LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=LGE_tol, npts=5)
+update_results!(df_LGE; L=L, T=Tc, λ=λ, Δ=Δ_LGE, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
+CSV.write(savepath_LGE, df_LGE)
+flush(stdout)
 
-## RUNNING THE CODE ## 
-for J in Js # iterate through all J values
-    println("Running J=$(J)")
-    for ϕx in ϕxs
-        for ϕy in ϕys
-            if !already_calculated(df_BdG; L=L, J=J, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, T=T)
-                λ, Δ_LGE = pairfield_correlation(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
-                update_results!(df_LGE; L=L, T=T, λ=λ, Δ=Δ_LGE, J=J, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
-                CSV.write(savepath_LGE, df_LGE)
-                flush(stdout)
+# Get the corresponding BdG spatial profile 
+println("Finding BdG spatial profile at Tc")
+Δ_BdG, hist = compute_Δ_dwave(Tc; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
+update_results!(df_BdG; L=L, T=Tc, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
+CSV.write(savepath_BdG, df_BdG)
+flush(stdout)
 
-                Δ_BdG, hist = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=tol, Δ_init=Δ_LGE)
-                update_results!(df_BdG; L=L, T=T, λ=λ, Δ=Δ_BdG, J=J, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
-                CSV.write(savepath_BdG, df_BdG)
-                flush(stdout)
-            end
-        end
-    end
-end
+## Superfluid stiffness calculation ##
+T = 0 # everything is at 0 temperature
+
+# Get the initial LGE guess 
+println("Finding LGE sol'n at T=0")
+λ, Δ_LGE = @time pairfield_correlation(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+update_results!(df_LGE; L=L, T=T, λ=λ, Δ=Δ_LGE, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
+CSV.write(savepath_LGE, df_LGE)
+flush(stdout)
+
+# Get the BdG parameters 
+println("Finding BdG coefficients at T=0")
+Δ_BdG, hist = @time compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
+
+# Superfluid stiffness
+K, Π = @time superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=BdG_tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=1, periodic=periodic, Δ_init=Δ_BdG)
+update_results!(df_BdG; L=L, T=T, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, K=K, Π=Π)
+CSV.write(savepath_BdG, df_BdG)
+flush(stdout)
 
 
