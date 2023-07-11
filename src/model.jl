@@ -195,7 +195,7 @@ function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx
     potmat = zeros(L, L)
     for x in 1:L
         for y in 1:L
-            potmat[x, y] = aubry_andre(x, y; L=L, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy)
+            potmat[x, y] = aubry_andre(x + floor(Int, L / 2), y + floor(Int, L / 2); L=L, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy)
         end
     end
     h = heatmap(potmat)
