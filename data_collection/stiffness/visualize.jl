@@ -84,22 +84,22 @@ for i in 1:2
 end
 
 
-# p2 = plot()
-# grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
-# cmap = cgrad(:matter, length(grouped), categorical=true)
-# for (i, df) in enumerate(grouped)
-#     ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
-#     Js, Ks, Πs = df.J, df.K, df.Π
-#     sortidx = sortperm(Js)
-#     Js, Ks, Πs = Js[sortidx], Ks[sortidx], Πs[sortidx]
-#     Ds = -Ks + Πs
-#     Ds = [D[2] for D in Ds]
-#     plot!(p2, Js, Ds, color=cmap[i], label=nothing)
-#     scatter!(p2, Js, Ds, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))")
-# end
-# xlabel!(p2, "J")
-# ylabel!(p2, "Ds/π")
-# title!(p2, "Tc₂ for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
+p2 = plot()
+grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
+cmap = cgrad(:matter, length(grouped), categorical=true)
+for (i, df) in enumerate(grouped)
+    ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
+    Js, Ks, Πs = df.J, df.K, df.Π
+    sortidx = sortperm(Js)
+    Js, Ks, Πs = Js[sortidx], Ks[sortidx], Πs[sortidx]
+    Ds = -Ks + Πs
+    Ds = [D[2] for D in Ds]
+    plot!(p2, Js, Ds, color=cmap[i], label=nothing)
+    scatter!(p2, Js, Ds, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))")
+end
+xlabel!(p2, "J")
+ylabel!(p2, "Ds/π")
+title!(p2, "Tc₂ for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
 
 # Spatial profiles of LGE and BdG solns at Tc (real space and configuration space)
 # ϕxs, ϕys = unique(df_LGE_Tc.ϕx), unique(df_LGE_Tc.ϕy)

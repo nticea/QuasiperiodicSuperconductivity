@@ -24,7 +24,7 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
         @assert V0 < 0
         M = swave(T, E=E, U=U, V0=V0)
     else
-        @assert V0 > 0 && V1 < 0
+        #@assert V0 > 0 && V1 < 0
         M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
     end
 
