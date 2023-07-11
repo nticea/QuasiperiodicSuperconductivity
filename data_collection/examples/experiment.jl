@@ -16,7 +16,7 @@ include("../../src/BdG.jl")
 L = 2 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
-μ = 1e-8
+μ = -0.1
 θ = nothing#π / 7
 ϕx = 0
 ϕy = 0
@@ -27,3 +27,4 @@ periodic = true
 
 
 Tc, λ, Δ_LGE = LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=1e-2, npts=5)
+M = return_M(Tc, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)

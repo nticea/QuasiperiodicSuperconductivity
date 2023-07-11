@@ -33,6 +33,25 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
     return λ, Δ
 end
 
+function return_M(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)
+    # Construct the non-interacting Hamiltonian matrix
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+    # Diagonalize this Hamiltonian
+    E, U = diagonalize_hamiltonian(H0)
+
+    # Construct the pairfield susceptibility
+    if V1 == 0
+        @assert V0 < 0
+        M = swave(T, E=E, U=U, V0=V0)
+    else
+        #@assert V0 > 0 && V1 < 0
+        M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
+    end
+
+    return M
+end
+
 function decomposition_M(M)
     decomp, _ = partialschur(M, nev=1, tol=1e-6, which=LR())
     return decomp.R
