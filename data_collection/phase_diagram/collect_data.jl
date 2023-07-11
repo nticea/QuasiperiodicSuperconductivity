@@ -11,21 +11,6 @@ using Dates
 include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
 
-## DELETE THIS ##
-L = 11 # the full system is L × L 
-t = 1 # hopping 
-Q = (√5 - 1) / 2
-μ = 1e-8
-θ = π / 7
-ϕx = 0 # fixed 
-ϕy = 0 # fixed 
-periodic = 1
-
-# Parameters to iterate through 
-V0 = 1 # iterate through this 
-J = 2 # iterate through this 
-V1 = -1.5 # look at just a few values: V1=0, -0.5, -1, -1.5
-
 ## MODEL PARAMETERS ##
 args = parse.(Float64, ARGS)
 @assert length(args) == 11

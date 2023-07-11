@@ -4,7 +4,7 @@ Pkg.activate(joinpath(@__DIR__, "../.."))
 include("../../src/model.jl")
 include("../../src/submit_job.jl")
 
-L = 11 # the full system is L × L 
+L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
