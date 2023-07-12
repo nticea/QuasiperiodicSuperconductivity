@@ -2,7 +2,7 @@ import Base.setindex!
 import Base.getindex
 
 struct IndexMatrix
-    data::Matrix{Float64}
+    data::Matrix{}
     rows
     cols
 end
@@ -29,6 +29,6 @@ function IndexMatrix(rowvals, colvals)
         return newvals
     end
     cols, rows = make_axes(colvals), make_axes(rowvals)
-    data = zeros(length(rows), length(cols))
+    data = fill(NaN, (length(rows), length(cols)))
     return IndexMatrix(data, rows, cols)
 end

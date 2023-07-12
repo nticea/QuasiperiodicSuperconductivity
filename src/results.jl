@@ -436,3 +436,6 @@ function symmetry_character(Δ; L::Int)
     return os + bds
 
 end
+
+finite_minimum(matrix) = minimum(matrix[isfinite.(matrix)])
+finite_maximum(matrix) = maximum(matrix[isfinite.(matrix)])
