@@ -66,7 +66,7 @@ for (i, df) in enumerate(grouped)
     ytick_positions = collect(1:length(mat.rows))
     ytick_labels = [string(round(y, digits=2)) for y in mat.rows]
 
-    h = heatmap(mat.data, title="V1=$V1", xticks=(xtick_positions, xtick_labels), yticks=(ytick_positions, ytick_labels))
+    h = heatmap(mat.data, title="V1=$V1", xticks=(xtick_positions, xtick_labels), yticks=(ytick_positions, ytick_labels), clims=clims)
     xlabel!("J")
     ylabel!("V0")
     push!(ps, h)
