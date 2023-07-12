@@ -37,37 +37,42 @@ end
 
 # extract only the parameters we are interested in 
 df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.ϕx.==ϕx).&(df_LGE.ϕy.==ϕy), :]
+clims = (finite_minimum(df_LGE.T), finite_maximum(df_LGE.T))
 
 ## FIGURES ##
 ps = []
 grouped = groupby(df_LGE, [:V1])
+V1s = []
 for (i, df) in enumerate(grouped)
-    mat = IndexMatrix(unique(df_LGE.J), unique(df_LGE.V0))
+    mat = IndexMatrix(unique(df_LGE.V0), unique(df_LGE.J))
 
     V1 = df.V1[1]
     V0s, Js = sort(df.V0), sort(df.J)
+    push!(V1s, V1)
 
     for V0 in V0s
         for J in Js
             dfi = df[(df.V0.==V0).&(df.J.==J).&(df.V1.==V1), :]
             if size(dfi)[1] == 1
-                mat[J, V0] = dfi.T[1]
+                mat[V0, J] = dfi.T[1]
             else
                 @error "Perhaps we need to average"
             end
         end
     end
-    h = heatmap(mat.data)
+
+    xtick_positions = collect(1:length(mat.cols))
+    xtick_labels = [string(round(x, digits=2)) for x in mat.cols]
+    ytick_positions = collect(1:length(mat.rows))
+    ytick_labels = [string(round(y, digits=2)) for y in mat.rows]
+
+    h = heatmap(mat.data, title="V1=$V1", xticks=(xtick_positions, xtick_labels), yticks=(ytick_positions, ytick_labels))
+    xlabel!("J")
+    ylabel!("V0")
     push!(ps, h)
 end
+sortidx = sortperm(V1s)
+ps = ps[sortidx]
 
-# for (i, df) in enumerate(grouped)
-#     ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
-#     Js, Tcs = df.J, df.T
-#     sortidx = sortperm(Js)
-#     Js, Tcs = Js[sortidx], Tcs[sortidx]
-#     plot!(p1, Js, Tcs, color=cmap[i], label=nothing)
-#     scatter!(p1, Js, Tcs, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))", ylabel="Tc",)
-# end
-# xlabel!(p1, "J")
-# title!(p1, "Tc for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
+p = plot(ps..., layout=Plots.grid(2, 3,
+        widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), plot_title="LGE Tc at θ=$(θ_to_π(θ))) for $L × $L lattice")
