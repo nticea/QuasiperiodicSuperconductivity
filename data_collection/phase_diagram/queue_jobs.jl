@@ -15,7 +15,7 @@ periodic = 1
 
 Js = collect(0.4:0.1:4)
 V0s = collect(-1:0.1:1)
-V1s = collect(-2:0.5:0)
+V1s = [0, -0.5]#collect(-2:0.5:0)
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "phase_diagram"
 
