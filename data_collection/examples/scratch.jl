@@ -12,15 +12,16 @@ include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
 L = 17 # the full system is L × L 
-t = 1
-J = 6.5
+t = 1 # hopping 
 Q = (√5 - 1) / 2
-μ = 0
+μ = 1e-8
 θ = π / 7
 ϕx = 0
 ϕy = 0
-V0 = 1
-V1 = -1.5
 periodic = true
 
-pairfield_correlation(0.2; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+V0 = 1
+V1 = -0.5
+J = 0
+
+LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=1e-2)
