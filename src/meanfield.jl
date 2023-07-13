@@ -182,15 +182,30 @@ function mortar(M::Matrix)
 end
 
 function calculate_λ_Δ(M)
-    # perform the decomposition 
-    decomp, _ = partialschur(M, nev=1, tol=1e-6, which=LR())
+    try
+        # perform the decomposition 
+        decomp, _ = partialschur(M, nev=1, tol=1e-6, which=LR())
 
-    # extract the maximum eigenvector/value pair 
-    maxev = decomp.Q[:, 1]
-    λ = decomp.R[1]
+        # extract the maximum eigenvector/value pair 
+        maxev = decomp.Q[:, 1]
+        λ = decomp.R[1]
 
-    @show λ
-    return λ, maxev
+        @show λ
+        return λ, maxev
+    catch e
+        @show e
+        println("Trying a different decomposition")
+        E, V = eigen(M)
+        E = real.(E)
+        sortidx = sortperm(E)
+        E, V = E[sortidx], V[:, sortidx]
+
+        λ = E[end]
+        maxev = V[:, end]
+
+        @show λ
+        return λ, maxev
+    end
 end
 
 function dwave_hermitian(T::Real; L, E, U, V0, V1)
@@ -288,14 +303,14 @@ end
 function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, npts=5, tol=1e-4, niter=10, L̃::Int=11)
     # find the min and max values based on the Tc of a smaller system 
     Tc0, λ0, Δ0 = _LGE_find_Tc(L=L̃, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, npts=npts, tol=tol)
-    if Tc0 == NaN
-        _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=0, max=1, npts=npts, tol=tol)
+    if isnan(Tc0)
+        println("No soln for small system size")
+        return _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=0, max=1, npts=npts, tol=tol)
     end
 
-    println("I've returned")
     min = Tc0 - 0.2 * Tc0
     max = Tc0 + 0.4 * Tc0
-    _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=min, max=max, npts=npts, tol=tol)
+    return _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=min, max=max, npts=npts, tol=tol)
 end
 
 function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx::Real, ϕy::Real, μ::Real, V0::Real, V1::Real, periodic::Bool=true, min=0, max=1, npts=5, tol=1e-4, niter=10)
@@ -332,6 +347,7 @@ function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothin
         knots = λs[idxlist]
 
         Tc = NaN
+        @show length(knots)
         if length(knots) > 1
             Interpolations.deduplicate_knots!(knots, move_knots=true)
             try
@@ -348,6 +364,16 @@ function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothin
 
                 continue
             end
+        else
+            if minimum(λs) > 1
+                max = 2 * max
+            elseif maximum(λs) < 1
+                min = min / 2
+            else
+                return NaN, λ0, Δ0
+            end
+
+            continue
         end
 
         # find λ at this temperature 
