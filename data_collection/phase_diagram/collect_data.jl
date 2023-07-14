@@ -31,7 +31,6 @@ df_LGE = load_dataframe(savepath_LGE)
 
 # check if this point has already been computed 
 if !(already_computed(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, J=J, periodic=periodic))
-
     ## Tc using LGE ##
     println("Finding Tc using LGE")
     Tc, λ, Δ_LGE = LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=LGE_tol, npts=5)
