@@ -13,7 +13,7 @@ Q = (√5 - 1) / 2
 ϕy = 0
 periodic = 1
 
-Js = collect(0.4:0.1:4)
+Js = collect(0:0.1:2)
 V0s = collect(-1:0.1:1)
 V1s = [0, -0.5]#collect(-2:0.5:0)
 filepath = joinpath(@__DIR__, "collect_data.jl")
