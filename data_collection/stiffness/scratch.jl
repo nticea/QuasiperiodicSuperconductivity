@@ -11,12 +11,17 @@ using Dates
 include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
 
-## MODEL PARAMETERS ##
-args = parse.(Float64, ARGS)
-@assert length(args) == 11
-L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic = [args[n] for n in 1:length(args)]
-L = Int(L)
-periodic = Bool(periodic)
+L = 11 # the full system is L × L 
+t = 1 # hopping 
+Q = (√5 - 1) / 2
+μ = 1e-8
+θ = π / 7
+V0 = -1
+V1 = 0
+periodic = true
+ϕx = 0
+ϕy = 0
+J = 1
 
 ## SIMULATION PARAMETERS ## 
 niter = 500
@@ -39,25 +44,13 @@ flush(stdout)
 
 # Get the corresponding BdG spatial profile 
 if isfinite(Tc)
-    println("Finding BdG spatial profile at Tc")
-    Δ_BdG, hist = compute_Δ_dwave(Tc; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
-    update_results!(df_BdG; L=L, T=Tc, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
-    CSV.write(savepath_BdG, df_BdG)
-    flush(stdout)
-
     ## Superfluid stiffness calculation ##
     T = 0 # everything is at 0 temperature
 
-    # Get the initial LGE guess 
-    println("Finding LGE sol'n at T=0")
-    λ, Δ_LGE = @time pairfield_correlation(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
-    update_results!(df_LGE; L=L, T=T, λ=λ, Δ=Δ_LGE, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
-    CSV.write(savepath_LGE, df_LGE)
-    flush(stdout)
-
     # Get the BdG parameters 
     println("Finding BdG coefficients at T=0")
-    Δ_BdG, hist = @time compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
+    Δ_BdG, hist = @time compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol)
+    flush(stdout)
 
     # Superfluid stiffness
     K, Π = @time superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=BdG_tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=1, periodic=periodic, Δ_init=Δ_BdG)
