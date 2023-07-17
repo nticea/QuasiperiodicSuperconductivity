@@ -1,3 +1,5 @@
+using DataFrames, CSV
+
 function already_computed(df_LGE; L, Q, θ, ϕx, ϕy, V0, V1, J)
     # extract only the parameters we are interested in 
     df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.ϕx.==ϕx).&(df_LGE.ϕy.==ϕy).&(df_LGE.V0.==V0).&(df_LGE.V1.==V1).&(df_LGE.J.==J), :]
