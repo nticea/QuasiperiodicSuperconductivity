@@ -10,7 +10,6 @@ using Dates
 
 include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
-include("utilities.jl")
 
 ## MODEL PARAMETERS ##
 args = parse.(Float64, ARGS)

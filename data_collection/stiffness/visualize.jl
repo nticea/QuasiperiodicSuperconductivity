@@ -13,11 +13,12 @@ include("../../src/results.jl")
 
 ## PARAMETERS ## 
 
-L = 11 # the full system is L × L 
+L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = -1.5
-V1 = 0#-1.5
+V0 = 1
+V1 = -1.5
+savefigs = true
 
 # read files 
 files = readdir(joinpath(@__DIR__, "data"))
@@ -82,8 +83,9 @@ for i in 1:2
     plot!(p1, Js, Ds[:, i], label=nothing, c=cmap[i], secondary=true)
     scatter!(p1, Js, Ds[:, i], label=dirs[i], c=cmap[i], secondary=true)
 end
-#savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))
-
+if savefigs
+    savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))
+end
 
 p2 = plot()
 grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
@@ -101,7 +103,9 @@ end
 xlabel!(p2, "J")
 ylabel!(p2, "Ds/π")
 title!(p2, "Tc₂ for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
-#savefig(p2, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_unaveraged.pdf"))
+if savefigs
+    savefig(p2, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_unaveraged.pdf"))
+end
 
 # Spatial profiles of LGE soln at Tc (real space and configuration space)
 ϕx, ϕy = 0, 0
@@ -123,7 +127,9 @@ for J in Js_to_plot
         p = plot(p1, p2, p3, p4, p5, p0, layout=Plots.grid(2, 3,
                 widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), aspect_ratio=:equal, plot_title=" LGE Δ(J=$J, V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice at Tc=$(round(Tc,digits=2))")
         push!(ps_config, p)
-        #savefig(p, joinpath(@__DIR__, "figures", "spatial_profile_J$J.pdf"))
+        if savefigs
+            savefig(p, joinpath(@__DIR__, "figures", "spatial_profile_$(L)L_$(V0)V0_$(V1)V1_J$J.pdf"))
+        end
     end
 end
 
@@ -135,14 +141,16 @@ for J in Js_to_plot
     dfsub = df_LGE_Tc[(df_LGE_Tc.L.==L).&(df_LGE_Tc.J.==J).&(df_LGE_Tc.θ.==θ).&(df_LGE_Tc.ϕx.==ϕx).&(df_LGE_Tc.ϕy.==ϕy).&(df_LGE_Tc.Q.==Q).&(df_LGE_Tc.V0.==V0).&(df_LGE_Tc.V1.==V1), :]
     if size(dfsub)[1] == 1
         Δ_LGE = dfsub.Δ[1]
-        χ = symmetry_character(Δ_LGE, L=L)
         Tc = dfsub.T[1]
         Δ = spatial_profile(Δ_LGE, L=L)
-        p0 = plot_spatial_profile(Δ, L=L, title="Real space, symmetry=$(round(χ,digits=2))")
+        p0 = plot_spatial_profile(Δ, L=L, title="J=$J at Tc=$(round(Tc,digits=2))")
         push!(ps_real, p0)
     end
 end
 
 p = plot(ps_real..., layout=Plots.grid(2, 5,
-        widths=[1 / 5 for _ in 1:5]), size=(1500, 1000), aspect_ratio=:equal, plot_title=" LGE Δ(J=$J, V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice at Tc=$(round(Tc,digits=2))")
-#savefig(p, joinpath(@__DIR__, "figures", "real_spatial_profile_J$J.pdf"))
+        widths=[1 / 5 for _ in 1:5]), size=(1500, 800), aspect_ratio=:equal, plot_title=" LGE Δ(V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice")
+
+if savefigs
+    savefig(p, joinpath(@__DIR__, "figures", "real_spatial_profile_$(L)L_$(V0)V0_$(V1)V1_J$J.pdf"))
+end

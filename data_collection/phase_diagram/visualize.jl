@@ -37,7 +37,6 @@ for f in files
     end
 end
 
-
 # extract only the parameters we are interested in 
 df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.ϕx.==ϕx).&(df_LGE.ϕy.==ϕy), :]
 clims = (finite_minimum(df_LGE.T), finite_maximum(df_LGE.T))

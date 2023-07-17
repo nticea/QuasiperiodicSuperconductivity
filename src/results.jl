@@ -191,12 +191,18 @@ function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
 end
 
 function spatial_profile(maxev; L)
-    evs = zeros(5, L, L)
-    for (n, i) in enumerate(1:(L*L):(5*L*L))
-        evi = maxev[i:(i+L*L-1)]
-        evs[n, :, :] = reshape(evi, L, L)
+    if length(maxev) == 5 * L * L
+        evs = zeros(5, L, L)
+        for (n, i) in enumerate(1:(L*L):(5*L*L))
+            evi = maxev[i:(i+L*L-1)]
+            evs[n, :, :] = reshape(evi, L, L)
+        end
+        return evs
+    else
+        evs = zeros(5, L, L)
+        evs[5, :, :] = reshape(maxev, L, L)
+        return evs
     end
-    return evs
 end
 
 

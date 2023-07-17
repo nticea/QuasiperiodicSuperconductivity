@@ -1,18 +1,11 @@
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "../.."))
-using LinearAlgebra, Arpack, Plots
-using Profile
-using ProgressBars
-using CSV
-using DataFrames
-using Dates
-
-include("../../src/stiffness.jl")
-include("../../src/meanfield.jl")
+include("../../src/model.jl")
+include("../../src/submit_job.jl")
 include("utilities.jl")
+using DataFrames, CSV
 
-## MODEL PARAMETERS ##
 L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
@@ -20,19 +13,22 @@ Q = (√5 - 1) / 2
 θ = π / 7
 ϕx = 0
 ϕy = 0
-periodic = true
-V1 = -2
-V0 = -0.5
-J = 1.5
+periodic = 1
 
-## SIMULATION PARAMETERS ## 
-niter = 500
-BdG_tol = 1e-15
-LGE_tol = 1e-2
+Js = collect(0.3:0.1:0.5)
+V0s = collect(-1:0.1:1)
+V1s = [-1.0]#collect(-2:0.5:0)
+filepath = joinpath(@__DIR__, "collect_data.jl")
+job_prefix = "phase_diagram"
 
-# check if this point has already been computed 
-if !(already_computed(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, J=J, periodic=periodic))
-    ## Tc using LGE ##
-    println("Finding Tc using LGE")
-    Tc, λ, Δ_LGE = LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=LGE_tol, npts=5)
+dfs = load_dfs()
+
+for J in Js
+    for V0 in V0s
+        for V1 in V1s
+            if !already_computed(dfs, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, J=J)
+                @show J, V0, V1
+            end
+        end
+    end
 end
