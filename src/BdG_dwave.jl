@@ -13,6 +13,14 @@ include("../src/results.jl")
 function converge_BdG_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
     ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
 
+
+    # do regular s-wave 
+    if V1 == 0
+        include(joinpath(@__DIR__, "BdG.jl"))
+        return converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, periodic=periodic, V0=V0, θ=θ, ϕx=ϕx,
+            niter=niter, tol=tol, noise=noise, Δ_init=Δ_init)
+    end
+
     # size of the BdG matrix is 2N × 2N
     N = L * L
 

@@ -38,11 +38,13 @@ CSV.write(savepath_LGE, df_LGE)
 flush(stdout)
 
 # Get the corresponding BdG spatial profile 
-println("Finding BdG spatial profile at Tc")
-Δ_BdG, hist = compute_Δ_dwave(Tc; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
-update_results!(df_BdG; L=L, T=Tc, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
-CSV.write(savepath_BdG, df_BdG)
-flush(stdout)
+if isfinite(Tc)
+    println("Finding BdG spatial profile at Tc")
+    Δ_BdG, hist = compute_Δ_dwave(Tc; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
+    update_results!(df_BdG; L=L, T=Tc, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
+    CSV.write(savepath_BdG, df_BdG)
+    flush(stdout)
+end
 
 ## Superfluid stiffness calculation ##
 T = 0 # everything is at 0 temperature

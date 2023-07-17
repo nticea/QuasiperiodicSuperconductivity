@@ -86,11 +86,6 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
         print(n, "-")
         Δi_diag, U, V, E = BdG_iteration(M, Δi; V0=V0, T=T) # perform one BdG iteration and get the new Δi 
 
-        # add noise if desired (noise is set to 0 by default)
-        d = Normal(0.0, maximum(Δi_diag) * noise)
-        ε = rand.(d, size(Δi_diag)...)
-        Δi_diag .+= ε
-
         Δi = diagm(Δi_diag) # make a matrix with Δi along the diagonals
 
         # calculate convergence information  
