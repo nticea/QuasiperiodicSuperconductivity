@@ -28,12 +28,15 @@ for f in files
     if endswith(f, ".csv") && contains(f, "LGE")
         dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
         # process all of the arrays 
-        dfi = convert_df_arrays(dfi, "Δ")
-        dfi = convert_df_arrays(dfi, "K")
-        dfi = convert_df_arrays(dfi, "Π")
-        append!(df_LGE, dfi)
+        if size(dfi)[1] == 1 && size(dfi)[2] == size(df_LGE)[2]
+            dfi = convert_df_arrays(dfi, "Δ")
+            dfi = convert_df_arrays(dfi, "K")
+            dfi = convert_df_arrays(dfi, "Π")
+            append!(df_LGE, dfi)
+        end
     end
 end
+
 
 # extract only the parameters we are interested in 
 df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.ϕx.==ϕx).&(df_LGE.ϕy.==ϕy), :]
