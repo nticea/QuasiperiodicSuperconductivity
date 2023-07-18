@@ -1,0 +1,122 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_18:36:53.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 1.1439177840130506
+s-wave configuration
+λ = 1.1439177840130494
+(T, λ) = (0.0, 1.1439177840130494)
+s-wave configuration
+λ = 0.39934730512206473
+(T, λ) = (0.25, 0.39934730512206473)
+s-wave configuration
+λ = 0.8410068841392152
+s-wave configuration
+λ = 0.9451722991774894
+(T, λ) = (0.033825692686334896, 0.9451722991774894)
+s-wave configuration
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-15_12:38:13.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 1.1439177840130617
+s-wave configuration
+λ = 1.143917784013061
+(T, λ) = (0.0, 1.143917784013061)
+s-wave configuration
+λ = 0.39934730512206484
+(T, λ) = (0.25, 0.39934730512206484)
+length(knots) = 2
+s-wave configuration
+λ = 0.8410068841391958
+s-wave configuration
+λ = 0.9451722991774729
+(T, λ) = (0.033825692686337096, 0.9451722991774729)
+length(knots) = 1
+s-wave configuration
+λ = 1.0985356787066427
+(T, λ) = (0.016912846343168548, 1.0985356787066427)
+s-wave configuration
+λ = 0.9927295491516676
+(T, λ) = (0.028389420647461493, 0.9927295491516676)
+s-wave configuration
+λ = 8.500113650611908
+s-wave configuration
+λ = 1.27051964193605
+(T, λ) = (0.022711536517969193, 1.27051964193605)
+s-wave configuration
+λ = 1.194484220818988
+(T, λ) = (0.026969949615088418, 1.194484220818988)
+s-wave configuration
+λ = 1.130762934811273
+(T, λ) = (0.031228362712207643, 1.130762934811273)
+s-wave configuration
+λ = 1.0757231400794922
+(T, λ) = (0.03548677580932687, 1.0757231400794922)
+s-wave configuration
+λ = 1.0272461685008878
+(T, λ) = (0.03974518890644609, 1.0272461685008878)
+length(knots) = 5
+s-wave configuration
+λ = 1.2705196419360487
+(T, λ) = (0.022711536517969193, 1.2705196419360487)
+s-wave configuration
+λ = 1.0589129305692424
+(T, λ) = (0.036906246841699936, 1.0589129305692424)
+s-wave configuration
+λ = 0.9210934564427312
+(T, λ) = (0.051100957165430685, 0.9210934564427312)
+length(knots) = 3
+s-wave configuration
+λ = 0.9940220224083891
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-17_02:04:16.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 1.14391778401306
+s-wave configuration
+λ = 1.1439177840130605
+(T, λ) = (0.0, 1.1439177840130605)
+s-wave configuration
+λ = 0.39934730512206507
+(T, λ) = (0.25, 0.39934730512206507)
+length(knots) = 2
+s-wave configuration
+λ = 0.8410068841391961
+s-wave configuration
+λ = 0.9451722991774728
+(T, λ) = (0.03382569268633702, 0.9451722991774728)
+length(knots) = 1
+s-wave configuration
+λ = 1.0985356787066423
+(T, λ) = (0.01691284634316851, 1.0985356787066423)
+s-wave configuration
+λ = 0.9927295491516654
+(T, λ) = (0.028389420647461423, 0.9927295491516654)
+s-wave configuration
+λ = 8.500113650611897
+s-wave configuration
+λ = 1.2705196419360523
+(T, λ) = (0.022711536517969137, 1.2705196419360523)
+s-wave configuration
+λ = 1.1944842208189894
+(T, λ) = (0.02696994961508835, 1.1944842208189894)
+s-wave configuration
+λ = 1.1307629348112747
+(T, λ) = (0.031228362712207566, 1.1307629348112747)
+s-wave configuration
+λ = 1.0757231400794922
+(T, λ) = (0.035486775809326784, 1.0757231400794922)
+s-wave configuration
+λ = 1.0272461685008933
+(T, λ) = (0.039745188906445995, 1.0272461685008933)
+length(knots) = 5
+s-wave configuration
+λ = 1.2705196419360503
+(T, λ) = (0.022711536517969137, 1.2705196419360503)
+s-wave configuration
+λ = 1.0589129305692437
+(T, λ) = (0.03690624684169985, 1.0589129305692437)
+s-wave configuration
+λ = 0.9210934564427302
+(T, λ) = (0.05110095716543056, 0.9210934564427302)
+length(knots) = 3
+s-wave configuration
+λ = 0.9940220224083878

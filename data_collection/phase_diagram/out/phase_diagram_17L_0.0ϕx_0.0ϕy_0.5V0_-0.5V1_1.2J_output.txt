@@ -1,0 +1,74 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_19:40:35.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 0.6039365821900482
+I've returned
+d-wave configuration
+λ = 1.076683411258175
+d-wave configuration
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-16_04:27:14.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 0.6039365822204146
+No soln for small system size
+d-wave configuration
+λ = 1.0766834137704617
+d-wave configuration
+λ = 1.0766834134392116
+(T, λ) = (0.0, 1.0766834134392116)
+d-wave configuration
+λ = 0.2739432240110165
+(T, λ) = (0.25, 0.2739432240110165)
+length(knots) = 2
+d-wave configuration
+λ = 0.8522648120432513
+d-wave configuration
+λ = 0.9089109864213016
+(T, λ) = (0.016717236197456405, 0.9089109864213016)
+length(knots) = 1
+d-wave configuration
+λ = 0.9730139268925063
+(T, λ) = (0.008358618098728203, 0.9730139268925063)
+length(knots) = 1
+d-wave configuration
+λ = 1.0211758697020776
+(T, λ) = (0.004179309049364101, 1.0211758697020776)
+d-wave configuration
+λ = 0.9544809779026053
+(T, λ) = (0.010896055735842122, 0.9544809779026053)
+length(knots) = 2
+d-wave configuration
+λ = 0.9901824018519187
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-17_10:28:47.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 0.6039365821970235
+No soln for small system size
+d-wave configuration
+λ = 1.0766834129491643
+d-wave configuration
+λ = 1.0766834135217602
+(T, λ) = (0.0, 1.0766834135217602)
+d-wave configuration
+λ = 0.27394322393263226
+(T, λ) = (0.25, 0.27394322393263226)
+length(knots) = 2
+d-wave configuration
+λ = 0.8522648121552512
+d-wave configuration
+λ = 0.908910986155946
+(T, λ) = (0.016717236212100806, 0.908910986155946)
+length(knots) = 1
+d-wave configuration
+λ = 0.973013926714677
+(T, λ) = (0.008358618106050403, 0.973013926714677)
+length(knots) = 1
+d-wave configuration
+λ = 1.0211758709552679
+(T, λ) = (0.004179309053025201, 1.0211758709552679)
+d-wave configuration
+λ = 0.9544809777324657
+(T, λ) = (0.010896055745387132, 0.9544809777324657)
+length(knots) = 2
+d-wave configuration
+λ = 0.9901823901089889

@@ -1,0 +1,78 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_16:47:07.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 0.43582838821689707
+I've returned
+s-wave configuration
+λ = 1.3008065936897624
+s-wave configuration
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-14_15:57:26.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 0.43582838821689457
+No soln for small system size
+s-wave configuration
+λ = 1.3008065936899402
+s-wave configuration
+λ = 1.300806593689938
+(T, λ) = (0.0, 1.300806593689938)
+s-wave configuration
+λ = 0.17838768178980563
+(T, λ) = (0.25, 0.17838768178980563)
+length(knots) = 2
+s-wave configuration
+λ = 0.3387080362864139
+s-wave configuration
+λ = 0.390504508923276
+(T, λ) = (0.046899738892160536, 0.390504508923276)
+length(knots) = 1
+s-wave configuration
+λ = 0.49196223824759777
+(T, λ) = (0.023449869446080268, 0.49196223824759777)
+length(knots) = 1
+s-wave configuration
+λ = 0.6098541850497147
+(T, λ) = (0.011724934723040134, 0.6098541850497147)
+length(knots) = 1
+s-wave configuration
+λ = 0.770968828467761
+(T, λ) = (0.005862467361520067, 0.770968828467761)
+length(knots) = 1
+s-wave configuration
+λ = 0.9986628171456342
+(T, λ) = (0.0029312336807600335, 0.9986628171456342)
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-17_01:46:35.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 0.4358283882168963
+No soln for small system size
+s-wave configuration
+λ = 1.3008065936897628
+s-wave configuration
+λ = 1.300806593689763
+(T, λ) = (0.0, 1.300806593689763)
+s-wave configuration
+λ = 0.17838768178980655
+(T, λ) = (0.25, 0.17838768178980655)
+length(knots) = 2
+s-wave configuration
+λ = 0.3387080362864746
+s-wave configuration
+λ = 0.39050450892333677
+(T, λ) = (0.04689973889214062, 0.39050450892333677)
+length(knots) = 1
+s-wave configuration
+λ = 0.49196223824766044
+(T, λ) = (0.02344986944607031, 0.49196223824766044)
+length(knots) = 1
+s-wave configuration
+λ = 0.609854185049794
+(T, λ) = (0.011724934723035155, 0.609854185049794)
+length(knots) = 1
+s-wave configuration
+λ = 0.7709688284678685
+(T, λ) = (0.005862467361517578, 0.7709688284678685)
+length(knots) = 1
+s-wave configuration
+λ = 0.9986628171457472
+(T, λ) = (0.002931233680758789, 0.9986628171457472)

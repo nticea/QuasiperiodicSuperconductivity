@@ -1,0 +1,85 @@
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+ERROR: LoadError: "QR algorithm did not converge"
+Stacktrace:
+  [1] local_schurfact!(H::SubArray{Float64, 2, Matrix{Float64}, Tuple{Base.OneTo{Int64}, Base.Slice{Base.OneTo{Int64}}}, false}, start::Int64, to::Int64, Q::Matrix{Float64}, tol::Float64, maxiter::Int64)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/schurfact.jl:320
+  [2] local_schurfact!
+    @ ~/.julia/packages/ArnoldiMethod/JdEiw/src/schurfact.jl:314 [inlined]
+  [3] _partialschur(A::Matrix{Float64}, #unused#::Type{Float64}, mindim::Int64, maxdim::Int64, nev::Int64, tol::Float64, restarts::Int64, which::LR)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:199
+  [4] partialschur(A::Matrix{Float64}; nev::Int64, which::LR, tol::Float64, mindim::Int64, maxdim::Int64, restarts::Int64)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:106
+  [5] partialschur
+    @ ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:94 [inlined]
+  [6] calculate_λ_Δ(M::Matrix{Float64})
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:186
+  [7] pairfield_correlation(T::Float64; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:31
+  [8] _LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, min::Float64, max::Float64, npts::Int64, tol::Float64, niter::Int64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:314
+  [9] LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, npts::Int64, tol::Float64, niter::Int64, L̃::Int64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:298
+ [10] top-level scope
+    @ ~/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for SplittablesBase [171d559e-b47b-412a-8079-5efa626c420e]
+│   exception = Required dependency Setfield [efcf1570-3423-57d1-acb7-fd33fddbac46] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: Module ArrayInterfaceStaticArraysCoreExt with build ID fafbfcfd-7451-d24a-0000-e3e324b42c5e is missing from the cache.
+│ This may mean ArrayInterfaceStaticArraysCoreExt [48797bb2-d098-51e0-906f-70266c2e01ac] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Error: Error during loading of extension ArrayInterfaceStaticArraysCoreExt of ArrayInterface, use `Base.retry_load_extensions()` to retry.
+│   exception =
+│    1-element ExceptionStack:
+│    Declaring __precompile__(false) is not allowed in files that are being precompiled.
+│    Stacktrace:
+│      [1] _require(pkg::Base.PkgId, env::Nothing)
+│        @ Base ./loading.jl:1762
+│      [2] _require_prelocked(uuidkey::Base.PkgId, env::Nothing)
+│        @ Base ./loading.jl:1625
+│      [3] _require_prelocked(uuidkey::Base.PkgId)
+│        @ Base ./loading.jl:1623
+│      [4] run_extension_callbacks(extid::Base.ExtensionId)
+│        @ Base ./loading.jl:1198
+│      [5] run_extension_callbacks(pkgid::Base.PkgId)
+│        @ Base ./loading.jl:1255
+│      [6] run_package_callbacks(modkey::Base.PkgId)
+│        @ Base ./loading.jl:1083
+│      [7] _tryrequire_from_serialized(modkey::Base.PkgId, path::String, ocachepath::String, sourcepath::String, depmods::Vector{Any})
+│        @ Base ./loading.jl:1363
+│      [8] _require_search_from_serialized(pkg::Base.PkgId, sourcepath::String, build_id::UInt128)
+│        @ Base ./loading.jl:1459
+│      [9] _require(pkg::Base.PkgId, env::String)
+│        @ Base ./loading.jl:1748
+│     [10] _require_prelocked(uuidkey::Base.PkgId, env::String)
+│        @ Base ./loading.jl:1625
+│     [11] macro expansion
+│        @ ./loading.jl:1613 [inlined]
+│     [12] macro expansion
+│        @ ./lock.jl:267 [inlined]
+│     [13] require(into::Module, mod::Symbol)
+│        @ Base ./loading.jl:1576
+│     [14] top-level scope
+│        @ ~/.julia/packages/StaticArrayInterface/aYPuV/ext/StaticArrayInterfaceStaticArraysExt.jl:8
+│     [15] include
+│        @ ./Base.jl:457 [inlined]
+│     [16] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt128}}, source::String)
+│        @ Base ./loading.jl:2010
+│     [17] top-level scope
+│        @ stdin:2
+│     [18] eval
+│        @ ./boot.jl:370 [inlined]
+│     [19] include_string(mapexpr::typeof(identity), mod::Module, code::String, filename::String)
+│        @ Base ./loading.jl:1864
+│     [20] include_string
+│        @ ./loading.jl:1874 [inlined]
+│     [21] exec_options(opts::Base.JLOptions)
+│        @ Base ./client.jl:305
+│     [22] _start()
+│        @ Base ./client.jl:522
+└ @ Base loading.jl:1204
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for TriangularIndices [20346346-81a6-4ca6-8795-c363bc8a2966]
+│   exception = Wrong number of entries in module list.
+└ @ Base loading.jl:1783

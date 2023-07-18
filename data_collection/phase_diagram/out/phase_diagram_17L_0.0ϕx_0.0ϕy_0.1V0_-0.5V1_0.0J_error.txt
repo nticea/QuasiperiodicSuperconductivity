@@ -1,0 +1,45 @@
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+ERROR: LoadError: "QR algorithm did not converge"
+Stacktrace:
+  [1] local_schurfact!(H::SubArray{Float64, 2, Matrix{Float64}, Tuple{Base.OneTo{Int64}, Base.Slice{Base.OneTo{Int64}}}, false}, start::Int64, to::Int64, Q::Matrix{Float64}, tol::Float64, maxiter::Int64)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/schurfact.jl:320
+  [2] local_schurfact!
+    @ ~/.julia/packages/ArnoldiMethod/JdEiw/src/schurfact.jl:314 [inlined]
+  [3] _partialschur(A::Matrix{Float64}, #unused#::Type{Float64}, mindim::Int64, maxdim::Int64, nev::Int64, tol::Float64, restarts::Int64, which::LR)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:199
+  [4] partialschur(A::Matrix{Float64}; nev::Int64, which::LR, tol::Float64, mindim::Int64, maxdim::Int64, restarts::Int64)
+    @ ArnoldiMethod ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:106
+  [5] partialschur
+    @ ~/.julia/packages/ArnoldiMethod/JdEiw/src/run.jl:94 [inlined]
+  [6] calculate_λ_Δ(M::Matrix{Float64})
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:186
+  [7] pairfield_correlation(T::Float64; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:31
+  [8] _LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, min::Float64, max::Float64, npts::Int64, tol::Float64, niter::Int64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:314
+  [9] LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, npts::Int64, tol::Float64, niter::Int64, L̃::Int64)
+    @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:298
+ [10] top-level scope
+    @ ~/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: thread = 1 warning: parsed expected 13 columns, but didn't reach end of line around data row: 2. Parsing extra columns and widening final columnset
+└ @ CSV ~/.julia/packages/CSV/OnldF/src/file.jl:578
+┌ Warning: thread = 1 warning: parsed expected 13 columns, but didn't reach end of line around data row: 2. Parsing extra columns and widening final columnset
+└ @ CSV ~/.julia/packages/CSV/OnldF/src/file.jl:578
+ERROR: LoadError: ArgumentError: Column names :Column14, :Column15, :Column16, :Column17, :Column18, :Column19, :Column20, :Column21, :Column22, :Column23, :Column24, :Column25, :Column26, :Column27, :Column28, :Column29, :Column30, :Column31, :Column32, :Column33, :Column34, :Column35, :Column36, :Column37, :Column38, :Column39, :Column40, :Column41, :Column42, :Column43, :Column44, :Column45, :Column46, :Column47, :Column48, :Column49, :Column50, :Column51, :Column52, :Column53, :Column54, :Column55, :Column56, :Column57, :Column58, :Column59, :Column60, :Column61, :Column62, :Column63, :Column64, :Column65, :Column66, :Column67, :Column68, :Column69, :Column70, :Column71, :Column72, :Column73, :Column74, :Column75, :Column76, :Column77, :Column78, :Column79, :Column80, :Column81, :Column82, :Column83, :Column84, :Column85, :Column86, :Column87, :Column88, :Column89, :Column90, :Column91, :Column92, :Column93, :Column94, :Column95, :Column96, :Column97, :Column98, :Column99, :Column100, :Column101, :Column102, :Column103, :Column104, :Column105, :Column106, :Column107, :Column108 and :Column109 were found in only one of the passed data frames and `cols == :setequal`
+Stacktrace:
+ [1] _append_or_prepend!(df1::DataFrame, df2::DataFrame; cols::Symbol, promote::Bool, atend::Bool)
+   @ DataFrames ~/.julia/packages/DataFrames/LteEl/src/dataframe/insertion.jl:209
+ [2] _append_or_prepend!
+   @ ~/.julia/packages/DataFrames/LteEl/src/dataframe/insertion.jl:173 [inlined]
+ [3] #append!#339
+   @ ~/.julia/packages/DataFrames/LteEl/src/dataframe/insertion.jl:84 [inlined]
+ [4] append!(df1::DataFrame, df2::DataFrame)
+   @ DataFrames ~/.julia/packages/DataFrames/LteEl/src/dataframe/insertion.jl:84
+ [5] already_computed(; L::Int64, t::Float64, Q::Float64, μ::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, V0::Float64, V1::Float64, J::Float64, periodic::Bool)
+   @ Main ~/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/utilities.jl:14
+ [6] top-level scope
+   @ ~/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+  Activating project at `~/code/QuasiperiodicSuperconductivity`

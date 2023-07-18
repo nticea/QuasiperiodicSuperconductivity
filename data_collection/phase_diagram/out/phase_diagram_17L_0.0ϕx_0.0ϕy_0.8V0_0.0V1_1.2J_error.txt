@@ -1,0 +1,23 @@
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: Module StaticArrays with build ID fafbfcfd-413e-401a-0000-210e64d04c2e is missing from the cache.
+│ This may mean StaticArrays [90137ffa-7385-5640-81b9-e52037218182] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrays with build ID fafbfcfd-222f-4814-0004-51efb18dfbf6 is missing from the cache.
+│ This may mean StaticArrays [90137ffa-7385-5640-81b9-e52037218182] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrays with build ID fafbfcfd-222f-4814-0004-51efb18dfbf6 is missing from the cache.
+│ This may mean StaticArrays [90137ffa-7385-5640-81b9-e52037218182] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrays with build ID fafbfcfd-222f-4814-0004-51efb18dfbf6 is missing from the cache.
+│ This may mean StaticArrays [90137ffa-7385-5640-81b9-e52037218182] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrays with build ID fafbfcfd-222f-4814-0004-51efb18dfbf6 is missing from the cache.
+│ This may mean StaticArrays [90137ffa-7385-5640-81b9-e52037218182] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: Module StaticArrays with build ID fafbfcfd-222f-4814-0004-51efb18dfbf6 is missing from the cache.
+│ This may mean StaticArrays [90137ffa-7385-5640-81b9-e52037218182] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Graphs [86223c79-3864-5bf0-83f7-82e725a168b6]
+│   exception = Required dependency StaticArrays [90137ffa-7385-5640-81b9-e52037218182] failed to load from a cache file.
+└ @ Base loading.jl:1783

@@ -1,0 +1,103 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_16:30:47.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 1.0895709705422358
+s-wave configuration
+λ = 1.0895709705422378
+(T, λ) = (0.0, 1.0895709705422378)
+s-wave configuration
+λ = 0.44209243327707526
+(T, λ) = (0.25, 0.44209243327707526)
+s-wave configuration
+λ = 0.9482934382957746
+s-wave configuration
+λ = 1.022912343905449
+(T, λ) = (0.024209172880231326, 1.022912343905449)
+s-wave configuration
+λ = 0.9853448072882108
+(T, λ) = (0.029396852783138035, 0.9853448072882108)
+s-wave configuration
+λ = 1.000105439387932
+I've returned
+s-wave configuration
+λ = 3.2520164842248507
+s-wave configuration
+λ = 1.2560320544005599
+(T, λ) = (0.02189850040230877, 1.2560320544005599)
+s-wave configuration
+λ = 1.1911361240083111
+(T, λ) = (0.026004469227741665, 1.1911361240083111)
+s-wave configuration
+λ = 1.13718057225831
+(T, λ) = (0.03011043805317456, 1.13718057225831)
+s-wave configuration
+λ = 1.0906675721344736
+(T, λ) = (0.034216406878607455, 1.0906675721344736)
+s-wave configuration
+λ = 1.0495762611530477
+(T, λ) = (0.038322375704040346, 1.0495762611530477)
+s-wave configuration
+λ = 1.2560320544005628
+(T, λ) = (0.02189850040230877, 1.2560320544005628)
+s-wave configuration
+λ = 1.0764412616058483
+(T, λ) = (0.03558506315375175, 1.0764412616058483)
+s-wave configuration
+λ = 0.958317096678928
+(T, λ) = (0.04927162590519473, 0.958317096678928)
+s-wave configuration
+λ = 0.995823710890942
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-14_09:12:35.csv\" is not a valid file or doesn't exist")
+Already computed!
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-17_01:47:29.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 1.0895709705422385
+s-wave configuration
+λ = 1.0895709705422363
+(T, λ) = (0.0, 1.0895709705422363)
+s-wave configuration
+λ = 0.4420924332770756
+(T, λ) = (0.25, 0.4420924332770756)
+length(knots) = 2
+s-wave configuration
+λ = 0.9482934382957772
+s-wave configuration
+λ = 1.022912343905452
+(T, λ) = (0.024209172880230976, 1.022912343905452)
+s-wave configuration
+λ = 0.9853448072882152
+(T, λ) = (0.029396852783137615, 0.9853448072882152)
+length(knots) = 2
+s-wave configuration
+λ = 1.0001054393879307
+s-wave configuration
+λ = 3.252016484224851
+s-wave configuration
+λ = 1.256032054400562
+(T, λ) = (0.021898500402308875, 1.256032054400562)
+s-wave configuration
+λ = 1.1911361240083087
+(T, λ) = (0.026004469227741793, 1.1911361240083087)
+s-wave configuration
+λ = 1.1371805722583082
+(T, λ) = (0.030110438053174704, 1.1371805722583082)
+s-wave configuration
+λ = 1.090667572134471
+(T, λ) = (0.034216406878607615, 1.090667572134471)
+s-wave configuration
+λ = 1.049576261153049
+(T, λ) = (0.03832237570404053, 1.049576261153049)
+length(knots) = 5
+s-wave configuration
+λ = 1.25603205440056
+(T, λ) = (0.021898500402308875, 1.25603205440056)
+s-wave configuration
+λ = 1.0764412616058472
+(T, λ) = (0.03558506315375193, 1.0764412616058472)
+s-wave configuration
+λ = 0.9583170966789275
+(T, λ) = (0.049271625905194974, 0.9583170966789275)
+length(knots) = 3
+s-wave configuration
+λ = 0.9958237108909436

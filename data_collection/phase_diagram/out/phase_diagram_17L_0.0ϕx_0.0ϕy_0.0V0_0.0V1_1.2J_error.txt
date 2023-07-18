@@ -1,0 +1,21 @@
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+ERROR: LoadError: AssertionError: V0 < 0
+Stacktrace:
+ [1] pairfield_correlation(T::Int64; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool)
+   @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:24
+ [2] pairfield_correlation
+   @ ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:15 [inlined]
+ [3] _LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, min::Int64, max::Int64, npts::Int64, tol::Float64, niter::Int64)
+   @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:302
+ [4] _LGE_find_Tc
+   @ ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:301 [inlined]
+ [5] LGE_find_Tc(; L::Int64, t::Float64, J::Float64, Q::Float64, θ::Float64, ϕx::Float64, ϕy::Float64, μ::Float64, V0::Float64, V1::Float64, periodic::Bool, npts::Int64, tol::Float64, niter::Int64, L̃::Int64)
+   @ Main ~/code/QuasiperiodicSuperconductivity/src/meanfield.jl:290
+ [6] top-level scope
+   @ ~/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Graphs [86223c79-3864-5bf0-83f7-82e725a168b6]
+│   exception = Required dependency StaticArrays [90137ffa-7385-5640-81b9-e52037218182] failed to load from a cache file.
+└ @ Base loading.jl:1783

@@ -1,0 +1,18 @@
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: Module StaticArrays with build ID ffffffff-ffff-ffff-0004-42cedaf72259 is missing from the cache.
+│ This may mean StaticArrays [90137ffa-7385-5640-81b9-e52037218182] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1758
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for ArnoldiMethod [ec485272-7323-5ecc-a04f-4719b315124d]
+│   exception = Required dependency StaticArraysCore [1e83bf80-4336-4d27-bf5d-d5a4f845583c] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for StaticArrays [90137ffa-7385-5640-81b9-e52037218182]
+│   exception = Required dependency StaticArraysCore [1e83bf80-4336-4d27-bf5d-d5a4f845583c] failed to load from a cache file.
+└ @ Base loading.jl:1783
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for CSV [336ed68f-0bac-5ca0-87d4-7b16caf5d00b]
+│   exception = Required dependency CodecZlib [944b1d66-785c-5afd-91f1-9de20f533193] failed to load from a cache file.
+└ @ Base loading.jl:1783
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for Graphs [86223c79-3864-5bf0-83f7-82e725a168b6]
+│   exception = Required dependency StaticArraysCore [1e83bf80-4336-4d27-bf5d-d5a4f845583c] failed to load from a cache file.
+└ @ Base loading.jl:1783

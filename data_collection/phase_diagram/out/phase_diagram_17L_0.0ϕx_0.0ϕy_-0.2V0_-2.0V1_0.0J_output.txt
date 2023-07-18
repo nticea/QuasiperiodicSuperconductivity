@@ -1,0 +1,40 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-11_21:36:09.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 3.4248749622625554
+d-wave configuration
+λ = 3.4248749622625554
+(T, λ) = (0.0, 3.4248749622625554)
+d-wave configuration
+λ = 1.389552763174028
+(T, λ) = (0.25, 1.389552763174028)
+d-wave configuration
+λ = 0.8421370956182606
+(T, λ) = (0.5, 0.8421370956182606)
+d-wave configuration
+λ = 0.9498285834852925
+d-wave configuration
+λ = 1.2303965862590394
+(T, λ) = (0.2995337640039504, 1.2303965862590394)
+d-wave configuration
+λ = 1.0718934926762451
+(T, λ) = (0.3637195705762255, 1.0718934926762451)
+d-wave configuration
+λ = 0.9498285834853049
+(T, λ) = (0.4279053771485006, 0.9498285834853049)
+d-wave configuration
+λ = 0.9964519506496369
+I've returned
+d-wave configuration
+λ = 4.531903064119729
+d-wave configuration
+λ = 1.1727458147066003
+(T, λ) = (0.3212188563801607, 1.1727458147066003)
+d-wave configuration
+λ = 1.035431275947964
+(T, λ) = (0.38144739195144084, 1.035431275947964)
+d-wave configuration
+λ = 0.9272834647924569
+(T, λ) = (0.44167592752272095, 0.9272834647924569)
+d-wave configuration
+λ = 0.9972960978431852

@@ -1,0 +1,80 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_11:38:19.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 2.7194066417225717
+d-wave configuration
+λ = 2.719406641722574
+(T, λ) = (0.0, 2.719406641722574)
+d-wave configuration
+λ = 1.215935285203774
+(T, λ) = (0.25, 1.215935285203774)
+d-wave configuration
+λ = 0.7918653348661625
+(T, λ) = (0.5, 0.7918653348661625)
+d-wave configuration
+λ = 0.9570647582973827
+d-wave configuration
+λ = 1.180820058380677
+(T, λ) = (0.2641095322377265, 1.180820058380677)
+d-wave configuration
+λ = 1.05767360139569
+(T, λ) = (0.32070443200295357, 1.05767360139569)
+d-wave configuration
+λ = 0.9570647582972364
+(T, λ) = (0.37729933176818065, 0.9570647582972364)
+d-wave configuration
+λ = 0.9976521778648344
+I've returned
+d-wave configuration
+λ = 3.357108713388629
+d-wave configuration
+λ = 1.1311782514881459
+(T, λ) = (0.28251777856691146, 1.1311782514881459)
+d-wave configuration
+λ = 1.0239505926893941
+(T, λ) = (0.33548986204820735, 1.0239505926893941)
+d-wave configuration
+λ = 0.9349492934260887
+(T, λ) = (0.3884619455295033, 0.9349492934260887)
+d-wave configuration
+λ = 0.9984197977149588
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_19:40:13.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 2.7194066417225526
+d-wave configuration
+λ = 2.719406641722554
+(T, λ) = (0.0, 2.719406641722554)
+d-wave configuration
+λ = 1.2159352847786478
+(T, λ) = (0.25, 1.2159352847786478)
+d-wave configuration
+λ = 0.7918653348666564
+(T, λ) = (0.5, 0.7918653348666564)
+d-wave configuration
+λ = 0.9570647584956556
+d-wave configuration
+λ = 1.1808200583329542
+(T, λ) = (0.26410953215172583, 1.1808200583329542)
+d-wave configuration
+λ = 1.0576736000627842
+(T, λ) = (0.32070443189852427, 1.0576736000627842)
+d-wave configuration
+λ = 0.9570647584957385
+(T, λ) = (0.37729933164532264, 0.9570647584957385)
+d-wave configuration
+λ = 0.9976521784689092
+I've returned
+d-wave configuration
+λ = 3.357108713388598
+d-wave configuration
+λ = 1.1311782521558713
+(T, λ) = (0.2825177782701433, 1.1311782521558713)
+d-wave configuration
+λ = 1.0239505931598973
+(T, λ) = (0.33548986169579514, 1.0239505931598973)
+d-wave configuration
+λ = 0.9349492940710342
+(T, λ) = (0.38846194512144705, 0.9349492940710342)
+d-wave configuration
+λ = 0.9984197969631201

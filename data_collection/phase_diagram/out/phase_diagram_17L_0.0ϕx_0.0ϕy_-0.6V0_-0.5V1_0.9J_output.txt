@@ -1,0 +1,108 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_16:38:27.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 0.8856343751534899
+I've returned
+d-wave configuration
+λ = 2.9052846324214125
+d-wave configuration
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-14_13:56:21.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 0.8856343751534896
+No soln for small system size
+d-wave configuration
+λ = 2.9052846324214143
+d-wave configuration
+λ = 2.9052846324214188
+(T, λ) = (0.0, 2.9052846324214188)
+d-wave configuration
+λ = 0.31026455011165077
+(T, λ) = (0.25, 0.31026455011165077)
+length(knots) = 2
+d-wave configuration
+λ = 0.37591203141718404
+d-wave configuration
+λ = 0.46534844997897024
+(T, λ) = (0.12848640862038127, 0.46534844997897024)
+length(knots) = 1
+d-wave configuration
+λ = 0.6718290159026525
+(T, λ) = (0.06424320431019064, 0.6718290159026525)
+length(knots) = 1
+d-wave configuration
+λ = 0.8923831713478287
+(T, λ) = (0.03212160215509532, 0.8923831713478287)
+length(knots) = 1
+d-wave configuration
+λ = 1.1231083130378923
+(T, λ) = (0.01606080107754766, 1.1231083130378923)
+d-wave configuration
+λ = 0.6372716877483099
+(T, λ) = (0.07170000481048061, 0.6372716877483099)
+length(knots) = 2
+d-wave configuration
+λ = 0.9124197537788022
+d-wave configuration
+λ = 0.9321414136344218
+(T, λ) = (0.028349899439484672, 0.9321414136344218)
+length(knots) = 1
+d-wave configuration
+λ = 1.1699178371660333
+(T, λ) = (0.014174949719742336, 1.1699178371660333)
+d-wave configuration
+λ = 1.0705655011584156
+(T, λ) = (0.018623471174342324, 1.0705655011584156)
+d-wave configuration
+λ = 0.9986386420851343
+(T, λ) = (0.02307199262894231, 0.9986386420851343)
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-17_01:46:33.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 0.8856343751534889
+No soln for small system size
+d-wave configuration
+λ = 2.9052846324214174
+d-wave configuration
+λ = 2.9052846324214214
+(T, λ) = (0.0, 2.9052846324214214)
+d-wave configuration
+λ = 0.3102645493706131
+(T, λ) = (0.25, 0.3102645493706131)
+length(knots) = 2
+d-wave configuration
+λ = 0.3759120327640118
+d-wave configuration
+λ = 0.4653484502149635
+(T, λ) = (0.12848640858369056, 0.4653484502149635)
+length(knots) = 1
+d-wave configuration
+λ = 0.6718290156620356
+(T, λ) = (0.06424320429184528, 0.6718290156620356)
+length(knots) = 1
+d-wave configuration
+λ = 0.8923831714362248
+(T, λ) = (0.03212160214592264, 0.8923831714362248)
+length(knots) = 1
+d-wave configuration
+λ = 1.1231083131421604
+(T, λ) = (0.01606080107296132, 1.1231083131421604)
+d-wave configuration
+λ = 0.6372716888835697
+(T, λ) = (0.07170000479000589, 0.6372716888835697)
+length(knots) = 2
+d-wave configuration
+λ = 0.9124197534253442
+d-wave configuration
+λ = 0.9321414132813054
+(T, λ) = (0.02834989947073722, 0.9321414132813054)
+length(knots) = 1
+d-wave configuration
+λ = 1.1699178367414254
+(T, λ) = (0.01417494973536861, 1.1699178367414254)
+d-wave configuration
+λ = 1.0705655007772512
+(T, λ) = (0.01862347119487259, 1.0705655007772512)
+d-wave configuration
+λ = 0.9986386417245279
+(T, λ) = (0.02307199265437657, 0.9986386417245279)

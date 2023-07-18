@@ -1,0 +1,331 @@
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_15:30:43.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 1.007975487896992
+s-wave configuration
+λ = 1.0079754878969918
+(T, λ) = (0.0, 1.0079754878969918)
+I've returned
+s-wave configuration
+λ = 19.099309590865484
+s-wave configuration
+λ = 19.099309590865474
+(T, λ) = (0.0, 19.099309590865474)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+s-wave configuration
+λ = 19.099309590865474
+(T, λ) = (0.0, 19.099309590865474)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.09930959086551
+(T, λ) = (0.0, 19.09930959086551)
+s-wave configuration
+λ = 19.09930959086551
+(T, λ) = (0.0, 19.09930959086551)
+s-wave configuration
+λ = 19.09930959086552
+(T, λ) = (0.0, 19.09930959086552)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865516
+(T, λ) = (0.0, 19.099309590865516)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.099309590865506
+(T, λ) = (0.0, 19.099309590865506)
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865506
+(T, λ) = (0.0, 19.099309590865506)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865474
+(T, λ) = (0.0, 19.099309590865474)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865477
+(T, λ) = (0.0, 19.099309590865477)
+s-wave configuration
+λ = 19.099309590865463
+(T, λ) = (0.0, 19.099309590865463)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865506
+(T, λ) = (0.0, 19.099309590865506)
+s-wave configuration
+λ = 19.099309590865477
+(T, λ) = (0.0, 19.099309590865477)
+s-wave configuration
+λ = 19.099309590865467
+(T, λ) = (0.0, 19.099309590865467)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-14_05:29:04.csv\" is not a valid file or doesn't exist")
+Already computed!
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-17_01:44:00.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+s-wave configuration
+λ = 1.0079754878969915
+s-wave configuration
+λ = 1.007975487896993
+(T, λ) = (0.0, 1.007975487896993)
+s-wave configuration
+λ = 19.099309590865484
+s-wave configuration
+λ = 19.099309590865506
+(T, λ) = (0.0, 19.099309590865506)
+s-wave configuration
+λ = 19.099309590865516
+(T, λ) = (0.0, 19.099309590865516)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.099309590865513
+(T, λ) = (0.0, 19.099309590865513)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+length(knots) = 5
+s-wave configuration
+λ = 19.09930959086551
+(T, λ) = (0.0, 19.09930959086551)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865467
+(T, λ) = (0.0, 19.099309590865467)
+length(knots) = 5
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+s-wave configuration
+λ = 19.099309590865506
+(T, λ) = (0.0, 19.099309590865506)
+s-wave configuration
+λ = 19.099309590865474
+(T, λ) = (0.0, 19.099309590865474)
+s-wave configuration
+λ = 19.0993095908655
+(T, λ) = (0.0, 19.0993095908655)
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+length(knots) = 5
+s-wave configuration
+λ = 19.09930959086549
+(T, λ) = (0.0, 19.09930959086549)
+s-wave configuration
+λ = 19.099309590865477
+(T, λ) = (0.0, 19.099309590865477)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865477
+(T, λ) = (0.0, 19.099309590865477)
+length(knots) = 5
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.09930959086553
+(T, λ) = (0.0, 19.09930959086553)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.099309590865463
+(T, λ) = (0.0, 19.099309590865463)
+length(knots) = 5
+s-wave configuration
+λ = 19.099309590865506
+(T, λ) = (0.0, 19.099309590865506)
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+length(knots) = 5
+s-wave configuration
+λ = 19.099309590865474
+(T, λ) = (0.0, 19.099309590865474)
+s-wave configuration
+λ = 19.099309590865474
+(T, λ) = (0.0, 19.099309590865474)
+s-wave configuration
+λ = 19.099309590865506
+(T, λ) = (0.0, 19.099309590865506)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865477
+(T, λ) = (0.0, 19.099309590865477)
+length(knots) = 5
+s-wave configuration
+λ = 19.099309590865495
+(T, λ) = (0.0, 19.099309590865495)
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+length(knots) = 5
+s-wave configuration
+λ = 19.099309590865527
+(T, λ) = (0.0, 19.099309590865527)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+s-wave configuration
+λ = 19.099309590865523
+(T, λ) = (0.0, 19.099309590865523)
+s-wave configuration
+λ = 19.099309590865502
+(T, λ) = (0.0, 19.099309590865502)
+s-wave configuration
+λ = 19.0993095908655
+(T, λ) = (0.0, 19.0993095908655)
+length(knots) = 5
+s-wave configuration
+λ = 19.099309590865484
+(T, λ) = (0.0, 19.099309590865484)
+s-wave configuration
+λ = 19.0993095908655
+(T, λ) = (0.0, 19.0993095908655)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.09930959086548
+(T, λ) = (0.0, 19.09930959086548)
+s-wave configuration
+λ = 19.099309590865488
+(T, λ) = (0.0, 19.099309590865488)
+length(knots) = 5
