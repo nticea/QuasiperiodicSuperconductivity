@@ -27,12 +27,8 @@ Manifest.toml
 *.png
 *.jld2
 *.h5
-*.csv
+#*.csv
 *.pdf
 *.slurm
 *.sh
-<<<<<<< HEAD
 *.txt
-=======
-*.txt
->>>>>>> e31cf1bab34cf125f829c4d5d19976fcdfbdb4f9
