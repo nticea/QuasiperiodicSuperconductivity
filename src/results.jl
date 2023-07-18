@@ -443,5 +443,20 @@ function symmetry_character(Δ; L::Int)
 
 end
 
-finite_minimum(matrix) = minimum(matrix[isfinite.(matrix)])
-finite_maximum(matrix) = maximum(matrix[isfinite.(matrix)])
+function finite_minimum(matrix)
+    fins = matrix[isfinite.(matrix)]
+    if prod(size(fins)...) > 0
+        return minimum(fins)
+    else
+        return NaN
+    end
+end
+
+function finite_maximum(matrix)
+    fins = matrix[isfinite.(matrix)]
+    if prod(size(fins)...) > 0
+        return maximum(fins)
+    else
+        return NaN
+    end
+end
