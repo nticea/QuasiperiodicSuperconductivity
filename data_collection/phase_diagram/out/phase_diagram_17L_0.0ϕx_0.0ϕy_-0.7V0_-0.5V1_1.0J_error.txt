@@ -1,3 +1,0 @@
-  Activating project at `~/code/QuasiperiodicSuperconductivity`
-slurmstepd: error: *** JOB 24006479 ON sh03-17n01 CANCELLED AT 2023-07-15T09:04:23 DUE TO JOB REQUEUE ***
-  Activating project at `~/code/QuasiperiodicSuperconductivity`

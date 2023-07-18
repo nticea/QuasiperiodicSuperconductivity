@@ -1,9 +1,0 @@
-error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-12_01:03:41.csv\" is not a valid file or doesn't exist")
-Finding Tc using LGE
-error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-17_01:19:02.csv\" is not a valid file or doesn't exist")
-Finding Tc using LGE
-s-wave configuration
-λ = -0.017398637546514863
-No soln for small system size
-s-wave configuration
-λ = -0.017810010387049942
