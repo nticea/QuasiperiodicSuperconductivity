@@ -16,8 +16,8 @@ include("../../src/results.jl")
 L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = 1
-V1 = -1.5
+V0 = -1
+V1 = 0
 savefigs = true
 
 # read files 
@@ -114,22 +114,38 @@ ps_config = []
 for J in Js_to_plot
     dfsub = df_LGE_Tc[(df_LGE_Tc.L.==L).&(df_LGE_Tc.J.==J).&(df_LGE_Tc.θ.==θ).&(df_LGE_Tc.ϕx.==ϕx).&(df_LGE_Tc.ϕy.==ϕy).&(df_LGE_Tc.Q.==Q).&(df_LGE_Tc.V0.==V0).&(df_LGE_Tc.V1.==V1), :]
     if size(dfsub)[1] == 1
-        Δ_LGE = dfsub.Δ[1]
-        χ = symmetry_character(Δ_LGE, L=L)
-        Tc = dfsub.T[1]
-        Δ = spatial_profile(Δ_LGE, L=L)
-        p0 = plot_spatial_profile(Δ, L=L, title="Real space, symmetry=$(round(χ,digits=2))")
-        p1 = plot_in_config_space(Δ[5, :, :], L=L, Q=Q, θ=θ, title="On-site")
-        p2 = plot_in_config_space(Δ[1, :, :], L=L, Q=Q, θ=θ, title="-x̂ bond")
-        p3 = plot_in_config_space(Δ[2, :, :], L=L, Q=Q, θ=θ, title="+ŷ bond")
-        p4 = plot_in_config_space(Δ[3, :, :], L=L, Q=Q, θ=θ, title="x̂ bond")
-        p5 = plot_in_config_space(Δ[4, :, :], L=L, Q=Q, θ=θ, title="-ŷ bond")
-        p = plot(p1, p2, p3, p4, p5, p0, layout=Plots.grid(2, 3,
-                widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), aspect_ratio=:equal, plot_title=" LGE Δ(J=$J, V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice at Tc=$(round(Tc,digits=2))")
-        push!(ps_config, p)
-        if savefigs
-            savefig(p, joinpath(@__DIR__, "figures", "spatial_profile_$(L)L_$(V0)V0_$(V1)V1_J$J.pdf"))
+        if V1 != 0
+            Δ_LGE = dfsub.Δ[1]
+            χ = symmetry_character(Δ_LGE, L=L)
+            Tc = dfsub.T[1]
+            Δ = spatial_profile(Δ_LGE, L=L)
+            p0 = plot_spatial_profile(Δ, L=L, title="Real space, symmetry=$(round(χ,digits=2))")
+            p1 = plot_in_config_space(Δ[5, :, :], L=L, Q=Q, θ=θ, title="On-site")
+            p2 = plot_in_config_space(Δ[1, :, :], L=L, Q=Q, θ=θ, title="-x̂ bond")
+            p3 = plot_in_config_space(Δ[2, :, :], L=L, Q=Q, θ=θ, title="+ŷ bond")
+            p4 = plot_in_config_space(Δ[3, :, :], L=L, Q=Q, θ=θ, title="x̂ bond")
+            p5 = plot_in_config_space(Δ[4, :, :], L=L, Q=Q, θ=θ, title="-ŷ bond")
+            p = plot(p1, p2, p3, p4, p5, p0, layout=Plots.grid(2, 3,
+                    widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), aspect_ratio=:equal, plot_title=" LGE Δ(J=$J, V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice at Tc=$(round(Tc,digits=2))")
+            push!(ps_config, p)
+            if savefigs
+                savefig(p, joinpath(@__DIR__, "figures", "spatial_profile_$(L)L_$(V0)V0_$(V1)V1_J$J.pdf"))
+            end
+        else
+            Δ_LGE = dfsub.Δ[1]
+            Tc = dfsub.T[1]
+            Δ = spatial_profile(Δ_LGE, L=L)
+            χ = symmetry_character(Δ_LGE, L=L)
+            p0 = plot_spatial_profile(Δ, L=L, title="Real space, symmetry=$(round(χ,digits=2))")
+            p1 = plot_in_config_space(Δ[5, :, :], L=L, Q=Q, θ=θ, title="On-site")
+            p = plot(p1, p0, layout=Plots.grid(1, 2,
+                    widths=[1 / 2, 1 / 2]), size=(1000, 700), aspect_ratio=:equal, plot_title=" LGE Δ(J=$J, V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice at Tc=$(round(Tc,digits=2))")
+            push!(ps_config, p)
+            if savefigs
+                savefig(p, joinpath(@__DIR__, "figures", "spatial_profile_$(L)L_$(V0)V0_$(V1)V1_J$J.pdf"))
+            end
         end
+
     end
 end
 
@@ -152,5 +168,5 @@ p = plot(ps_real..., layout=Plots.grid(2, 5,
         widths=[1 / 5 for _ in 1:5]), size=(1500, 800), aspect_ratio=:equal, plot_title=" LGE Δ(V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice")
 
 if savefigs
-    savefig(p, joinpath(@__DIR__, "figures", "real_spatial_profile_$(L)L_$(V0)V0_$(V1)V1_J$J.pdf"))
+    savefig(p, joinpath(@__DIR__, "figures", "real_spatial_profile_$(L)L_$(V0)V0_$(V1)V1.pdf"))
 end
