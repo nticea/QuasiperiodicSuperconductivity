@@ -14,3 +14,40 @@ d-wave configuration
 λ = 0.956654271492807
 (T, λ) = (0.08259792999251883, 0.956654271492807)
 d-wave configuration
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/data/17L_ΦQ_LGE_2023-07-18_09:44:29.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 1.3512595744996765
+d-wave configuration
+λ = 1.351259574499678
+(T, λ) = (0.0, 1.351259574499678)
+d-wave configuration
+λ = 0.6070469099962683
+(T, λ) = (0.25, 0.6070469099962683)
+length(knots) = 2
+d-wave configuration
+λ = 0.8427514496792208
+d-wave configuration
+λ = 0.9566542716260454
+(T, λ) = (0.08259792995925565, 0.9566542716260454)
+length(knots) = 1
+d-wave configuration
+λ = 1.1843110680112248
+(T, λ) = (0.041298964979627824, 1.1843110680112248)
+d-wave configuration
+λ = 1.0148113583878033
+(T, λ) = (0.06932326264437527, 1.0148113583878033)
+d-wave configuration
+λ = 0.9034530812852472
+(T, λ) = (0.09734756030912273, 0.9034530812852472)
+length(knots) = 3
+d-wave configuration
+λ = 0.9973008305534922
+d-wave configuration
+λ = 1.6658072644723831
+d-wave configuration
+λ = 1.0556714745752662
+(T, λ) = (0.05844053783262383, 1.0556714745752662)
+d-wave configuration
+λ = 0.9996937635305806
+(T, λ) = (0.06939813867624081, 0.9996937635305806)

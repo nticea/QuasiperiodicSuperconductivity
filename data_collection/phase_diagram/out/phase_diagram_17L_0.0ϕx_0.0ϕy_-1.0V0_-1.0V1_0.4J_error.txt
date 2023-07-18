@@ -24,3 +24,4 @@ Stacktrace:
  [11] top-level scope
     @ ~/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
 in expression starting at /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/phase_diagram/collect_data.jl:33
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
