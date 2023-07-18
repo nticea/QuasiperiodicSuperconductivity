@@ -26,7 +26,7 @@ for J in Js
         for V1 in V1s
             if !already_computed(dfs, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, J=J)
                 ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, J=J, periodic=periodic)
-                submit_job(ps, filepath, @__DIR__, job_prefix)
+                submit_job(ps, filepath, @__DIR__, job_prefix, mem=10)
             end
         end
     end

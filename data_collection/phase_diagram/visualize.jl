@@ -47,6 +47,7 @@ grouped = groupby(df_LGE, [:V1])
 V1s = []
 for (i, df) in enumerate(grouped)
     mat = IndexMatrix(unique(df_LGE.V0), unique(df_LGE.J))
+    matnans = IndexMatrix(unique(df_LGE.V0), unique(df_LGE.J))
 
     V1 = df.V1[1]
     V0s, Js = sort(df.V0), sort(df.J)
@@ -55,10 +56,12 @@ for (i, df) in enumerate(grouped)
     for V0 in V0s
         for J in Js
             dfi = df[(df.V0.==V0).&(df.J.==J).&(df.V1.==V1), :]
-            if size(dfi)[1] == 1
-                mat[V0, J] = dfi.T[1]
-            else
-                @error "Perhaps we need to average"
+            if size(dfi)[1] > 0
+                Tc = finite_maximum(dfi.T)
+                mat[V0, J] = Tc
+                if isnan(Tc)
+                    matnans[V0, J] = -1
+                end
             end
         end
     end
@@ -68,7 +71,9 @@ for (i, df) in enumerate(grouped)
     ytick_positions = collect(1:length(mat.rows))
     ytick_labels = [string(round(y, digits=2)) for y in mat.rows]
 
-    h = heatmap(mat.data, title="V1=$V1", xticks=(xtick_positions, xtick_labels), yticks=(ytick_positions, ytick_labels), clims=clims)
+    h = heatmap(matnans.data, cmap=cgrad(:gist_rainbow, 2, categorical=true))
+    h = heatmap!(h, mat.data, title="V1=$V1", xticks=(xtick_positions, xtick_labels),
+        yticks=(ytick_positions, ytick_labels), clims=clims)
     xlabel!("J")
     ylabel!("V0")
     push!(ps, h)
