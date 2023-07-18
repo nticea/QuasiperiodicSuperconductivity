@@ -63,7 +63,9 @@ Js, Tcs = df_LGE_Tc_swave.J, df_LGE_Tc_swave.T
 sortidx = sortperm(Js)
 Js, Tcs = Js[sortidx], Tcs[sortidx]
 plot!(p1, Js, Tcs, color="red", label=nothing)
-scatter!(p1, Js, Tcs, color="red", label="s-wave Tc (V0=$V0_swave)", ylabel="Tc",)
+scatter!(p1, Js, Tcs, color="red", label="s-wave Tc (V0=$V0_swave)", ylabel="Tc")
+
+@assert 1 == 0
 
 Js = sort(unique(df_LGE_Tc_dwave.J))
 Tcs = zeros(length(Js))
