@@ -1,2 +1,0 @@
-slurmstepd: error: *** JOB 23687365 ON sh02-07n21 CANCELLED AT 2023-07-10T19:02:18 DUE TO PREEMPTION ***
-  Activating project at `~/code/QuasiperiodicSuperconductivity`
