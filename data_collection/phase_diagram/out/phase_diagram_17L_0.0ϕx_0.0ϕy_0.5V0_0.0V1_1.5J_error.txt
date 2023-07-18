@@ -1,1 +1,0 @@
-slurmstepd: error: *** JOB 24246716 ON sh02-06n52 CANCELLED AT 2023-07-17T10:34:43 ***

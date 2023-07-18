@@ -83,3 +83,5 @@ ps = ps[sortidx]
 
 p = plot(ps..., layout=Plots.grid(2, 3,
         widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), plot_title="LGE Tc at θ=$(θ_to_π(θ))) for $L × $L lattice")
+
+#savefig(p, "phase_diagram_$(L)L.pdf")

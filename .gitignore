@@ -29,3 +29,6 @@ Manifest.toml
 *.h5
 *.csv
 *.pdf
+*.slurm
+*.sh
+*.txt

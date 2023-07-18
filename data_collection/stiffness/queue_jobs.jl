@@ -9,11 +9,11 @@ t = 1 # hopping
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-V0 = -1
-V1 = 0#-1.5
+V0 = -2.3
+V1 = 0
 periodic = 1
 
-Js = collect(0:0.1:4)
+Js = collect(0:0.1:2)
 ϕxs, ϕys = LinRange(0, 3, 3), LinRange(0, 3, 3)
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "sweep"
