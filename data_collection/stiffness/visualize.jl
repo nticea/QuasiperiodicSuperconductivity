@@ -16,7 +16,7 @@ include("../../src/results.jl")
 L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = -2.3
+V0 = -1
 V1 = 0
 savefigs = false
 
@@ -74,6 +74,10 @@ for (j, J) in enumerate(Js)
     dfsub = df_BdG_0[(df_BdG_0.L.==L).&(df_BdG_0.J.==J).&(df_BdG_0.θ.==θ).&(df_BdG_0.Q.==Q).&(df_BdG_0.V0.==V0).&(df_BdG_0.V1.==V1), :]
     Ks, Πs = hcat(dfsub.K...), hcat(dfsub.Π...)
     Ks, Πs = mean(Ks, dims=2), mean(Πs, dims=2)
+    if J == 0
+        @show V0, V1
+        @show Ks, Πs
+    end
     Ds[j, :] = -Ks + Πs
 end
 
@@ -83,6 +87,8 @@ for i in 1:2
     plot!(p1, Js, Ds[:, i], label=nothing, c=cmap[i], secondary=true)
     scatter!(p1, Js, Ds[:, i], label=dirs[i], c=cmap[i], secondary=true)
 end
+plot!(p1, legend=:right)
+
 if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))
 end
