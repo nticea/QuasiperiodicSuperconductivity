@@ -37,19 +37,19 @@ update_results!(df_LGE; L=L, T=Tc, λ=λ, Δ=Δ_LGE, J=J, Q=Q, θ=θ, ϕx=ϕx, �
 CSV.write(savepath_LGE, df_LGE)
 flush(stdout)
 
-# Get the corresponding BdG spatial profile 
-if isfinite(Tc)
-    ## Superfluid stiffness calculation ##
-    T = 0 # everything is at 0 temperature
+# # Get the corresponding BdG spatial profile 
+# if isfinite(Tc)
+#     ## Superfluid stiffness calculation ##
+#     T = 0 # everything is at 0 temperature
 
-    # Get the BdG parameters 
-    println("Finding BdG coefficients at T=0")
-    Δ_BdG, hist = @time compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol)
-    flush(stdout)
+#     # Get the BdG parameters 
+#     println("Finding BdG coefficients at T=0")
+#     Δ_BdG, hist = @time compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol)
+#     flush(stdout)
 
-    # Superfluid stiffness
-    K, Π = @time superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=BdG_tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=1, periodic=periodic, Δ_init=Δ_BdG)
-    update_results!(df_BdG; L=L, T=T, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, K=K, Π=Π)
-    CSV.write(savepath_BdG, df_BdG)
-    flush(stdout)
-end
+#     # Superfluid stiffness
+#     K, Π = @time superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=BdG_tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=1, periodic=periodic, Δ_init=Δ_BdG)
+#     update_results!(df_BdG; L=L, T=T, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, K=K, Π=Π)
+#     CSV.write(savepath_BdG, df_BdG)
+#     flush(stdout)
+# end

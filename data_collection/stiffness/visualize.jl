@@ -16,9 +16,9 @@ include("../../src/results.jl")
 L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = -1
+V0 = -2.3
 V1 = 0
-savefigs = true
+savefigs = false
 
 # read files 
 files = readdir(joinpath(@__DIR__, "data"))
