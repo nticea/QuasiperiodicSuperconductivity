@@ -16,9 +16,9 @@ include("../../src/results.jl")
 L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = 1
-V1 = -1.5
-savefigs = false
+V0 = -2.3
+V1 = 0
+savefigs = true
 
 # read files 
 if savefigs

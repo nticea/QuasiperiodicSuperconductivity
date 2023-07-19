@@ -1,2 +1,0 @@
-/var/spool/slurmd/job24536562/slurm_script: line 22: 20854 Killed                  julia /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/stiffness_new/collect_data.jl 17 1 0.6180339887498949 1.0e-8 0.4487989505128276 0 0 1 -1.5 1.2 1
-slurmstepd: error: Detected 1 oom_kill event in StepId=24536562.batch. Some of the step tasks have been OOM Killed.

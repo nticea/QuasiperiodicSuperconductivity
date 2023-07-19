@@ -14,7 +14,7 @@ V1 = -1.5#0
 periodic = 1
 
 Js = collect(2.1:0.1:4)
-ϕxs, ϕys = LinRange(1, 3, 2), LinRange(1, 3, 2)
+ϕxs, ϕys = LinRange(0, 3, 2), LinRange(0, 3, 2)
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "sweep"
 

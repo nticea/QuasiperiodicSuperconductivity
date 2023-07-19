@@ -118,11 +118,11 @@ function kinetic_term(sites; U, V, E, f, t)
     return K
 end
 
-function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8)
+function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8, porder=3)
     # the minimum q I can consider is 1/L
     N, _ = size(U)
     L = √N
-    qs = 2π / L * collect(1:npts)
+    qs = expspace(1, -9, npts)#1 / L * collect(1:npts)
     Πs = zeros(npts, 4)
 
     # the diagonals have ΔE=0, which causes divergence 
@@ -136,20 +136,25 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8)
     # compute the prefactor
     @einsimd pf[n1, n2] := fn1n2[n1, n2] / En1n2[n1, n2]
 
-    # perform extrapolation q → 0
-    # Threads.@threads for (i, q) in collect(enumerate(qs))
-    for (i, q) in collect(enumerate(qs))
+    # perform extrapolation qy → 0
+    Threads.@threads for (i, q) in collect(enumerate(qs))
         print(i, "-")
         Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
-        @show Πs[i, 1]
     end
 
+    @show Πs[:, 1]
+
+    if npts <= porder
+        porder = npts - 2
+    end
     Πs_extrapolated = []
     for x in 1:4
         Πxx = Πs[:, x]
-        model = Polynomials.fit(qs, Πxx, npts)
+        model = Polynomials.fit(qs, Πxx, porder)
         push!(Πs_extrapolated, model(0))
     end
+
+    @show Πs_extrapolated[1]
 
     return Πs_extrapolated
 end
