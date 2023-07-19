@@ -16,8 +16,8 @@ include("../../src/results.jl")
 L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = -2.3
-V1 = 0
+V0 = 1
+V1 = -1.5
 savefigs = false
 
 # read files 
@@ -53,7 +53,7 @@ df_BdG = df_BdG[(df_BdG.L.==L).&(df_BdG.θ.==θ).&(df_BdG.Q.==Q).&(df_BdG.V0.==V
 df_LGE_Tc = df_LGE[df_LGE.T.>0, :]
 df_BdG_Tc = df_BdG[df_BdG.T.>0, :]
 
-p1 = plot()
+p1 = plot(ylims=(-0.1, 1))
 Js = sort(unique(df_LGE_Tc.J))
 Tcs = zeros(length(Js))
 for (j, J) in enumerate(Js)
@@ -95,7 +95,7 @@ if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))
 end
 
-p2 = plot()
+p2 = plot(ylims=(-0.1, 1))
 grouped = groupby(df_LGE_Tc, [:ϕx, :ϕy])
 if length(grouped) > 1
     grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
@@ -167,11 +167,11 @@ end
 
 # Spatial profiles of LGE soln at Tc (real space only)
 ϕx, ϕy = 0, 0
-Js_to_plot = [0, 0.5, 0.7, 0.9, 1, 1.1, 1.2, 1.5, 2, 2.5]
+Js_to_plot = [0, 0.6, 0.7, 0.9, 1, 1.1, 1.2, 1.5, 2, 2.5, 3]
 ps_real = []
 for J in Js_to_plot
     dfsub = df_LGE_Tc[(df_LGE_Tc.L.==L).&(df_LGE_Tc.J.==J).&(df_LGE_Tc.θ.==θ).&(df_LGE_Tc.ϕx.==ϕx).&(df_LGE_Tc.ϕy.==ϕy).&(df_LGE_Tc.Q.==Q).&(df_LGE_Tc.V0.==V0).&(df_LGE_Tc.V1.==V1), :]
-    if size(dfsub)[1] == 1
+    if size(dfsub)[1] > 0
         Δ_LGE = dfsub.Δ[1]
         Tc = dfsub.T[1]
         Δ = spatial_profile(Δ_LGE, L=L)
