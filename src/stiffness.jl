@@ -9,9 +9,9 @@ function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::
 
     # get the BdG coefficients 
     if V1 == 0
-        U, V, E = BdG_coefficients_swave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
+        U, V, E, Δ = BdG_coefficients_swave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
     else
-        U, V, E = BdG_coefficients_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
+        U, V, E, Δ = BdG_coefficients_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
     end
 
     # number of sites (L × L)
@@ -42,7 +42,7 @@ function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::
     K = kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
     Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, t=t)
 
-    return K, Π
+    return K, Π, Δ
 end
 
 function superfluid_stiffness(; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
@@ -137,7 +137,9 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8)
     @einsimd pf[n1, n2] := fn1n2[n1, n2] / En1n2[n1, n2]
 
     # perform extrapolation q → 0
-    Threads.@threads for (i, q) in collect(enumerate(qs))
+    # Threads.@threads for (i, q) in collect(enumerate(qs))
+    for (i, q) in collect(enumerate(qs))
+        print(i, "-")
         Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
     end
 

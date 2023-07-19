@@ -89,9 +89,9 @@ function BdG_coefficients_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, 
     ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
 
     # converge the BdG 
-    _, U, V, E, _ = converge_BdG_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
+    Δij, U, V, E, _ = converge_BdG_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
 
-    return U, V, E
+    return U, V, E, Δij
 end
 
 function BdG_iteration_dwave(M::Matrix{Float64}, Δij; Vij, T::Real)
