@@ -16,11 +16,14 @@ include("../../src/results.jl")
 L = 11 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = -2.3
-V1 = 0
+V0 = 1
+V1 = -1.5
 savefigs = false
 
 # read files 
+if savefigs
+    mkpath(joinpath(@__DIR__, "figures"))
+end
 files = readdir(joinpath(@__DIR__, "data"))
 df_BdG = DataFrame(L=Int64[], J=Float64[], Q=Float64[], θ=Float64[],
     ϕx=Float64[], ϕy=Float64[], V0=Float64[], V1=Float64[],
@@ -51,16 +54,15 @@ df_LGE_Tc = df_LGE[df_LGE.T.>0, :]
 df_BdG_Tc = df_BdG[df_BdG.T.>0, :]
 
 p1 = plot()
-grouped = groupby(df_LGE_Tc, [:ϕx, :ϕy])
-cmap = cgrad(:matter, length(grouped), categorical=true)
-for (i, df) in enumerate(grouped)
-    ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
-    Js, Tcs = df.J, df.T
-    sortidx = sortperm(Js)
-    Js, Tcs = Js[sortidx], Tcs[sortidx]
-    plot!(p1, Js, Tcs, color=cmap[i], label=nothing)
-    scatter!(p1, Js, Tcs, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))", ylabel="Tc",)
+Js = sort(unique(df_LGE_Tc.J))
+Tcs = zeros(length(Js))
+for (j, J) in enumerate(Js)
+    dfsub = df_LGE_Tc[(df_LGE_Tc.J.==J), :]
+    Ts = dfsub.T
+    Tcs[j] = mean(Ts)
 end
+plot!(p1, Js, Tcs, color="red", label=nothing)
+scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
 xlabel!(p1, "J")
 title!(p1, "Tc for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
 
@@ -74,10 +76,6 @@ for (j, J) in enumerate(Js)
     dfsub = df_BdG_0[(df_BdG_0.L.==L).&(df_BdG_0.J.==J).&(df_BdG_0.θ.==θ).&(df_BdG_0.Q.==Q).&(df_BdG_0.V0.==V0).&(df_BdG_0.V1.==V1), :]
     Ks, Πs = hcat(dfsub.K...), hcat(dfsub.Π...)
     Ks, Πs = mean(Ks, dims=2), mean(Πs, dims=2)
-    if J == 0
-        @show V0, V1
-        @show Ks, Πs
-    end
     Ds[j, :] = -Ks + Πs
 end
 
@@ -93,25 +91,25 @@ if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))
 end
 
-p2 = plot()
-grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
-cmap = cgrad(:matter, length(grouped), categorical=true)
-for (i, df) in enumerate(grouped)
-    ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
-    Js, Ks, Πs = df.J, df.K, df.Π
-    sortidx = sortperm(Js)
-    Js, Ks, Πs = Js[sortidx], Ks[sortidx], Πs[sortidx]
-    Ds = -Ks + Πs
-    Ds = [D[2] for D in Ds]
-    plot!(p2, Js, Ds, color=cmap[i], label=nothing)
-    scatter!(p2, Js, Ds, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))")
-end
-xlabel!(p2, "J")
-ylabel!(p2, "Ds/π")
-title!(p2, "Tc₂ for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
-if savefigs
-    savefig(p2, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_unaveraged.pdf"))
-end
+# p2 = plot()
+# grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
+# cmap = cgrad(:matter, length(grouped), categorical=true)
+# for (i, df) in enumerate(grouped)
+#     ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
+#     Js, Ks, Πs = df.J, df.K, df.Π
+#     sortidx = sortperm(Js)
+#     Js, Ks, Πs = Js[sortidx], Ks[sortidx], Πs[sortidx]
+#     Ds = -Ks + Πs
+#     Ds = [D[2] for D in Ds]
+#     plot!(p2, Js, Ds, color=cmap[i], label=nothing)
+#     scatter!(p2, Js, Ds, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))")
+# end
+# xlabel!(p2, "J")
+# ylabel!(p2, "Ds/π")
+# title!(p2, "Tc₂ for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
+# if savefigs
+#     savefig(p2, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_unaveraged.pdf"))
+# end
 
 # Spatial profiles of LGE soln at Tc (real space and configuration space)
 ϕx, ϕy = 0, 0

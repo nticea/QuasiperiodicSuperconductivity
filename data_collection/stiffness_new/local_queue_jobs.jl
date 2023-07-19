@@ -7,8 +7,8 @@ t = 1 # hopping
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-V0 = -2.3
-V1 = 0
+V0 = 1
+V1 = -1.5
 
 Js = collect(0:0.1:2)
 ϕxs, ϕys = [0], [0] #LinRange(0, 3, 3), LinRange(0, 3, 3)
