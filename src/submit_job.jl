@@ -1,6 +1,6 @@
 include("model.jl")
 
-function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1, ntasks=1, cpus_per_task=8, mem=256, partition="owners,simes")
+function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1, ntasks=1, cpus_per_task=8, mem=256, partition="owners,simes,hns")
     outpath = joinpath(dirpath, "out")
     slurmpath = joinpath(dirpath, "slurmfiles")
     mkpath(outpath)

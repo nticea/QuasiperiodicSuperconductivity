@@ -13,10 +13,10 @@ include("../../src/results.jl")
 
 ## PARAMETERS ## 
 
-L = 17 # the full system is L × L 
+L = 11 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = -1
+V0 = -2.3
 V1 = 0
 savefigs = false
 

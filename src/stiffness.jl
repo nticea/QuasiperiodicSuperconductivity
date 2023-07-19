@@ -141,6 +141,7 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8)
     for (i, q) in collect(enumerate(qs))
         print(i, "-")
         Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
+        @show Πs[i, 1]
     end
 
     Πs_extrapolated = []

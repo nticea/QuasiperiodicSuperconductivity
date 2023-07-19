@@ -13,7 +13,6 @@ include("../src/results.jl")
 function converge_BdG_dwave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
     ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
 
-
     # do regular s-wave 
     if V1 == 0
         include(joinpath(@__DIR__, "BdG.jl"))

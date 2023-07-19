@@ -18,6 +18,8 @@ L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic = [args[n] for n in 1:length(args
 L = Int(L)
 periodic = Bool(periodic)
 
+@show V0, V1, J
+
 ## SIMULATION PARAMETERS ## 
 niter = 500
 BdG_tol = 1e-15
@@ -40,11 +42,11 @@ flush(stdout)
 
 # Get the corresponding BdG spatial profile 
 if isfinite(Tc)
-    println("Finding BdG spatial profile at Tc")
-    Δ_BdG, hist = compute_Δ_dwave(Tc; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
-    update_results!(df_BdG; L=L, T=Tc, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
-    CSV.write(savepath_BdG, df_BdG)
-    flush(stdout)
+    # println("Finding BdG spatial profile at Tc")
+    # Δ_BdG, hist = compute_Δ_dwave(Tc; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
+    # update_results!(df_BdG; L=L, T=Tc, λ=λ, Δ=Δ_BdG, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1)
+    # CSV.write(savepath_BdG, df_BdG)
+    # flush(stdout)
 
     ## Superfluid stiffness calculation ##
     T = 0 # everything is at 0 temperature

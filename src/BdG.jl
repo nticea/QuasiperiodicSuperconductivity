@@ -67,10 +67,6 @@ function converge_BdG(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::
     M[1:N, 1:N] .= hij
     M[(N+1):end, (N+1):end] .= -conj.(hij)
 
-    if isnothing(fsgap)
-        fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic))
-    end
-
     # initial gues for Δ_i
     Δi = initialize_Δ_swave(L=L, Δ_init=Δ_init)
 
@@ -103,10 +99,8 @@ end
 function compute_Δ(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, θ::Union{Real,Nothing},
     ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0)
 
-    fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic))
-
     # converge the BdG 
-    Δi, U, V, E, max_Δ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, fsgap=fsgap, noise=noise)
+    Δi, U, V, E, max_Δ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise)
 
     return Δi, max_Δ
 end
@@ -114,11 +108,9 @@ end
 function BdG_coefficients_swave(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, V0::Real, θ::Union{Real,Nothing},
     ϕx::Real=0, ϕy::Real=0, periodic::Bool=true, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init=nothing)
 
-    fsgap = maximum(finite_size_gap(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic))
-
     # converge the BdG 
-    Δi, U, V, E, max_Δ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol,
-        θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, fsgap=fsgap, noise=noise, Δ_init=Δ_init)
+    Δi, U, V, E, _ = converge_BdG(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol,
+        θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
 
     return U, V, E, Δi
 end
