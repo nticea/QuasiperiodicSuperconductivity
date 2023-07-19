@@ -1,0 +1,45 @@
+  Activating project at `~/code/QuasiperiodicSuperconductivity`
+
+[87016] signal (11.1): Segmentation fault
+in expression starting at none:0
+setindex! at ./array.jl:969 [inlined]
+unsafe_write at ./iobuffer.jl:430
+unsafe_write at ./io.jl:430 [inlined]
+write at ./strings/io.jl:244 [inlined]
+print at ./strings/io.jl:246 [inlined]
+showerror at ./errorshow.jl:142 [inlined]
+#showerror#898 at ./errorshow.jl:88
+showerror at ./errorshow.jl:86 [inlined]
+showvalue at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/usr/share/julia/stdlib/v1.9/Logging/src/ConsoleLogger.jl:56
+unknown function (ip: 0x7ff1dc2ee9e6)
+_jl_invoke at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2758 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2940
+#handle_message#3 at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/usr/share/julia/stdlib/v1.9/Logging/src/ConsoleLogger.jl:134
+handle_message at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/usr/share/julia/stdlib/v1.9/Logging/src/ConsoleLogger.jl:106
+unknown function (ip: 0x7ff1dc2e5781)
+_jl_invoke at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2758 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2940
+jl_apply at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/julia.h:1879 [inlined]
+jl_f__call_latest at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/builtins.c:774
+_jl_invoke at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2758 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2940
+jl_apply at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/julia.h:1879 [inlined]
+do_apply at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/builtins.c:730
+#invokelatest#2 at ./essentials.jl:818
+_jl_invoke at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2758 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2940
+jl_apply at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/julia.h:1879 [inlined]
+do_apply at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/builtins.c:730
+invokelatest at ./essentials.jl:813
+_jl_invoke at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2758 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2940
+macro expansion at ./logging.jl:365 [inlined]
+profile_printing_listener at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/usr/share/julia/stdlib/v1.9/Profile/src/Profile.jl:49
+#3 at ./threadingconstructs.jl:373
+jfptr_YY.3_59501.clone_1 at /share/software/user/open/julia/1.9.0/lib/julia/sys.so (unknown line)
+_jl_invoke at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2758 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/gf.c:2940
+jl_apply at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/julia.h:1879 [inlined]
+start_task at /cache/build/default-amdci4-0/julialang/julia-release-1-dot-9/src/task.c:1092
+Allocations: 19408109127 (Pool: 19407915905; Big: 193222); GC: 3056
+/var/spool/slurmd/job24537580/slurm_script: line 22: 87016 Segmentation fault      julia /home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/stiffness_new/collect_data.jl 17 1 0.6180339887498949 1.0e-8 0.4487989505128276 1.0 3.0 1 -1.5 0.1 1

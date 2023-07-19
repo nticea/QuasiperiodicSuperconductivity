@@ -1,0 +1,48 @@
+(V0, V1, J) = (1.0, -1.5, 0.0)
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/stiffness_new/data/17L_ΦQ_BdG_2023-07-19_06:17:08.csv\" is not a valid file or doesn't exist")
+error_reading_dataframe = ArgumentError("\"/home/users/nticea/code/QuasiperiodicSuperconductivity/data_collection/stiffness_new/data/17L_ΦQ_LGE_2023-07-19_06:17:08.csv\" is not a valid file or doesn't exist")
+Finding Tc using LGE
+d-wave configuration
+λ = 2.5686562216969473
+d-wave configuration
+λ = 2.5686562216969486
+(T, λ) = (0.0, 2.5686562216969486)
+d-wave configuration
+λ = 1.0421645723805164
+(T, λ) = (0.25, 1.0421645723805164)
+d-wave configuration
+λ = 0.6316028217138326
+(T, λ) = (0.5, 0.6316028217138326)
+length(knots) = 3
+d-wave configuration
+λ = 0.9766273148417038
+d-wave configuration
+λ = 1.225192984028451
+(T, λ) = (0.19297244910079528, 1.225192984028451)
+d-wave configuration
+λ = 1.086753931756867
+(T, λ) = (0.23432368819382285, 1.086753931756867)
+d-wave configuration
+λ = 0.9766273148415577
+(T, λ) = (0.2756749272868504, 0.9766273148415577)
+length(knots) = 3
+d-wave configuration
+λ = 0.9980683198789014
+d-wave configuration
+λ = 3.3989272980897813
+d-wave configuration
+λ = 1.1586630435249254
+(T, λ) = (0.21351900887572536, 1.1586630435249254)
+d-wave configuration
+λ = 1.0353689547846228
+(T, λ) = (0.25355382303992385, 1.0353689547846228)
+d-wave configuration
+λ = 0.9368859420456556
+(T, λ) = (0.29358863720412237, 0.9368859420456556)
+length(knots) = 3
+d-wave configuration
+λ = 0.9975855953312163
+Finding LGE sol'n at T=0
+d-wave configuration
+λ = 3.3989272980897827
+  9.835845 seconds (53.01 k allocations: 13.454 GiB, 7.63% gc time, 0.12% compilation time)
