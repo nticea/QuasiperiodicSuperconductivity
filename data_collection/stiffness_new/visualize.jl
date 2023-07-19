@@ -16,9 +16,9 @@ include("../../src/results.jl")
 L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = 1
-V1 = -1.5
-savefigs = true
+V0 = -2.3
+V1 = 0
+savefigs = false
 
 # read files 
 if savefigs
@@ -71,19 +71,23 @@ df_LGE_0 = df_LGE[df_LGE.T.==0, :]
 df_BdG_0 = df_BdG[df_BdG.T.==0, :]
 
 Js = sort(unique(df_BdG_0.J))
-Ds = zeros(length(Js), 4)
+Ds_avg = zeros(length(Js), 4)
+Ks_avg = zeros(length(Js), 4)
+Πs_avg = zeros(length(Js), 4)
 for (j, J) in enumerate(Js)
     dfsub = df_BdG_0[(df_BdG_0.L.==L).&(df_BdG_0.J.==J).&(df_BdG_0.θ.==θ).&(df_BdG_0.Q.==Q).&(df_BdG_0.V0.==V0).&(df_BdG_0.V1.==V1), :]
     Ks, Πs = hcat(dfsub.K...), hcat(dfsub.Π...)
     Ks, Πs = mean(Ks, dims=2), mean(Πs, dims=2)
-    Ds[j, :] = -Ks + Πs
+    Ds_avg[j, :] = -Ks + Πs
+    Ks_avg[j, :] = Ks
+    Πs_avg[j, :] = Πs
 end
 
 dirs = ["Dₛ/π (x̂)", "Dₛ/π (ŷ)"]
 cmap = ["green", "orange"]
 for i in 1:2
-    plot!(p1, Js, Ds[:, i], label=nothing, c=cmap[i], secondary=true)
-    scatter!(p1, Js, Ds[:, i], label=dirs[i], c=cmap[i], secondary=true)
+    plot!(p1, Js, Ds_avg[:, i], label=nothing, c=cmap[i], secondary=true)
+    scatter!(p1, Js, Ds_avg[:, i], label=dirs[i], c=cmap[i], secondary=true)
 end
 plot!(p1, legend=:right)
 
@@ -91,25 +95,33 @@ if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))
 end
 
-# p2 = plot()
-# grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
-# cmap = cgrad(:matter, length(grouped), categorical=true)
-# for (i, df) in enumerate(grouped)
-#     ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
-#     Js, Ks, Πs = df.J, df.K, df.Π
-#     sortidx = sortperm(Js)
-#     Js, Ks, Πs = Js[sortidx], Ks[sortidx], Πs[sortidx]
-#     Ds = -Ks + Πs
-#     Ds = [D[2] for D in Ds]
-#     plot!(p2, Js, Ds, color=cmap[i], label=nothing)
-#     scatter!(p2, Js, Ds, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))")
-# end
-# xlabel!(p2, "J")
-# ylabel!(p2, "Ds/π")
-# title!(p2, "Tc₂ for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
-# if savefigs
-#     savefig(p2, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_unaveraged.pdf"))
-# end
+p2 = plot()
+grouped = groupby(df_LGE_Tc, [:ϕx, :ϕy])
+if length(grouped) > 1
+    grouped = groupby(df_BdG_0, [:ϕx, :ϕy])
+    cmap = cgrad(:matter, length(grouped), categorical=true)
+    for (i, df) in enumerate(grouped)
+        ϕx, ϕy = unique(df.ϕx)[1], unique(df.ϕy)[1]
+        Js, Ks, Πs = df.J, df.K, df.Π
+        sortidx = sortperm(Js)
+        Js, Ks, Πs = Js[sortidx], Ks[sortidx], Πs[sortidx]
+        Ds = -Ks + Πs
+        Ds = [D[2] for D in Ds]
+        scatter!(p2, Js, Ds, color=cmap[i], label="(ϕx,ϕy)=($(round(ϕx, digits=2)),$(round(ϕy, digits=2)))")
+        Ds = -Ks + Πs
+    end
+    dirs = ["Dₛ/π (x̂) avg", "Dₛ/π (ŷ) avg"]
+    cmap2 = ["green", "orange"]
+    for i in 1:2
+        plot!(p2, Js, Ds_avg[:, i], label=dirs[i], c=cmap2[i], secondary=true)
+    end
+    xlabel!(p2, "J")
+    ylabel!(p2, "Ds/π")
+    title!(p2, "Tc₂ for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $L × $L lattice")
+    if savefigs
+        savefig(p2, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_unaveraged.pdf"))
+    end
+end
 
 # Spatial profiles of LGE soln at Tc (real space and configuration space)
 ϕx, ϕy = 0, 0

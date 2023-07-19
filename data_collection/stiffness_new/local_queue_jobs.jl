@@ -8,12 +8,12 @@ Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
 
-Js = collect(0:0.1:2)
+Js = collect(2.1:0.1:4)
 ϕxs, ϕys = [0], [0] #LinRange(0, 3, 3), LinRange(0, 3, 3)
 filepath = joinpath(@__DIR__, "collect_data.jl")
 
-V0 = 1
-V1 = -1.5
+V0 = -2.3
+V1 = 0
 for ϕx in ϕxs
     for ϕy in ϕys
         for J in Js
