@@ -18,7 +18,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 V0 = 1
 V1 = -1.5
-savefigs = false
+savefigs = true
 
 # read files 
 if savefigs
