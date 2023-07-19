@@ -21,7 +21,7 @@ periodic = true
 ϕx = 0
 ϕy = 0
 V0 = 1
-V1 = -1.3
+V1 = -1.5
 LGE_tol = 1e-2
 BdG_tol = 1e-12
 niter = 500
@@ -29,33 +29,7 @@ niter = 500
 ## Tc using LGE ##
 
 ## Superfluid stiffness calculation ##
-T = 0 # everything is at 0 temperature
-J = 0
+T = 0.2 # everything is at 0 temperature
+J = 1
 
 λ, Δ_LGE = @time pairfield_correlation(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
-K, Π, Δ = @time superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=BdG_tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, Δ_init=Δ_LGE)
-@assert 1 == 0
-
-Ks, Πs = [], []
-Js = [0, 1, 2, 3, 4]
-for J in Js
-    # Get the initial LGE guess 
-    println("Finding LGE sol'n at T=0")
-    λ, Δ_LGE = @time pairfield_correlation(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
-
-    # Δ_BdG, hist = compute_Δ_dwave(T; L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, niter=niter, tol=BdG_tol, Δ_init=Δ_LGE)
-    # Get the BdG parameters 
-    println("Finding BdG coefficients at T=0")
-
-    # Superfluid stiffness
-    K, Π, Δ = @time superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=BdG_tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, Δ_init=Δ_LGE)
-    push!(Ks, K[1])
-    push!(Πs, Π[1])
-end
-# Δ0 = zeros(size(Δ_LGE)...)
-# K, Π, Δ = @time superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=BdG_tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=1, periodic=periodic, Δ_init=Δ0)
-
-plot(Js, Ks, label="K")
-plot!(Js, Πs, label="Π")
-
-plot(Js, -Ks + Πs, label="Dₛ/π")

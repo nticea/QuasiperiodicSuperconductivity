@@ -19,6 +19,13 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
     # Diagonalize this Hamiltonian
     E, U = diagonalize_hamiltonian(H0)
 
+    @error "Keeping only states close to εf"
+    sortidx = sortperm(E)
+    Ẽ = E[sortidx]
+    Ũ = U[:, sortidx]
+    E = Ẽ[Ẽ.<T.&&Ẽ.>-T]
+    U = Ũ[:, Ẽ.<T.&&Ẽ.>-T]
+
     # Construct the pairfield susceptibility
     if V1 == 0
         M = swave(T, E=E, U=U, V0=V0)
@@ -40,7 +47,7 @@ function return_M(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=
 
     # Construct the pairfield susceptibility
     if V1 == 0
-        @assert V0 < 0
+        #@assert V0 < 0
         M = swave(T, E=E, U=U, V0=V0)
     else
         #@assert V0 > 0 && V1 < 0
