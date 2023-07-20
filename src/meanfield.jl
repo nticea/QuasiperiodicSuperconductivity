@@ -31,6 +31,40 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
     return λ, Δ
 end
 
+function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Float64}=nothing)
+    # Construct the non-interacting Hamiltonian matrix
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+    # Diagonalize this Hamiltonian
+    E, U = diagonalize_hamiltonian(H0)
+
+    if !isnothing(Λ)
+        @warn "Keeping only states close to εf"
+        sortidx = sortperm(E)
+        Ẽ = E[sortidx]
+        Ũ = U[:, sortidx]
+        E = Ẽ[Ẽ.<Λ.&&Ẽ.>-Λ]
+        U = Ũ[:, Ẽ.<Λ.&&Ẽ.>-Λ]
+    end
+
+    # Construct the pairfield susceptibility
+    if symmetry == "s-wave"
+        return swave_χ(T, E=E, U=U)
+    elseif symmetry == "d-wave"
+        return dwave_χ(T, L=L, E=E, U=U)
+    else
+        @error "Symmetry $symmetry not recognized"
+    end
+end
+
+function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Float64}=nothing)
+    # Construct the non-interacting Hamiltonian matrix
+    χ = pairfield_susceptibility(T, symmetry, L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic, Λ=Λ)
+    if symmetry == "s-wave"
+        @einsimd Δ := χ[r, r]
+    end
+end
+
 function return_M(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)
     # Construct the non-interacting Hamiltonian matrix
     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
@@ -40,10 +74,8 @@ function return_M(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=
 
     # Construct the pairfield susceptibility
     if V1 == 0
-        @assert V0 < 0
         M = swave(T, E=E, U=U, V0=V0)
     else
-        #@assert V0 > 0 && V1 < 0
         M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
     end
 
@@ -55,10 +87,13 @@ function decomposition_M(M)
     return decomp.R
 end
 
+function swave_χ(T::Real; E, U)
+    return swave(T, E=E, U=U, V0=-1)
+end
+
 function swave(T::Real; E, U, V0)
     println("s-wave configuration")
-    N = size(U)[1]
-    χ = zeros(N, N)
+    Ntot, N = size(U)
 
     Uconj = conj.(U)
 
@@ -74,14 +109,14 @@ function swave(T::Real; E, U, V0)
 
     @einsimd PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
     @einsimd UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
-    PUU = reshape(PUU, N, N * N)
-    UU = reshape(UU, N * N, N)
+    PUU = reshape(PUU, Ntot, N * N)
+    UU = reshape(UU, N * N, Ntot)
     χ = PUU * UU
 
     return -V0 * χ
 end
 
-function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int)
+function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int, Ntot::Int)
     Uconjb = [Uconj[r, :] for r in b_sites]
     Ud = [U[r, :] for r in d_sites]
 
@@ -89,22 +124,27 @@ function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int)
     Ud = transpose(hcat(Ud...))
 
     @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconjb[r, m]
-    PUU = reshape(PUU, N, N * N)
+    PUU = reshape(PUU, Ntot, N * N)
 
     @tullio UU1[m, n, rprime] := U[rprime, n] * Ud[rprime, m]
-    UU1 = reshape(UU1, N * N, N)
+    UU1 = reshape(UU1, N * N, Ntot)
     χ1 = PUU * UU1
 
     @tullio UU2[m, n, rprime] := Ud[rprime, n] * U[rprime, m]
-    UU2 = reshape(UU2, N * N, N)
+    UU2 = reshape(UU2, N * N, Ntot)
     χ2 = PUU * UU2
 
     return -V / 2 .* (χ1 .+ χ2)
 end
 
+function dwave_χ(T::Real; L, E, U)
+    return dwave(T, L=L, E=E, U=U, V0=-1, V1=-1)
+end
+
 function dwave(T::Real; L, E, U, V0, V1)
     println("d-wave configuration")
-    N = L^2
+    N = size(U)[2]#L^2
+    Ntot = L^2
     Uconj = conj.(U) # This is U*
 
     # Initialize the M matrix 
@@ -123,13 +163,13 @@ function dwave(T::Real; L, E, U, V0, V1)
     # the s-wave sector. This is in the (5,5) block of M matrix
     @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
     @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
-    PUU = reshape(PUU, N, N * N)
-    UU = reshape(UU, N * N, N)
+    PUU = reshape(PUU, Ntot, N * N)
+    UU = reshape(UU, N * N, Ntot)
     M[5, 5] = -V0 * PUU * UU
 
     # make lists of the nearest-neighbour sites 
     Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
-    for r in 1:N
+    for r in 1:Ntot
         nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
         push!(Rsites, nnr[1])
         push!(Usites, nnr[2])
@@ -148,15 +188,16 @@ function dwave(T::Real; L, E, U, V0, V1)
             b_sites, d_sites = sites[b], sites[d]
 
             if b == 5 # only δ=0 term gets V0, not δ'=0! 
-                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N)
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
             else # bond terms have potential V1 
-                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
             end
 
             # fill in the matrix 
             M[b, d] = Mblock
         end
     end
+
     M = mortar(M)
 
     return M
