@@ -414,6 +414,35 @@ function ΔBdG_to_ΔLGE_flat(Δ_BdG; L::Int)
     return evs_flat
 end
 
+function to_5N_LGE_Δ(maxev; L)
+    @assert length(maxev) == 3 * L * L
+    evs = zeros(3, L, L)
+    for (n, i) in enumerate(1:(L*L):(3*L*L))
+        evi = maxev[i:(i+L*L-1)]
+        evs[n, :, :] = reshape(evi, L, L)
+    end
+
+    # now put in the missing blocks
+    Δ1 = evs[1, :, :]
+    Δ2 = evs[2, :, :]
+    Δ3 = circshift(Δ1, (-1, 0)) # mapping between +x̂ and -x̂
+    Δ4 = circshift(Δ2, (0, 1)) # mapping between +ŷ and -ŷ
+    new_evs = zeros(5, L, L)
+    new_evs[1, :, :] = Δ1
+    new_evs[2, :, :] = Δ2
+    new_evs[3, :, :] = Δ3
+    new_evs[4, :, :] = Δ4
+    new_evs[5, :, :] = evs[3, :, :]
+
+    evs_flat = zeros(5 * L * L)
+    for (n, i) in enumerate(1:(L*L):(5*L*L))
+        evi = new_evs[n, :, :]
+        evs_flat[i:(i+L*L-1)] = reshape(evi, L * L)
+    end
+
+    return evs_flat
+end
+
 function symmetry_character(Δ; L::Int)
     if ndims(Δ) == 1
         Δ = spatial_profile(Δ, L=L)

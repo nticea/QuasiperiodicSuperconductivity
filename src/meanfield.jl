@@ -28,7 +28,10 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
 
     λ, Δ = calculate_λ_Δ(M)
 
-    return λ, Δ
+    # the result is only 3N. Need to make it 5N 
+    Δ̃ = to_5N_LGE_Δ(Δ; L=L)
+
+    return λ, Δ̃
 end
 
 function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Float64}=nothing)

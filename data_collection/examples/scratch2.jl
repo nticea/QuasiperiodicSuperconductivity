@@ -27,33 +27,10 @@ BdG_tol = 1e-12
 niter = 500
 
 ## Tc using LGE ##
-J = 1.1
+J = 0.9
 Tc, λ, Δ_LGE = @time LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=LGE_tol, npts=5)
 
-function to_5N_LGE_Δ(maxev; L)
-    @assert length(maxev) == 3 * L * L
-    evs = zeros(3, L, L)
-    for (n, i) in enumerate(1:(L*L):(3*L*L))
-        evi = maxev[i:(i+L*L-1)]
-        evs[n, :, :] = reshape(evi, L, L)
-    end
-
-    # now put in the missing blocks
-    Δ1 = evs[1, :, :]
-    Δ2 = evs[2, :, :]
-    Δ3 = circshift(Δ1, (-1, 0)) # mapping between +x̂ and -x̂
-    Δ4 = circshift(Δ2, (0, 1)) # mapping between +ŷ and -ŷ
-    new_evs = zeros(5, L, L)
-    new_evs[1, :, :] = Δ1
-    new_evs[2, :, :] = Δ2
-    new_evs[3, :, :] = Δ3
-    new_evs[4, :, :] = Δ4
-    new_evs[5, :, :] = evs[3, :, :]
-
-    return new_evs
-end
-
-Δsoln = to_5N_LGE_Δ(Δ_LGE, L=L)
+Δsoln = spatial_profile(Δ_LGE, L=L)
 p0 = plot_spatial_profile(Δsoln, L=L, title="Real space")
 p1 = plot_in_config_space(Δsoln[5, :, :], L=L, Q=Q, θ=θ, title="On-site")
 p2 = plot_in_config_space(Δsoln[1, :, :], L=L, Q=Q, θ=θ, title="-x̂ bond")
