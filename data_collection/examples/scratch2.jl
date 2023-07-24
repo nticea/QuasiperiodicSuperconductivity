@@ -20,35 +20,54 @@ Q = (√5 - 1) / 2
 periodic = true
 ϕx = 0
 ϕy = 0
-V0 = 1
-V1 = -1.5
 LGE_tol = 1e-2
 BdG_tol = 1e-12
 niter = 500
 
-## Tc using LGE ##
-J = 0.9
-Tc, λ, Δ_LGE = @time LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, tol=LGE_tol, npts=5)
+J = 0
 
-Δsoln = spatial_profile(Δ_LGE, L=L)
-p0 = plot_spatial_profile(Δsoln, L=L, title="Real space")
-p1 = plot_in_config_space(Δsoln[5, :, :], L=L, Q=Q, θ=θ, title="On-site")
-p2 = plot_in_config_space(Δsoln[1, :, :], L=L, Q=Q, θ=θ, title="-x̂ bond")
-p3 = plot_in_config_space(Δsoln[2, :, :], L=L, Q=Q, θ=θ, title="+ŷ bond")
-p4 = plot_in_config_space(Δsoln[3, :, :], L=L, Q=Q, θ=θ, title="x̂ bond")
-p5 = plot_in_config_space(Δsoln[4, :, :], L=L, Q=Q, θ=θ, title="-ŷ bond")
-p = plot(p1, p2, p3, p4, p5, p0, layout=Plots.grid(2, 3,
-        widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), aspect_ratio=:equal, plot_title=" LGE Δ(J=$J, V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice at Tc=$(round(Tc,digits=2))")
+symmetry = "d-wave"
+Ts = expspace(-5, 1, 20)
+Ls = [23]
 
+if symmetry == "s-wave"
+    χs = zeros(length(Ts), length(Ls))
+else
+    χs = zeros(length(Ts), length(Ls), 3, 3)
+end
 
-# Δ = spatial_profile(Δ_LGE, L=L)
-# Δ1 = Δ[1, :, :]
-# Δ2 = Δ[2, :, :]
-# Δ3 = Δ[3, :, :]
-# Δ4 = Δ[4, :, :]
+for (i, T) in enumerate(Ts)
+    for (j, L) in enumerate(Ls)
+        χ = @time pairfield_susceptibility(T, symmetry, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic)
+        if symmetry == "s-wave"
+            χs[i, j] = χ
+        else
+            χs[i, j, :, :] = χ
+        end
+    end
+end
 
-# Δ̃1 = circshift(Δ1, (-1, 0)) # mapping between +x̂ and -x̂
-# Δ̃2 = circshift(Δ2, (0, 1)) # mapping between +ŷ and -ŷ
+p = plot()
+cmap = ["blue"]#cgrad(:matter, length(Ls), categorical=true)
+for (j, L) in enumerate(Ls)
+    if symmetry == "s-wave"
+        plot!(Ts, χs[:, j], color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(Ts, χs[:, j], color=cmap[j], label="L=$L", xaxis=:log10)
+    else
+        plot!(Ts, χs[:, j, 1, 1], color=cmap[j], ls=:dash, label=nothing, xaxis=:log10)
+        scatter!(Ts, χs[:, j, 1, 1], color=cmap[j], label="x̂, L=$L", xaxis=:log10)
+        plot!(Ts, χs[:, j, 2, 2], color=cmap[j], ls=:dashdot, label=nothing, xaxis=:log10)
+        scatter!(Ts, χs[:, j, 2, 2], color=cmap[j], label="ŷ, L=$L", xaxis=:log10)
+        plot!(Ts, χs[:, j, 3, 3], color="red", label=nothing, xaxis=:log10)
+        scatter!(Ts, χs[:, j, 3, 3], color="red", label="on-site, L=$L", xaxis=:log10)
+    end
+end
+title!("Susceptibility for J=$J")
+xlabel!("T")
+ylabel!("χ")
 
-# @show maximum(Δ̃1 - Δ3)
-# @show maximum(Δ̃2 - Δ4)
+# plot(Ts, χs, color="blue", label=nothing, xaxis=:log10)
+# scatter!(Ts, χs, color="blue", label="$symmetry", xaxis=:log10)
+# title!("Susceptibility for $L × $L system for J=$J")
+# xlabel!("T")
+# ylabel!("χ")

@@ -52,12 +52,23 @@ function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real,
 
     # Construct the pairfield susceptibility
     if symmetry == "s-wave"
-        return swave_χ(T, E=E, U=U)
+        χ = swave_χ(T, E=E, U=U)
+        χ0 = sum(χ)
     elseif symmetry == "d-wave"
-        return dwave_χ(T, L=L, E=E, U=U)
+        χ = dwave_χ(T, L=L, E=E, U=U)
+        χ0 = zeros(3, 3)
+        for (b1, i) in enumerate(1:(L*L):(3*L*L))
+            for (b2, j) in enumerate(1:(L*L):(3*L*L))
+                χδδ = χ[i:(i+L*L-1), j:(j+L*L-1)]
+                # take the sum of this guy 
+                χ0[b1, b2] = sum(χδδ)
+            end
+        end
     else
         @error "Symmetry $symmetry not recognized"
     end
+
+    return χ0
 end
 
 function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Float64}=nothing)
@@ -163,7 +174,7 @@ function dwave(T::Real; L, E, U, V0, V1)
     end
     P = (1 .- fnm) ./ Enm
 
-    # the s-wave sector. This is in the (5,5) block of M matrix
+    # the s-wave sector. This is in the (3,3) block of M matrix
     @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
     @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
     PUU = reshape(PUU, Ntot, N * N)
@@ -171,17 +182,13 @@ function dwave(T::Real; L, E, U, V0, V1)
     M[3, 3] = -V0 * PUU * UU
 
     # make lists of the nearest-neighbour sites 
-    # Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
     Rsites, Usites, onsites = [], [], []
     for r in 1:Ntot
         nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
         push!(Rsites, nnr[1])
         push!(Usites, nnr[2])
-        # push!(Lsites, nnr[3])
-        # push!(Dsites, nnr[4])
         push!(onsites, r)
     end
-    # sites = [Rsites, Usites, Lsites, Dsites, onsites]
     sites = [Rsites, Usites, onsites]
 
     # iterate through each of the 3×3 blocks
@@ -195,6 +202,7 @@ function dwave(T::Real; L, E, U, V0, V1)
             if b == 3 # only δ=0 term gets V0, not δ'=0! 
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
             else # bond terms have potential V1 
+                # multiply by 2 bc we are only considering a 3×3 matrix
                 Mblock = 2 * dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
             end
 
