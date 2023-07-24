@@ -16,8 +16,8 @@ include("../../src/results.jl")
 L = 17 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-V0 = -2.3
-V1 = 0
+V0 = 1
+V1 = -1.5
 savefigs = true
 
 # read files 
@@ -180,8 +180,8 @@ for J in Js_to_plot
     end
 end
 
-p = plot(ps_real..., layout=Plots.grid(2, 5,
-        widths=[1 / 5 for _ in 1:5]), size=(1500, 800), aspect_ratio=:equal, plot_title=" LGE Δ(V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice")
+p = plot(ps_real..., layout=Plots.grid(2, 6,
+        widths=[1 / 6 for _ in 1:6]), size=(1500, 800), aspect_ratio=:equal, plot_title=" LGE Δ(V0=$V0, V1=$V1, θ=$(θ_to_π(θ)), ϕx=$(θ_to_π(ϕx)), ϕy=$(θ_to_π(ϕy))) for $L × $L lattice")
 
 if savefigs
     savefig(p, joinpath(@__DIR__, "figures", "real_spatial_profile_$(L)L_$(V0)V0_$(V1)V1.pdf"))

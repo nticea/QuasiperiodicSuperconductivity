@@ -143,12 +143,12 @@ end
 
 function dwave(T::Real; L, E, U, V0, V1)
     println("d-wave configuration")
-    N = size(U)[2]#L^2
+    N = size(U)[2]
     Ntot = L^2
-    Uconj = conj.(U) # This is U*
+    Uconj = conj.(U) # This is U^*
 
     # Initialize the M matrix 
-    M = Matrix{Matrix{Float64}}(undef, 5, 5)
+    M = Matrix{Matrix{Float64}}(undef, 3, 3)
 
     # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
     fs = fermi.(E, T)
@@ -165,32 +165,34 @@ function dwave(T::Real; L, E, U, V0, V1)
     @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
     PUU = reshape(PUU, Ntot, N * N)
     UU = reshape(UU, N * N, Ntot)
-    M[5, 5] = -V0 * PUU * UU
+    M[3, 3] = -V0 * PUU * UU
 
     # make lists of the nearest-neighbour sites 
-    Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
+    # Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
+    Rsites, Usites, onsites = [], [], []
     for r in 1:Ntot
         nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
         push!(Rsites, nnr[1])
         push!(Usites, nnr[2])
-        push!(Lsites, nnr[3])
-        push!(Dsites, nnr[4])
+        # push!(Lsites, nnr[3])
+        # push!(Dsites, nnr[4])
         push!(onsites, r)
     end
-    sites = [Rsites, Usites, Lsites, Dsites, onsites]
+    # sites = [Rsites, Usites, Lsites, Dsites, onsites]
+    sites = [Rsites, Usites, onsites]
 
-    # iterate through each of the 5×5 blocks
+    # iterate through each of the 3×3 blocks
     for bd in CartesianIndices(M)
         (b, d) = Tuple(bd)
 
         # don't do the s-wave component (we've done it already)
-        if !(b == 5 && d == 5)
+        if !(b == 3 && d == 3)
             b_sites, d_sites = sites[b], sites[d]
 
-            if b == 5 # only δ=0 term gets V0, not δ'=0! 
+            if b == 3 # only δ=0 term gets V0, not δ'=0! 
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
             else # bond terms have potential V1 
-                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
+                Mblock = 2 * dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
             end
 
             # fill in the matrix 
