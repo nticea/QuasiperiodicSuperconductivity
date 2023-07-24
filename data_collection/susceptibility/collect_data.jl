@@ -17,8 +17,8 @@ L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic = [args[n] for n in 1:length(args
 L = Int(L)
 periodic = Bool(periodic)
 
-Ts = expspace(1e-5, 1, 20) # temperature 
-symmetries = ["d-wave", "s-wave"] # model symmetry 
+Ts = expspace(-5, 1, 20) # temperature 
+symmetries = ["d-wave"] # model symmetry 
 
 for T in Ts
     for symmetry in symmetries
