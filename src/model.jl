@@ -124,6 +124,16 @@ function site_to_coordinate(r; L::Int)
     return vec[r]
 end
 
+function rvec_to_2D(vec)
+    L = Int(sqrt(length(vec)))
+    mat = zeros(L, L)
+    for r in 1:length(vec)
+        x, y = site_to_coordinate(r, L=L)
+        mat[x, y] = vec[r]
+    end
+    return mat
+end
+
 function coordinate_to_configuration_space(x, y; L::Int, Q::Real, θ::Union{Real,Nothing})
     # prepare the vectors 
     r = [x + floor(Int, L / 2); y + floor(Int, L / 2)]

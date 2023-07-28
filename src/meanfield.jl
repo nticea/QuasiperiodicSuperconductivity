@@ -8,6 +8,7 @@ using Einsum
 using Interpolations
 using LoopVectorization
 using Polynomials
+using FFTW
 
 include("../src/results.jl")
 include("../src/model.jl")
@@ -34,7 +35,7 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
     return λ, Δ̃
 end
 
-function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Float64}=nothing)
+function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Real}=nothing)
     # Construct the non-interacting Hamiltonian matrix
     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
 
@@ -71,12 +72,81 @@ function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real,
     return χ0
 end
 
-function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Float64}=nothing)
+function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Real}=nothing)
     # Construct the non-interacting Hamiltonian matrix
-    χ = pairfield_susceptibility(T, symmetry, L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic, Λ=Λ)
-    if symmetry == "s-wave"
-        @einsimd Δ := χ[r, r]
+    N = L * L
+    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+    # Diagonalize this Hamiltonian
+    E, U = diagonalize_hamiltonian(H0)
+
+    if !isnothing(Λ)
+        @warn "Keeping only states close to εf"
+        sortidx = sortperm(E)
+        Ẽ = E[sortidx]
+        Ũ = U[:, sortidx]
+        E = Ẽ[Ẽ.<Λ.&&Ẽ.>-Λ]
+        U = Ũ[:, Ẽ.<Λ.&&Ẽ.>-Λ]
     end
+    # We need to transform each of the eigenvectors into 2D space! 
+    function fourier_transform_U(u; minus=false)
+        # first, map back to 2D space 
+        u = reshape(u, L, L)
+
+        # take FT along both spatial dimensions 
+        if !minus # this is the expression for U_{q}
+            uq = fft(u)
+        else # this is the expression for U_{-q}
+            uq = conj.(fft(conj.(u)))
+        end
+
+        # reshape it back 
+        # and normalize. FFTW does not normalize!!
+        uq = reshape(uq, N) ./ N
+
+        return uq
+    end
+
+    # perform a Fourier transform along the real space dim
+    Uq = fourier_transform_U.(eachcol(U))
+    Uq = hcat(Uq...)
+    Uminusq = fourier_transform_U.(eachcol(U), minus=true)
+    Uminusq = hcat(Uminusq...)
+    Uq_conj = conj.(Uq)
+    Uminusq_conj = conj.(Uminusq)
+
+    # make the prefactor
+    fs = fermi.(E, T)
+    fnm = zeros(N, N)
+    Enm = zeros(N, N)
+    for i in 1:N
+        fnm[:, i] = fs .+ fs[i]
+        Enm[:, i] = E .+ E[i]
+    end
+    Pnm = (1 .- fnm) ./ Enm
+
+    # Construct the pairfield susceptibility
+    if symmetry == "s-wave"
+        # This code is equivalent to the following commented out code
+        # @einsimd Tq[n, m] := Uminusq_conj[q, n] * Uq_conj[q, m]
+        # @einsimd Tl[n, m] := Uminusq[l, n] * Uq[l, m] + Uq[l, n] * Uminusq[l, m]
+
+        Tq = transpose(Uminusq_conj) * Uq_conj
+        Tl1 = transpose(Uminusq) * Uq
+        Tl2 = transpose(Uq) * Uminusq
+        Tl = Tl1 + Tl2
+        @einsimd χ0 := Pnm[n, m] * Tq[n, m] * Tl[n, m]
+    
+    elseif symmetry == "d-wave"
+        @error "Not yet implemented"
+        χ0 = nothing
+    
+    else
+        @error "Symmetry $symmetry not recognized"
+    end
+
+    @show χ0
+    return real.(χ0)
 end
 
 function return_M(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)

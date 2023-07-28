@@ -12,10 +12,11 @@ include("../../src/results.jl")
 
 ## PARAMETERS ## 
 
-L = 11 # the full system is L × L 
+L = 23 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
+figpath = mkpath(joinpath(@__DIR__, "figures"))
 
 # read files 
 if savefigs
@@ -38,6 +39,7 @@ end
 # extract only the parameters we are interested in 
 df = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q), :]
 Js = sort(unique(df.J))
+Js = Js[1:2:end]
 
 ps = []
 for symmetry in ["d-wave"]
@@ -49,29 +51,34 @@ for symmetry in ["d-wave"]
         χs = dfJ.χ
         if length(Ts) > 0
 
-            χx = [a[1] for a in χs]
-            χy = [a[5] for a in χs]
-            χos = [a[9] for a in χs]
-            plot!(px, Ts, χx, color=cmap[j], label=nothing, xaxis=:log10)
-            scatter!(px, Ts, χx, color=cmap[j], label="J=$J", xaxis=:log10)
-            plot!(py, Ts, χy, color=cmap[j], label=nothing, xaxis=:log10)
-            scatter!(py, Ts, χy, color=cmap[j], label="J=$J", xaxis=:log10)
-            plot!(pos, Ts, χos, color=cmap[j], label=nothing, xaxis=:log10)
-            scatter!(pos, Ts, χos, color=cmap[j], label="J=$J", xaxis=:log10)
+            # on-site
+            χswave = 1 / (L * L) * [a[9] for a in χs]
 
-            title!(px, "Susceptibility (x̂)")
+            # make the d-wave components 
+            xx = [a[1] for a in χs]
+            yy = [a[5] for a in χs]
+            xy = [a[2] for a in χs]
+            yx = [a[4] for a in χs]
+            χdwave = 1 / (L * L) * (xx + yy - xy - yx)
+
+            plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
+            scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J", xaxis=:log10)
+            plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+            scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J", xaxis=:log10)
+
+            title!(px, "Susceptibility (d-wave)")
             xlabel!(px, "T")
             ylabel!(px, "χ")
-            title!(py, "Susceptibility (ŷ)")
-            xlabel!(py, "T")
-            ylabel!(py, "χ")
-            title!(pos, "Susceptibility (on-site)")
+            title!(pos, "Susceptibility (s-wave)")
             xlabel!(pos, "T")
             ylabel!(pos, "χ")
         end
     end
-    push!(ps, px, py, pos)
+    push!(ps, px, pos)
 end
 
-p = plot(ps..., layout=Plots.grid(1, 3,
-        widths=[1 / 3, 1 / 3, 1 / 3]), size=(1700, 500), plot_title="LGE χ for $L × $L lattice")
+p = plot(ps..., layout=Plots.grid(1, 2,
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="LGE χ for $L × $L lattice")
+if savefigs
+    savefig(p, joinpath(figpath, "susceptibility_$(L)L.pdf"))
+end
