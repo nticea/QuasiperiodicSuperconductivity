@@ -12,7 +12,6 @@ include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 17
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -20,45 +19,54 @@ Q = (√5 - 1) / 2
 periodic = true
 ϕx = 0
 ϕy = 0
-LGE_tol = 1e-2
-BdG_tol = 1e-12
-niter = 500
-
-symmetry = "s-wave"
 J = 0
-T = 1
+Λ = 1
 
-χ_true = @time pairfield_susceptibility(T, symmetry, L=L, t=t, J=J,
-    Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic, Λ=nothing)
-
-# χ_fast = @time uniform_susceptibility(T, symmetry, L=L, t=t, J=J,
-#     Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic, Λ=nothing)
-
-Ts = expspace(-3, 1, 20)
+Ts = expspace(-5, 1, 10)
 Ls = [17, 23, 31, 35]
-χs = zeros(length(Ls), length(Ts))
+χs_dwave = zeros(length(Ls), length(Ts))
+χs_swave = zeros(length(Ls), length(Ts))
+
+
+χ = @time uniform_susceptibility(1e-2, "d-wave", L=55, t=t, J=J,
+    Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic, Λ=1)
+
+@assert 1 == 0
+
 for (i, T) in enumerate(Ts)
     for (j, L) in enumerate(Ls)
-        χ = @time uniform_susceptibility(T, symmetry, L=L, t=t, J=J,
-            Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic, Λ=nothing)
-        if symmetry == "d-wave"
-            # make the d-wave components 
-            xx = χ[1, 1]
-            yy = χ[2, 2]
-            xy = χ[1, 2]
-            yx = χ[2, 1]
-            χ = xx + yy - xy - yx
-        end
-        χs[j, i] = χ / (L * L)
+        χ = @time uniform_susceptibility(T, "d-wave", L=L, t=t, J=J,
+            Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic, Λ=Λ)
+        # make the d-wave components 
+        xx = χ[1, 1]
+        yy = χ[2, 2]
+        xy = χ[1, 2]
+        yx = χ[2, 1]
+
+        χs_dwave[j, i] = xx + yy - xy - yx
+        χs_swave[j, i] = χ[3, 3]
     end
 end
 
-p = plot()
+pswave = plot()
 c = palette(:tab10)
 for (j, L) in enumerate(Ls)
-    plot!(p, Ts, χs[j, :], c=c[j], label=nothing, xaxis=:log10)
-    scatter!(p, Ts, χs[j, :], c=c[j], label="L=$L", xaxis=:log10)
+    plot!(pswave, Ts, χs_swave[j, :], c=c[j], label=nothing, xaxis=:log10)
+    scatter!(pswave, Ts, χs_swave[j, :], c=c[j], label="L=$L", xaxis=:log10)
 end
-title!("$symmetry susceptibility")
+title!("s-wave susceptibility")
 xlabel!("T")
 ylabel!("χ")
+
+pdwave = plot()
+c = palette(:tab10)
+for (j, L) in enumerate(Ls)
+    plot!(pdwave, Ts, χs_dwave[j, :], c=c[j], label=nothing, xaxis=:log10)
+    scatter!(pdwave, Ts, χs_dwave[j, :], c=c[j], label="L=$L", xaxis=:log10)
+end
+title!("d-wave susceptibility")
+xlabel!("T")
+ylabel!("χ")
+
+p = plot(pswave, pdwave, layout=Plots.grid(1, 2,
+        widths=[1 / 2, 1 / 2]), size=(1700, 600), plot_title="LGE χ for $Λ cutoff at J=$J")

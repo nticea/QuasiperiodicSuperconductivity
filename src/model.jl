@@ -134,6 +134,11 @@ function rvec_to_2D(vec)
     return mat
 end
 
+function momentum_components(r::Int; L::Int)
+    x, y = site_to_coordinate(r, L=L)
+    return (2 * π * x / L, 2 * π * y / L)
+end
+
 function coordinate_to_configuration_space(x, y; L::Int, Q::Real, θ::Union{Real,Nothing})
     # prepare the vectors 
     r = [x + floor(Int, L / 2); y + floor(Int, L / 2)]
@@ -179,19 +184,6 @@ function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::
         BSD = B(L=L, Q=Q, θ=θ)
         return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕx) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕy))
     end
-    # Q̃ = floor(Int, Q * L) / L
-    # return J * (cos(2 * π * Q̃ * (x + y)) - cos(2 * π * Q̃ * (x - y)))
-    # if !isnothing(L) && isnothing(θ)
-    #     Q̃ = floor(Int, Q * L) / L
-    #     @error "Flipped the sign!!"
-    #     return J * (cos(2 * π * Q̃ * (x + y)) + cos(2 * π * Q̃ * (x - y)))
-    # elseif isnothing(L) || isnothing(θ)
-    #     @error "Flipped the sign!!"
-    #     return J * (cos(2 * π * Q * (x + y)) + cos(2 * π * Q * (x - y)))
-    # else
-    #     BSD = B(L=L, Q=Q, θ=θ)
-    #     return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y)) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y)))
-    # end
 end
 
 function fermi(ε::Real, T::Real)

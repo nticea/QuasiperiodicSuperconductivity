@@ -17,7 +17,7 @@ L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic = [args[n] for n in 1:length(args
 L = Int(L)
 periodic = Bool(periodic)
 
-Ts = expspace(-5, 1, 20) # temperature 
+Ts = expspace(-9, 1, 20) # temperature 
 symmetries = ["d-wave"] # model symmetry 
 
 for T in Ts
@@ -32,7 +32,7 @@ for T in Ts
 
         ## Tc using LGE ##
         println("Finding χ")
-        χ = @time pairfield_susceptibility(T, symmetry, L=L, t=t, J=J,
+        χ = @time uniform_susceptibility(T, symmetry, L=L, t=t, J=J,
             Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic)
         df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
             ϕx=[ϕx], ϕy=[ϕy], symmetry=[symmetry],

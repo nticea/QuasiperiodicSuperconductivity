@@ -74,20 +74,12 @@ end
 
 function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Real}=nothing)
     # Construct the non-interacting Hamiltonian matrix
-    N = L * L
     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
 
     # Diagonalize this Hamiltonian
     E, U = diagonalize_hamiltonian(H0)
+    rvec = collect(1:L*L)
 
-    if !isnothing(Λ)
-        @warn "Keeping only states close to εf"
-        sortidx = sortperm(E)
-        Ẽ = E[sortidx]
-        Ũ = U[:, sortidx]
-        E = Ẽ[Ẽ.<Λ.&&Ẽ.>-Λ]
-        U = Ũ[:, Ẽ.<Λ.&&Ẽ.>-Λ]
-    end
     # We need to transform each of the eigenvectors into 2D space! 
     function fourier_transform_U(u; minus=false)
         # first, map back to 2D space 
@@ -100,9 +92,14 @@ function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q
             uq = conj.(fft(conj.(u)))
         end
 
+        # uq ./= √N
+        # id = conj.(transpose(uq)) * uq
+        # @show maximum(abs.(id - I))
+        # @assert 1 == 0
+
         # reshape it back 
         # and normalize. FFTW does not normalize!!
-        uq = reshape(uq, N) ./ N
+        uq = reshape(uq, L * L) ./ L
 
         return uq
     end
@@ -112,8 +109,23 @@ function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q
     Uq = hcat(Uq...)
     Uminusq = fourier_transform_U.(eachcol(U), minus=true)
     Uminusq = hcat(Uminusq...)
+
+    if !isnothing(Λ)
+        @warn "Keeping only states close to εf"
+        sortidx = sortperm(E)
+        Ẽ = E[sortidx]
+        Ũq = Uq[:, sortidx]
+        Ũminusq = Uminusq[:, sortidx]
+        E = Ẽ[Ẽ.<Λ.&&Ẽ.>-Λ]
+        Uq = Ũq[:, Ẽ.<Λ.&&Ẽ.>-Λ]
+        Uminusq = Ũminusq[:, Ẽ.<Λ.&&Ẽ.>-Λ]
+    end
+
     Uq_conj = conj.(Uq)
     Uminusq_conj = conj.(Uminusq)
+
+    # number of states we are keeping 
+    N = size(Uq)[2]
 
     # make the prefactor
     fs = fermi.(E, T)
@@ -127,27 +139,50 @@ function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q
 
     # Construct the pairfield susceptibility
     if symmetry == "s-wave"
-        # This code is equivalent to the following commented out code
-        # @einsimd Tq[n, m] := Uminusq_conj[q, n] * Uq_conj[q, m]
-        # @einsimd Tl[n, m] := Uminusq[l, n] * Uq[l, m] + Uq[l, n] * Uminusq[l, m]
-
         Tq = transpose(Uminusq_conj) * Uq_conj
         Tl1 = transpose(Uminusq) * Uq
         Tl2 = transpose(Uq) * Uminusq
         Tl = Tl1 + Tl2
-        @einsimd χ0 := Pnm[n, m] * Tq[n, m] * Tl[n, m]
-    
+        @einsimd χ0 := 1 / (2 * L * L) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
+        χ0 = real.(χ0)
+
     elseif symmetry == "d-wave"
-        @error "Not yet implemented"
-        χ0 = nothing
-    
+        # I also need the x and y components of q for the d-wave prefactor
+        pfs = susceptibility_dwave_prefactors.(rvec, L=L, Q=Q, θ=θ)
+        pfs = hcat(pfs...) # dimensions [δ] x [q]
+        pfsneg = conj.(pfs)
+
+        # multiply by prefactors 
+        χ0 = zeros(3, 3)
+        for δ in 1:3
+            for δp in 1:3
+                # multiply with the prefactor 
+                Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
+                Uminusq_δ = Uminusq .* pfsneg[δp, :]
+                # create the terms 
+                Tq = transpose(Uminusq_conj_δ) * Uq_conj
+                Tl1 = transpose(Uminusq_δ) * Uq
+                Tl2 = transpose(Uq) * Uminusq_δ
+                # sum them together 
+                Tl = Tl1 + Tl2
+                @einsimd χ := 1 / (2 * L * L) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
+                # store the data 
+                χ0[δ, δp] = real.(χ)
+            end
+        end
     else
         @error "Symmetry $symmetry not recognized"
     end
 
     @show χ0
-    return real.(χ0)
+    return χ0
 end
+
+function susceptibility_dwave_prefactors(r::Int; L::Int, Q::Real, θ::Union{Nothing,Real})
+    qx, qy = momentum_components(r, L=L)
+    [exp(1im * qx), exp(1im * qy), 1]
+end
+
 
 function return_M(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)
     # Construct the non-interacting Hamiltonian matrix
