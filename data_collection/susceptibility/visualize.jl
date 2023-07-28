@@ -24,14 +24,10 @@ if savefigs
 end
 files = readdir(joinpath(@__DIR__, "data"))
 df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
-    symmetry=[], T=[], χ=[])
+    T=[], χ=[])
 for f in files
     if endswith(f, ".csv")
         dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
-        # process all of the arrays 
-        if dfi.symmetry[1] == "d-wave"
-            dfi = convert_df_arrays(dfi, "χ")
-        end
         append!(df, dfi)
     end
 end
@@ -42,39 +38,36 @@ Js = sort(unique(df.J))
 Js = Js[1:2:end]
 
 ps = []
-for symmetry in ["d-wave"]
-    cmap = cgrad(:matter, length(Js), categorical=true)
-    px, py, pos = plot(), plot(), plot()
-    for (j, J) in enumerate(Js)
-        dfJ = df[(df.symmetry.==symmetry).&(df.J.==J), :]
-        Ts = dfJ.T
-        χs = dfJ.χ
-        if length(Ts) > 0
+cmap = cgrad(:matter, length(Js), categorical=true)
+px, py, pos = plot(), plot(), plot()
+for (j, J) in enumerate(Js)
+    dfJ = df[(df.J.==J), :]
+    Ts = dfJ.T
+    χs = dfJ.χ
+    if length(Ts) > 0
 
-            # on-site
-            χswave = 1 / (L * L) * [a[9] for a in χs]
+        # on-site
+        χswave = 1 / (L * L) * [a[9] for a in χs]
 
-            # make the d-wave components 
-            xx = [a[1] for a in χs]
-            yy = [a[5] for a in χs]
-            xy = [a[2] for a in χs]
-            yx = [a[4] for a in χs]
-            χdwave = 1 / (L * L) * (xx + yy - xy - yx)
+        # make the d-wave components 
+        xx = [a[1] for a in χs]
+        yy = [a[5] for a in χs]
+        xy = [a[2] for a in χs]
+        yx = [a[4] for a in χs]
+        χdwave = 1 / (L * L) * (xx + yy - xy - yx)
 
-            plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
-            scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J", xaxis=:log10)
-            plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
-            scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J", xaxis=:log10)
+        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J", xaxis=:log10)
+        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J", xaxis=:log10)
 
-            title!(px, "Susceptibility (d-wave)")
-            xlabel!(px, "T")
-            ylabel!(px, "χ")
-            title!(pos, "Susceptibility (s-wave)")
-            xlabel!(pos, "T")
-            ylabel!(pos, "χ")
-        end
+        title!(px, "Susceptibility (d-wave)")
+        xlabel!(px, "T")
+        ylabel!(px, "χ")
+        title!(pos, "Susceptibility (s-wave)")
+        xlabel!(pos, "T")
+        ylabel!(pos, "χ")
     end
-    push!(ps, px, pos)
 end
 
 p = plot(ps..., layout=Plots.grid(1, 2,

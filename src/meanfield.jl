@@ -148,7 +148,7 @@ function uniform_susceptibility(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{
     # multiply by prefactors 
     χ0 = zeros(3, 3)
     δδp = [(1, 1), (2, 2), (1, 2), (2, 1), (3, 3)]
-    for (δ, δp) in enumerate(δδp)
+    for (δ, δp) in δδp
         # multiply with the prefactor 
         Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
         Uminusq_δ = Uminusq .* pfsneg[δp, :]
