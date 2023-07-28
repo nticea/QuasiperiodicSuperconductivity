@@ -39,8 +39,8 @@ function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::
     sites = [Rsites, Usites, Lsites, Dsites, onsites]
     coords = [xcoords, ycoords]
 
-    K = kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
-    Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, t=t)
+    @time K = kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
+    @time Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, t=t)
 
     return K, Π, Δ
 end
@@ -102,11 +102,12 @@ function kinetic_term(sites; U, V, E, f, t)
         Uconj_i, U_i, Uconj_j, U_j = ij_blocks(i_sites, j_sites, U, conj.(U))
         Vconj_i, V_i, Vconj_j, V_j = ij_blocks(i_sites, j_sites, V, conj.(V))
 
+        fminus = 1 .- f
         # calculate the terms 
         @einsimd t1 := f[n] * Uconj_j[r, n] * U_i[r, n]
         @einsimd t2 := f[n] * Uconj_i[r, n] * U_j[r, n]
-        @einsimd t3 := (1 .- f[n]) * V_j[r, n] * Vconj_i[r, n]
-        @einsimd t4 := (1 .- f[n]) * V_i[r, n] * Vconj_j[r, n]
+        @einsimd t3 := fminus[n] * V_j[r, n] * Vconj_i[r, n]
+        @einsimd t4 := fminus[n] * V_i[r, n] * Vconj_j[r, n]
 
         Kx = -2 * t / N * (t1 + t2 + t3 + t4) # factor of 2 from spin 
 
@@ -204,7 +205,15 @@ function Aq(q, i_sites, j_sites, coords; U)
     # make the exponential prefactor 
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
 
-    @einsimd A[n1, n2] := exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
+    # multiply everything together 
+    # @einsimd A[n1, n2] := exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
+
+    # this is way faster! 
+    U1 = Uconj_j .* exp_pf
+    U2 = Uconj_i .* exp_pf
+    t1 = transpose(U1) * U_i
+    t2 = transpose(U2) * U_j
+    A = t1 - t2
 
     return A
 end
@@ -222,7 +231,14 @@ function Dq(q, i_sites, j_sites, coords; V)
     exp_pf = exp.(-1im .* (qx .* x + qy .* y))
 
     # factor of 2 is for the spin ??
-    @einsimd D[n1, n2] := exp_pf[r] * (V_j[r, n1] * Vconj_i[r, n2] - V_i[r, n1] * Vconj_j[r, n2])
+    # @einsimd D[n1, n2] := exp_pf[r] * (V_j[r, n1] * Vconj_i[r, n2] - V_i[r, n1] * Vconj_j[r, n2])
+
+    # this is way faster! 
+    U1 = V_j .* exp_pf
+    U2 = V_i .* exp_pf
+    t1 = transpose(U1) * Vconj_i
+    t2 = transpose(U2) * Vconj_j
+    D = t1 - t2
 
     return D
 end

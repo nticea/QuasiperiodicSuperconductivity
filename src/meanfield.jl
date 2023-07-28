@@ -72,7 +72,7 @@ function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real,
     return χ0
 end
 
-function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Real}=nothing)
+function uniform_susceptibility(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Real}=nothing)
     # Construct the non-interacting Hamiltonian matrix
     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
 
@@ -138,40 +138,29 @@ function uniform_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q
     Pnm = (1 .- fnm) ./ Enm
 
     # Construct the pairfield susceptibility
-    if symmetry == "s-wave"
-        Tq = transpose(Uminusq_conj) * Uq_conj
-        Tl1 = transpose(Uminusq) * Uq
-        Tl2 = transpose(Uq) * Uminusq
+
+
+    # I also need the x and y components of q for the d-wave prefactor
+    pfs = susceptibility_dwave_prefactors.(rvec, L=L, Q=Q, θ=θ)
+    pfs = hcat(pfs...) # dimensions [δ] x [q]
+    pfsneg = conj.(pfs)
+
+    # multiply by prefactors 
+    χ0 = zeros(3, 3)
+    δδp = [(1, 1), (2, 2), (1, 2), (2, 1), (3, 3)]
+    for (δ, δp) in enumerate(δδp)
+        # multiply with the prefactor 
+        Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
+        Uminusq_δ = Uminusq .* pfsneg[δp, :]
+        # create the terms 
+        Tq = transpose(Uminusq_conj_δ) * Uq_conj
+        Tl1 = transpose(Uminusq_δ) * Uq
+        Tl2 = transpose(Uq) * Uminusq_δ
+        # sum them together 
         Tl = Tl1 + Tl2
-        @einsimd χ0 := 1 / (2 * L * L) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
-        χ0 = real.(χ0)
-
-    elseif symmetry == "d-wave"
-        # I also need the x and y components of q for the d-wave prefactor
-        pfs = susceptibility_dwave_prefactors.(rvec, L=L, Q=Q, θ=θ)
-        pfs = hcat(pfs...) # dimensions [δ] x [q]
-        pfsneg = conj.(pfs)
-
-        # multiply by prefactors 
-        χ0 = zeros(3, 3)
-        for δ in 1:3
-            for δp in 1:3
-                # multiply with the prefactor 
-                Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
-                Uminusq_δ = Uminusq .* pfsneg[δp, :]
-                # create the terms 
-                Tq = transpose(Uminusq_conj_δ) * Uq_conj
-                Tl1 = transpose(Uminusq_δ) * Uq
-                Tl2 = transpose(Uq) * Uminusq_δ
-                # sum them together 
-                Tl = Tl1 + Tl2
-                @einsimd χ := 1 / (2 * L * L) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
-                # store the data 
-                χ0[δ, δp] = real.(χ)
-            end
-        end
-    else
-        @error "Symmetry $symmetry not recognized"
+        @einsimd χ := 1 / (2 * L * L) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
+        # store the data 
+        χ0[δ, δp] = real.(χ)
     end
 
     @show χ0

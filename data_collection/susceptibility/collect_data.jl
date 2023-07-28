@@ -18,27 +18,23 @@ L = Int(L)
 periodic = Bool(periodic)
 
 Ts = expspace(-9, 1, 20) # temperature 
-symmetries = ["d-wave"] # model symmetry 
+symmetry = "d-wave" # model symmetry 
 
 for T in Ts
-    for symmetry in symmetries
+    @show J, symmetry, T
 
-        @show J, symmetry, T
+    ## SAVING ##  
+    timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
+    mkpath(joinpath(@__DIR__, "data"))
+    savepath = joinpath(@__DIR__, "data", "$(L)L_$(J)J_$(symmetry)" * timestamp * ".csv")
 
-        ## SAVING ##  
-        timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
-        mkpath(joinpath(@__DIR__, "data"))
-        savepath = joinpath(@__DIR__, "data", "$(L)L_$(J)J_$(symmetry)" * timestamp * ".csv")
-
-        ## Tc using LGE ##
-        println("Finding χ")
-        χ = @time uniform_susceptibility(T, symmetry, L=L, t=t, J=J,
-            Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic)
-        df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
-            ϕx=[ϕx], ϕy=[ϕy], symmetry=[symmetry],
-            T=[T], χ=[χ])
-        CSV.write(savepath, df)
-        flush(stdout)
-
-    end
+    ## Tc using LGE ##
+    println("Finding χ")
+    χ = @time uniform_susceptibility(T, symmetry, L=L, t=t, J=J,
+        Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic)
+    df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
+        ϕx=[ϕx], ϕy=[ϕy], symmetry=[symmetry],
+        T=[T], χ=[χ])
+    CSV.write(savepath, df)
+    flush(stdout)
 end

@@ -12,7 +12,7 @@ include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ##
-L = 55
+L = 17
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
