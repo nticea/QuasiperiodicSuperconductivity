@@ -1,4 +1,0 @@
-  Activating project at `~/code/QuasiperiodicSuperconductivity`
-┌ Warning: The call to compilecache failed to create a usable precompiled cache file for CSV [336ed68f-0bac-5ca0-87d4-7b16caf5d00b]
-│   exception = ArgumentError: Invalid checksum in cache file /home/users/nticea/.julia/compiled/v1.9/CSV/HHBkp_ffsEU.so.
-└ @ Base loading.jl:1783
