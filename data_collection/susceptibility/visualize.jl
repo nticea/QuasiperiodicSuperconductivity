@@ -12,10 +12,10 @@ include("../../src/results.jl")
 
 ## PARAMETERS ## 
 
-L = 23 # the full system is L × L 
+Ls = [67, 89, 95, 105] # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-savefigs = false
+savefigs = true
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 
 # read files 
@@ -28,50 +28,61 @@ df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
 for f in files
     if endswith(f, ".csv")
         dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+        dfi = convert_df_arrays(dfi, "χ")
         append!(df, dfi)
     end
 end
 
-# extract only the parameters we are interested in 
-df = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q), :]
-Js = sort(unique(df.J))
-Js = Js[1:2:end]
+if length(Ls) == 1
+    cmap = ["red"]
+else
+    cmap = cgrad(:matter, length(Ls), categorical=true)
+end
 
-ps = []
-cmap = cgrad(:matter, length(Js), categorical=true)
-px, py, pos = plot(), plot(), plot()
-for (j, J) in enumerate(Js)
-    dfJ = df[(df.J.==J), :]
-    Ts = dfJ.T
-    χs = dfJ.χ
-    if length(Ts) > 0
+px, pos = plot(), plot()
+for (l, L) in enumerate(Ls)
+    # extract only the parameters we are interested in 
+    dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q), :]
+    Js = sort(unique(dfL.J))
 
-        # on-site
-        χswave = 1 / (L * L) * [a[9] for a in χs]
+    for (j, J) in enumerate(Js)
+        dfJ = dfL[(dfL.J.==J), :]
+        Ts = dfJ.T
+        χs = dfJ.χ
 
-        # make the d-wave components 
-        xx = [a[1] for a in χs]
-        yy = [a[5] for a in χs]
-        xy = [a[2] for a in χs]
-        yx = [a[4] for a in χs]
-        χdwave = 1 / (L * L) * (xx + yy - xy - yx)
+        #sortidx = sortperm(Ts)
+        #Ts = Ts[sortidx]
+        #χx = χs[sortidx]
 
-        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J", xaxis=:log10)
-        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J", xaxis=:log10)
+        if length(Ts) > 0
 
-        title!(px, "Susceptibility (d-wave)")
-        xlabel!(px, "T")
-        ylabel!(px, "χ")
-        title!(pos, "Susceptibility (s-wave)")
-        xlabel!(pos, "T")
-        ylabel!(pos, "χ")
+            # on-site
+            χswave = [a[9] for a in χs]
+
+            # make the d-wave components 
+            xx = [a[1] for a in χs]
+            yy = [a[5] for a in χs]
+            xy = [a[2] for a in χs]
+            yx = [a[4] for a in χs]
+            χdwave = 1 / 4 * (xx + yy - xy - yx)
+
+            #plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
+            scatter!(px, Ts, χdwave, color=cmap[l], label="J=$J, L=$L", xaxis=:log10)
+            #plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+            scatter!(pos, Ts, χswave, color=cmap[l], label="J=$J, L=$L", xaxis=:log10)
+
+            title!(px, "Susceptibility (d-wave)")
+            xlabel!(px, "T")
+            ylabel!(px, "χ")
+            title!(pos, "Susceptibility (s-wave)")
+            xlabel!(pos, "T")
+            ylabel!(pos, "χ")
+        end
     end
 end
 
-p = plot(ps..., layout=Plots.grid(1, 2,
-        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="LGE χ for $L × $L lattice")
+p = plot(px, pos, layout=Plots.grid(1, 2,
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility")
 if savefigs
     savefig(p, joinpath(figpath, "susceptibility_$(L)L.pdf"))
 end

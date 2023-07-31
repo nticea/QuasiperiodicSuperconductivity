@@ -137,10 +137,7 @@ function uniform_susceptibility(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{
     end
     Pnm = (1 .- fnm) ./ Enm
 
-    # Construct the pairfield susceptibility
-
-
-    # I also need the x and y components of q for the d-wave prefactor
+    # I need the x and y components of q for the d-wave prefactor
     pfs = susceptibility_dwave_prefactors.(rvec, L=L, Q=Q, θ=θ)
     pfs = hcat(pfs...) # dimensions [δ] x [q]
     pfsneg = conj.(pfs)
