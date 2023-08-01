@@ -78,5 +78,52 @@ end
 p = plot(px, pos, layout=Plots.grid(1, 2,
         widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility")
 if savefigs
-    savefig(p, joinpath(figpath, "susceptibility.pdf"))
+    savefig(p, joinpath(figpath, "susceptibility_J_$(L)L.pdf"))
+end
+
+# also, plot the value of each J at various temperatures 
+Ts = sort(unique(dfL.T))
+Ts = Ts[1:1:end]
+cmap = cgrad(:viridis, length(Ts), categorical=true)
+
+ptemp_s = plot()
+ptemp_d = plot()
+
+for (i, T) in enumerate(Ts)
+    dfT = dfL[(dfL.T.==T), :]
+    Js = dfT.J
+    χs = dfT.χ
+
+    sortidx = sortperm(Js)
+    Js = Js[sortidx]
+    χs = χs[sortidx]
+
+    # on-site
+    χswave = [a[9] for a in χs]
+
+    # make the d-wave components 
+    xx = [a[1] for a in χs]
+    yy = [a[5] for a in χs]
+    xy = [a[2] for a in χs]
+    yx = [a[4] for a in χs]
+    χdwave = 1 / 4 * (xx + yy - xy - yx)
+
+    plot!(ptemp_s, Js, χswave, label=nothing, c=cmap[i])
+    scatter!(ptemp_s, Js, χswave, c=cmap[i], label=nothing)
+
+    plot!(ptemp_d, Js, χdwave, label=nothing, c=cmap[i])
+    scatter!(ptemp_d, Js, χdwave, c=cmap[i], label="T=$T")
+
+    title!(ptemp_d, "Susceptibility (d-wave)")
+    xlabel!(ptemp_d, "J")
+    ylabel!(ptemp_d, "χ")
+    title!(ptemp_s, "Susceptibility (s-wave)")
+    xlabel!(ptemp_s, "J")
+    ylabel!(ptemp_s, "χ")
+end
+
+p2 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility")
+if savefigs
+    savefig(p2, joinpath(figpath, "susceptibility_temp_$(L)L.pdf"))
 end
