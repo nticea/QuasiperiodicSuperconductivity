@@ -44,9 +44,9 @@ for (j, J) in enumerate(Js)
     Ts = dfJ.T
     χs = dfJ.χ
 
-    #sortidx = sortperm(Ts)
-    #Ts = Ts[sortidx]
-    #χx = χs[sortidx]
+    sortidx = sortperm(Ts)
+    Ts = Ts[sortidx]
+    χs = χs[sortidx]
 
     if length(Ts) > 0
 
@@ -60,17 +60,11 @@ for (j, J) in enumerate(Js)
         yx = [a[4] for a in χs]
         χdwave = 1 / 4 * (xx + yy - xy - yx)
 
-        #plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
+        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
         scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
-        # now plot the error
-        T̂, χ̂, a, b, err = fit_χ(Ts, χdwave)
-        #plot!(px, T̂, χ̂, color="red", xaxis=:log10, label="Error: $(round(err,digits=2))")
 
-        #plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
         scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
-        # now plot the error
-        T̂, χ̂, a, b, err = fit_χ(Ts, χswave)
-        #plot!(pos, T̂, χ̂, color="red", xaxis=:log10, label="Error: $(round(err,digits=2))")
 
         title!(px, "Susceptibility (d-wave)")
         xlabel!(px, "T")
