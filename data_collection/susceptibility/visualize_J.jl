@@ -98,6 +98,9 @@ for (i, T) in enumerate(Ts)
     Js = Js[sortidx]
     χs = χs[sortidx]
 
+    χs = χs[Js.>=0.05.&&Js.<=0.3]
+    Js = Js[Js.>=0.05.&&Js.<=0.3]
+
     # on-site
     χswave = [a[9] for a in χs]
 
