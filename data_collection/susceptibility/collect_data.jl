@@ -22,15 +22,15 @@ Ts = expspace(-4, 1, 50) # temperature
 for T in Ts
     @show L, J, T
 
+    ## CALCULATION ## 
+    println("Finding χ")
+    χ = @time uniform_susceptibility(T, L=L, t=t, J=J,
+        Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic)
+
     ## SAVING ##  
     timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
     mkpath(joinpath(@__DIR__, "data"))
     savepath = joinpath(@__DIR__, "data", "$(L)L_$(J)J" * timestamp * ".csv")
-
-    ## Tc using LGE ##
-    println("Finding χ")
-    χ = @time uniform_susceptibility(T, L=L, t=t, J=J,
-        Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic)
     df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
         ϕx=[ϕx], ϕy=[ϕy],
         T=[T], χ=[χ])
