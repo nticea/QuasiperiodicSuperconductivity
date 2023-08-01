@@ -26,3 +26,29 @@ function load_dfs()
 
     return df
 end
+
+function fit_χ(Ts, χs; nbits::Real=3)
+    # split up Ts into 5 bits 
+    sortidx = sortperm(Ts)
+    Ts = Ts[sortidx]
+    χs = χs[sortidx]
+
+    wl = ceil(Int, length(Ts) / nbits) # window length 
+    errs = []
+    for idx in 1:(length(Ts)-wl)
+        T = log10.(Ts[idx:idx+wl])
+        χ = χs[idx:idx+wl]
+        b, a = linear_fit(T, χ)
+        χ̂ = a .* T .+ b
+        err = norm(χ - χ̂)
+        push!(errs, err)
+    end
+
+    minerr = argmin(errs)
+    T = log10.(Ts[minerr:minerr+wl])
+    χ = χs[minerr:minerr+wl]
+    b, a = linear_fit(T, χ)
+    χ̂ = a .* T .+ b
+
+    return 10 .^ T, χ̂, a, b, errs[minerr]
+end
