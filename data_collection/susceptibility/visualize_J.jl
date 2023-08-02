@@ -98,8 +98,8 @@ for (i, T) in enumerate(Ts)
     Js = Js[sortidx]
     χs = χs[sortidx]
 
-    χs = χs[Js.>=0.05.&&Js.<=0.3]
-    Js = Js[Js.>=0.05.&&Js.<=0.3]
+    χs = χs[Js.>=1.6.&&Js.<=2.4]
+    Js = Js[Js.>=1.6.&&Js.<=2.4]
 
     # on-site
     χswave = [a[9] for a in χs]
@@ -115,7 +115,7 @@ for (i, T) in enumerate(Ts)
     scatter!(ptemp_s, Js, χswave, c=cmap[i], label=nothing)
 
     plot!(ptemp_d, Js, χdwave, label=nothing, c=cmap[i])
-    scatter!(ptemp_d, Js, χdwave, c=cmap[i], label="T=$T")
+    scatter!(ptemp_d, Js, χdwave, c=cmap[i], label=nothing)
 
     title!(ptemp_d, "Susceptibility (d-wave)")
     xlabel!(ptemp_d, "J")
