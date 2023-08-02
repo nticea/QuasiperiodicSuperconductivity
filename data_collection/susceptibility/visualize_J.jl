@@ -98,8 +98,8 @@ for (i, T) in enumerate(Ts)
     Js = Js[sortidx]
     χs = χs[sortidx]
 
-    χs = χs[Js.>=1.6.&&Js.<=2.4]
-    Js = Js[Js.>=1.6.&&Js.<=2.4]
+    # χs = χs[Js.>=1.6.&&Js.<=2.4]
+    # Js = Js[Js.>=1.6.&&Js.<=2.4]
 
     # on-site
     χswave = [a[9] for a in χs]
@@ -124,6 +124,9 @@ for (i, T) in enumerate(Ts)
     xlabel!(ptemp_s, "J")
     ylabel!(ptemp_s, "χ")
 end
+# make a colourbar 
+heatmap!(ptemp_s, zeros(2, 2), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
+
 
 p2 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
         widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility")
