@@ -20,7 +20,10 @@ function load_dfs()
         if endswith(f, ".csv")
             dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
             dfi = convert_df_arrays(dfi, "χ")
-            append!(df, dfi)
+            try
+                append!(df, dfi)
+            catch e
+            end
         end
     end
 
