@@ -26,7 +26,9 @@ dfs = load_dfs()
 
 # diagonalize and save the Hamiltonian 
 stamp = "diagonalized_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q.h5"
-scratchpath = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians", stamp)
+scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians")
+mkdir(scratchbase)
+scratchpath = joinpath(scratchbase, stamp)
 
 H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
 E, U = diagonalize_hamiltonian(H0)
