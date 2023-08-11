@@ -15,8 +15,9 @@ include("utilities.jl")
 L = 105 # the full system is L × L 
 Q = (√5 - 1) / 2
 θ = π / 7
-savefigs = true
+savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
+T_cutoff = 1e-2
 
 # read files 
 if savefigs
@@ -24,7 +25,7 @@ if savefigs
 end
 files = readdir(joinpath(@__DIR__, "data"))
 df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
-    T=[], χ=[])
+    T=[], Λ=[], χ=[])
 for f in files
     if endswith(f, ".csv")
         dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
@@ -33,7 +34,7 @@ for f in files
     end
 end
 
-px, pos = plot(), plot()
+px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
 dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q), :]
 Js = sort(unique(dfL.J))
@@ -48,6 +49,10 @@ for (j, J) in enumerate(Js)
     Ts = Ts[sortidx]
     χs = χs[sortidx]
 
+    # consider only the linear regime 
+    # χs = χs[Ts.>=T_cutoff]
+    # Ts = Ts[Ts.>=T_cutoff]
+
     if length(Ts) > 0
 
         # on-site
@@ -60,11 +65,11 @@ for (j, J) in enumerate(Js)
         yx = [a[4] for a in χs]
         χdwave = 1 / 4 * (xx + yy - xy - yx)
 
-        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
+        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
+        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
 
-        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
+        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
+        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
 
         title!(px, "Susceptibility (d-wave)")
         xlabel!(px, "T")
@@ -83,11 +88,11 @@ end
 
 # also, plot the value of each J at various temperatures 
 Ts = sort(unique(dfL.T))
-Ts = Ts[1:1:end]
+Ts = Ts[Ts.>=T_cutoff]
 cmap = cgrad(:viridis, length(Ts), categorical=true)
 
-ptemp_s = plot()
-ptemp_d = plot()
+ptemp_s = plot(margin=10Plots.mm)
+ptemp_d = plot(margin=10Plots.mm)
 
 for (i, T) in enumerate(Ts)
     dfT = dfL[(dfL.T.==T), :]
@@ -97,9 +102,6 @@ for (i, T) in enumerate(Ts)
     sortidx = sortperm(Js)
     Js = Js[sortidx]
     χs = χs[sortidx]
-
-    # χs = χs[Js.>=1.6.&&Js.<=2.4]
-    # Js = Js[Js.>=1.6.&&Js.<=2.4]
 
     # on-site
     χswave = [a[9] for a in χs]
@@ -124,6 +126,7 @@ for (i, T) in enumerate(Ts)
     xlabel!(ptemp_s, "J")
     ylabel!(ptemp_s, "χ")
 end
+
 # make a colourbar 
 heatmap!(ptemp_s, zeros(2, 2), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
 

@@ -10,8 +10,9 @@ using LoopVectorization
 using Polynomials
 using FFTW
 
-include("../src/results.jl")
-include("../src/model.jl")
+include("results.jl")
+include("model.jl")
+include("results.jl")
 
 function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)
     # Construct the non-interacting Hamiltonian matrix
@@ -35,12 +36,36 @@ function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{R
     return λ, Δ̃
 end
 
-function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Real}=nothing)
-    # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real,
+    J::Real, Q::Real, θ::Union{Real,Nothing}=nothing,
+    ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true,
+    Λ::Union{Nothing,Real}=nothing, checkpointpath::Union{String,Nothing}=nothing)
 
-    # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
+    if !isnothing(checkpointpath)
+        # try to load the Hamiltonian corresponding to these parameters 
+        try
+            DH = load_results(checkpointpath)
+            @assert DH.L == L && DH.t == t && DH.J == J && DH.Q == Q && DH.μ == μ && DH.θ == θ && DH.ϕx == ϕx && DH.ϕy == ϕy && DH.periodic == periodic
+            E, U = DH.E, DH.U
+        catch e
+            @show e
+            # Construct the non-interacting Hamiltonian matrix
+            H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+            # Diagonalize this Hamiltonian
+            E, U = diagonalize_hamiltonian(H0)
+
+            # save everything to checkpointpath 
+            DH = DiagonalizedHamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic, E=E, U=U)
+            save_structs(DH, checkpointpath)
+        end
+    else
+        # Construct the non-interacting Hamiltonian matrix
+        H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+        # Diagonalize this Hamiltonian
+        E, U = diagonalize_hamiltonian(H0)
+    end
 
     if !isnothing(Λ)
         @warn "Keeping only states close to εf"
@@ -72,12 +97,37 @@ function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real, J::Real,
     return χ0
 end
 
-function uniform_susceptibility(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true, Λ::Union{Nothing,Real}=nothing)
-    # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+function uniform_susceptibility(T; L::Int, t::Real, J::Real,
+    Q::Real, θ::Union{Real,Nothing}=nothing,
+    ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true,
+    Λ::Union{Nothing,Real}=nothing, checkpointpath::Union{String,Nothing}=nothing)
 
-    # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
+    if !isnothing(checkpointpath)
+        # try to load the Hamiltonian corresponding to these parameters 
+        try
+            DH = load_results(checkpointpath)
+            @assert DH.L == L && DH.t == t && DH.J == J && DH.Q == Q && DH.μ == μ && DH.θ == θ && DH.ϕx == ϕx && DH.ϕy == ϕy && DH.periodic == periodic
+            E, U = DH.E, DH.U
+        catch e
+            @show e
+            # Construct the non-interacting Hamiltonian matrix
+            H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+            # Diagonalize this Hamiltonian
+            E, U = diagonalize_hamiltonian(H0)
+
+            # save everything to checkpointpath 
+            DH = DiagonalizedHamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic, E=E, U=U)
+            save_structs(DH, checkpointpath)
+        end
+    else
+        # Construct the non-interacting Hamiltonian matrix
+        H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+
+        # Diagonalize this Hamiltonian
+        E, U = diagonalize_hamiltonian(H0)
+    end
+
     rvec = collect(1:L*L)
 
     # We need to transform each of the eigenvectors into 2D space! 

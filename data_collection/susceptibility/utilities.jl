@@ -1,9 +1,9 @@
 using DataFrames, CSV
 include("../../src/results.jl")
 
-function already_computed(df; T, L, Q, θ, ϕx, ϕy, J)
+function already_computed(df; T, L, Q, θ, ϕx, ϕy, J, Λ)
     # extract only the parameters we are interested in 
-    df = df[(df.L.==L).&(df.T.==T).&(df.θ.==θ).&(df.Q.==Q).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.J.==J), :]
+    df = df[(df.L.==L).&(df.T.==T).&(df.θ.==θ).&(df.Q.==Q).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.J.==J).&(df.Λ.==Λ), :]
     if size(df)[1] > 0
         println("Already computed!")
         return true
@@ -15,7 +15,7 @@ function load_dfs()
     # read files 
     files = readdir(joinpath(@__DIR__, "data"))
     df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
-        T=[], χ=[])
+        T=[], Λ=[], χ=[])
     for f in files
         if endswith(f, ".csv")
             dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))

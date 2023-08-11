@@ -14,8 +14,8 @@ V1 = 0
 ϕy = 0
 periodic = 1
 
-Ls = [115]
-Js = collect(0:0.2:3)
+Ls = [200, 150]
+Js = collect(0:0.25:3)
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "susceptibility"

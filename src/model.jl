@@ -21,8 +21,28 @@ struct ModelParams
     periodic::Real
 end
 
+struct DiagonalizedHamiltonian
+    L::Int
+    t::Real
+    Q::Real
+    μ::Real
+    θ::Real
+    ϕx::Real
+    ϕy::Real
+    J::Real
+    periodic::Real
+
+    # diagonalization 
+    E
+    U
+end
+
 function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic)
     ModelParams(L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic)
+end
+
+function DiagonalizedHamiltonian(; L, t, Q, μ, θ, ϕx, ϕy, J, periodic, E, U)
+    DiagonalizedHamiltonian(L, t, Q, μ, θ, ϕx, ϕy, J, periodic, E, U)
 end
 
 function expspace(start, stop, length)

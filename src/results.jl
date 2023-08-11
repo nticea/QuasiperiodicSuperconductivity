@@ -1,5 +1,8 @@
 using DataFrames
+using HDF5
+
 include("IndexMatrix.jl")
+include("model.jl")
 
 function update_results!(df::DataFrame; L, λ, J, θ, ϕx, ϕy, V0, V1, T, Δ)
     if isnothing(θ)
@@ -488,4 +491,28 @@ function finite_maximum(matrix)
     else
         return NaN
     end
+end
+
+function save_structs(struc, path::String)
+    function Name(arg)
+        string(arg)
+    end
+    fnames = fieldnames(typeof(struc))
+    h5open(path, "w") do file
+        for fn in fnames
+            n = Name(fn)
+            d = getfield(struc, fn)
+            write(file, n, d)
+        end
+    end
+end
+
+function load_diagonalized_H(loadpath::String)
+    f = h5open(loadpath, "r")
+    d = read(f)
+    @show keys(d)
+    close(f)
+    return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
+        d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["J"],
+        d["periodic"], d["E"], d["U"])
 end

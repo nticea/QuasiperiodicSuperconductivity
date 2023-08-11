@@ -11,29 +11,38 @@ using CurveFit
 
 include("../../src/stiffness.jl")
 include("../../src/meanfield.jl")
+include("../../src/results.jl")
 
-function fit_χ(Ts, χs)
-    # split up Ts into 5 bits 
-    sortidx = sortperm(Ts)
-    Ts = Ts[sortidx]
-    χs = χs[sortidx]
+L = 17
+t = 1 # hopping 
+Q = (√5 - 1) / 2
+μ = 1e-8
+θ = π / 7
+ϕx = 0
+ϕy = 0
+periodic = true
+J = 2
+T = 0
 
-    wl = ceil(Int, length(Ts) / 5) # window length 
-    errs = []
-    for idx in 1:(length(Ts)-wl)
-        T = log10.(Ts[idx:idx+wl])
-        χ = χs[idx:idx+wl]
-        b, a = linear_fit(T, χ)
-        χ̂ = a .* T .+ b
-        err = norm(χ - χ̂)
-        push!(errs, err)
-    end
+stamp = "diagonalized_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q.h5"
+scratchpath = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians", stamp)
 
-    minerr = argmin(errs)
-    T = log10.(Ts[minerr:minerr+wl])
-    χ = χs[minerr:minerr+wl]
-    b, a = linear_fit(T, χ)
-    χ̂ = a .* T .+ b
+H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+E, U = diagonalize_hamiltonian(H0)
+DH = DiagonalizedHamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic, E=E, U=U)
+save_structs(DH, stamp)
 
-    return 10 .^ T, χ̂, a, b, errs[minerr]
-end
+uniform_susceptibility(T, L=L, t=t, J=J,
+    Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, periodic=periodic)
+
+# times = []
+# bytes = []
+# for L in Ls
+#     @show L
+#     H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+#     # Diagonalize this Hamiltonian
+#     res = @timed diagonalize_hamiltonian(H0)
+
+#     push!(times, res.time)
+#     push!(bytes, res.bytes)
+# end

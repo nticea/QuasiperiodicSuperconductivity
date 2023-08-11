@@ -18,13 +18,14 @@ L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic = [args[n] for n in 1:length(args
 L = Int(L)
 periodic = Bool(periodic)
 
-Ts = expspace(-4, 1, 50) # temperature 
+Ts = expspace(-3, 1, 30) # temperature 
+Λ = 0.3
 
 # all the other things we have computed 
 dfs = load_dfs()
 
 for T in Ts
-    if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, J=J)
+    if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, J=J, Λ=Λ)
         @show L, J, T
 
         ## CALCULATION ## 
@@ -38,7 +39,7 @@ for T in Ts
         savepath = joinpath(@__DIR__, "data", "$(L)L_$(J)J" * timestamp * ".csv")
         df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
             ϕx=[ϕx], ϕy=[ϕy],
-            T=[T], χ=[χ])
+            T=[T], χ=[χ], Λ=[Λ])
         CSV.write(savepath, df)
         flush(stdout)
     end
