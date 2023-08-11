@@ -105,11 +105,13 @@ function uniform_susceptibility(T; L::Int, t::Real, J::Real,
     if !isnothing(checkpointpath)
         # try to load the Hamiltonian corresponding to these parameters 
         try
-            DH = load_results(checkpointpath)
+            DH = load_diagonalized_H(checkpointpath)
             @assert DH.L == L && DH.t == t && DH.J == J && DH.Q == Q && DH.μ == μ && DH.θ == θ && DH.ϕx == ϕx && DH.ϕy == ϕy && DH.periodic == periodic
             E, U = DH.E, DH.U
+            println("Loading Hamiltonian...")
         catch e
             @show e
+            println("Diagonalizing again...")
             # Construct the non-interacting Hamiltonian matrix
             H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
 
@@ -121,6 +123,7 @@ function uniform_susceptibility(T; L::Int, t::Real, J::Real,
             save_structs(DH, checkpointpath)
         end
     else
+        println("Diagonalizing again...")
         # Construct the non-interacting Hamiltonian matrix
         H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
 
