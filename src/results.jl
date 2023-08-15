@@ -426,21 +426,56 @@ function to_5N_LGE_Δ(maxev; L)
     end
 
     # now put in the missing blocks
-    Δ1 = evs[1, :, :]
-    Δ2 = evs[2, :, :]
-    Δ3 = circshift(Δ1, (-1, 0)) # mapping between +x̂ and -x̂
-    Δ4 = circshift(Δ2, (0, 1)) # mapping between +ŷ and -ŷ
+    Δx = evs[2, :, :]
+    Δy = evs[3, :, :]
+    Δxminus = circshift(Δx, (-1, 0)) # mapping between +x̂ and -x̂
+    Δyminus = circshift(Δy, (0, 1)) # mapping between +ŷ and -ŷ
     new_evs = zeros(5, L, L)
-    new_evs[1, :, :] = Δ1
-    new_evs[2, :, :] = Δ2
-    new_evs[3, :, :] = Δ3
-    new_evs[4, :, :] = Δ4
-    new_evs[5, :, :] = evs[3, :, :]
+    new_evs[1, :, :] = evs[1, :, :]
+    new_evs[2, :, :] = Δx
+    new_evs[3, :, :] = Δy
+    new_evs[4, :, :] = Δxminus
+    new_evs[5, :, :] = Δyminus
 
     evs_flat = zeros(5 * L * L)
     for (n, i) in enumerate(1:(L*L):(5*L*L))
         evi = new_evs[n, :, :]
         evs_flat[i:(i+L*L-1)] = reshape(evi, L * L)
+    end
+
+    return evs_flat
+end
+
+function to_7N_LGE_Δ(maxev; L)
+    N = L * L * L
+    @assert length(maxev) == 4 * N
+    evs = zeros(4, L, L, L)
+    for (n, i) in enumerate(1:N:4*N)
+        evi = maxev[i:(i+N-1)]
+        evs[n, :, :, :] = reshape(evi, L, L, L)
+    end
+
+    # now put in the missing blocks
+    Δx = evs[2, :, :, :]
+    Δy = evs[3, :, :, :]
+    Δz = evs[4, :, :, :]
+    Δxminus = circshift(Δx, (-1, 0, 0)) # mapping between +x̂ and -x̂
+    Δyminus = circshift(Δy, (0, 1, 0)) # mapping between +ŷ and -ŷ
+    Δzminus = circshift(Δz, (0, 0, 1)) # mapping between +ẑ and -ẑ
+
+    new_evs = zeros(7, L, L, L)
+    new_evs[1, :, :, :] = evs[1, :, :, :] # on-site term 
+    new_evs[2, :, :, :] = Δx
+    new_evs[3, :, :, :] = Δy
+    new_evs[4, :, :, :] = Δxminus
+    new_evs[5, :, :, :] = Δyminus
+    new_evs[6, :, :, :] = Δz
+    new_evs[7, :, :, :] = Δzminus
+
+    evs_flat = zeros(7 * N)
+    for (n, i) in enumerate(1:N:7N)
+        evi = new_evs[n, :, :, :]
+        evs_flat[i:(i+N-1)] = reshape(evi, N)
     end
 
     return evs_flat

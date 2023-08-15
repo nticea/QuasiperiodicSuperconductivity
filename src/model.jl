@@ -6,6 +6,7 @@ using TriangularIndices
 using Tullio
 using Einsum
 using Interpolations
+import Base.copy
 
 struct ModelParams
     L::Int
@@ -15,10 +16,12 @@ struct ModelParams
     θ::Real
     ϕx::Real
     ϕy::Real
+    ϕz::Real
     V0::Real
     V1::Real
     J::Real
     periodic::Real
+    ndims::Int
 end
 
 struct DiagonalizedHamiltonian
@@ -29,64 +32,107 @@ struct DiagonalizedHamiltonian
     θ::Real
     ϕx::Real
     ϕy::Real
+    ϕz::Real
     J::Real
     periodic::Real
+    ndims::Int
 
     # diagonalization 
     E
     U
 end
 
-function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic)
-    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, V0, V1, J, periodic)
+function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims)
+    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims)
 end
 
-function DiagonalizedHamiltonian(; L, t, Q, μ, θ, ϕx, ϕy, J, periodic, E, U)
-    DiagonalizedHamiltonian(L, t, Q, μ, θ, ϕx, ϕy, J, periodic, E, U)
+function copy(m::ModelParams)
+    mnew = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.J, m.periodic, m.ndims)
+end
+
+function DiagonalizedHamiltonian(m::ModelParams; E, U)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, E, U)
+end
+
+function DiagonalizedHamiltonian(m::ModelParams)
+    H0 = noninteracting_hamiltonian(m)
+    E, U = diagonalize_hamiltonian(H0)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, E, U)
 end
 
 function expspace(start, stop, length)
     exp10.(range(start, stop, length=length))
 end
 
-function noninteracting_hamiltonian(; L::Int, t::Real, J::Real, Q::Real, μ::Real,
-    periodic::Bool=true, θ::Union{Nothing,Real}=nothing, ϕx::Real=0, ϕy::Real=0)
+function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false)
     # construct the kinetic part 
-    Ht = square_lattice_kinetic(L=L, t=t, periodic=periodic)
+    Ht = square_lattice_kinetic(m)
 
     # interaction
-    Hint = zeros(L * L) # this is just the diagonal 
-    for x in 1:L
-        for y in 1:L
-            n = coordinate_to_site(x, y, L=L)
-            U_xy = aubry_andre(x + floor(Int, L / 2), y + floor(Int, L / 2), J=J, Q=Q, L=L, θ=θ, ϕx=ϕx, ϕy=ϕy)
-            Hint[n] = -(U_xy + μ)
-        end
-    end
-    Hint = spdiagm(Hint)
+    _, rs = coordinate_map(m)
+    pot = aubry_andre.(rs, m=m)
+    pot .+= μ # add chemical potential 
+    Hint = spdiagm(pot)
     H0 = Ht + Hint
 
     # scale the Hamiltonian
-    #@error "I am using the J-scaled version of H"
-    #H0 = 1 / (1 + J / 2) .* H0
+    if scale_model
+        @warn "I am using the J-scaled version of H"
+        H0 = 1 / (1 + m.J / 2) .* H0
+    end
 
     return H0
 end
 
-function diagonalize_hamiltonian(H)
+function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
     # we must compute all eigenvalues
-    vals, vecs = eigen(Hermitian(Matrix(H)))
-    return vals, vecs
+    if isnothing(loadpath)
+        H = noninteracting_hamiltonian(m)
+        E, U = eigen(Hermitian(Matrix(H)))
+        return E, U
+    end
+
+    # try to load the Hamiltonian corresponding to these parameters 
+    try
+        DH = load_results(loadpath)
+        @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.periodic == m.periodic
+    catch e
+        @show e
+        # save everything to checkpointpath 
+        DH = DiagonalizedHamiltonian(m)
+        save_structs(DH, loadpath)
+    end
+
+    return DH.E, DH.U
 end
 
-function square_lattice_kinetic(; L::Int, t::Real, periodic::Bool=true)
-    g = Graphs.SimpleGraphs.grid((L, L), periodic=periodic)
+function square_lattice_kinetic(m::ModelParams)
+    L, t, periodic, ndims = m.L, m.t, m.periodic, m.ndims
+
+    if ndims == 2
+        g = Graphs.SimpleGraphs.grid((L, L), periodic=periodic)
+    elseif ndims == 3
+        g = Graphs.SimpleGraphs.grid((L, L, L), periodic=periodic)
+    else
+        println("ndims=$ndims not supported (yet?)")
+        return
+    end
+
     H = Graphs.LinAlg.adjacency_matrix(g)
     return -t .* H
 end
 
-function nearest_neighbours(r::Int; L::Int)
-    x, y = site_to_coordinate(r, L=L)
+function nearest_neighbours(r::Int; m::ModelParams)
+    L, ndims = m.L, m.ndims
+
+    if ndims == 2
+        x, y = site_to_coordinate(r, m=m)
+    elseif ndims == 3
+        x, y, z = site_to_coordinate(r, m=m)
+    else
+        println("$ndims dimensions not supported (yet?)")
+        return
+    end
 
     # left 
     if x == 1
@@ -113,59 +159,95 @@ function nearest_neighbours(r::Int; L::Int)
         yD = y - 1
     end
 
-    # convert back to r representation 
-    rL = coordinate_to_site(xL, y, L=L)
-    rU = coordinate_to_site(x, yU, L=L)
-    rR = coordinate_to_site(xR, y, L=L)
-    rD = coordinate_to_site(x, yD, L=L)
+    if ndims == 2
+        # convert back to r representation 
+        rL = coordinate_to_site(xL, y, m=m)
+        rU = coordinate_to_site(x, yU, m=m)
+        rR = coordinate_to_site(xR, y, m=m)
+        rD = coordinate_to_site(x, yD, m=m)
 
-    return rL, rU, rR, rD
+        return rL, rU, rR, rD
+
+    elseif ndims == 3
+        # up 
+        if z == L
+            zU = 1
+        else
+            zU = z + 1
+        end
+
+        # down 
+        if z == 1
+            zD = L
+        else
+            zD = z - 1
+        end
+
+        # convert back to r representation 
+        rL = coordinate_to_site(xL, y, z, m=m)
+        rU = coordinate_to_site(x, yU, z, m=m)
+        rR = coordinate_to_site(xR, y, z, m=m)
+        rD = coordinate_to_site(x, yD, z, m=m)
+        rzU = coordinate_to_site(x, y, zU, m=m)
+        rzD = coordinate_to_site(x, y, zD, m=m)
+
+        return rL, rU, rR, rD, rzU, rzD
+    end
 end
 
-function coordinate_map(; L::Int)
-    mat = Matrix{Tuple{Int64,Int64}}(undef, L, L)
-    for x in 1:L
-        for y in 1:L
-            mat[x, y] = (x, y)
-        end
+function coordinate_map(m::ModelParams)
+    L, ndims = m.L, m.ndims
+
+    if ndims == 2
+        mat = [(x, y) for x in 1:L, y in 1:L]
+        vec = reshape(mat, L * L)
+    elseif ndims == 3
+        mat = [(x, y, z) for x in 1:L, y in 1:L, z in 1:L]
+        vec = reshape(mat, L * L * L)
+    else
+        println("ndims=$ndims not supported (yet?)")
+        return
     end
 
-    vec = reshape(mat, L * L)
     return mat, vec
 end
 
-function coordinate_to_site(x::Int, y::Int; L::Int)
-    _, vec = coordinate_map(L=L)
+function coordinate_to_site(x::Int, y::Int; m::ModelParams)
+    @assert m.ndims == 2
+    _, vec = coordinate_map(m)
     return findall(r -> r == (x, y), vec)[1]
 end
 
-function site_to_coordinate(r; L::Int)
-    _, vec = coordinate_map(L=L)
+function coordinate_to_site(x::Int, y::Int, z::Int; m::ModelParams)
+    @assert m.ndims == 3
+    _, vec = coordinate_map(m)
+    return findall(r -> r == (x, y, z), vec)[1]
+end
+
+function site_to_coordinate(r; m::ModelParams)
+    _, vec = coordinate_map(m)
     return vec[r]
 end
 
-function rvec_to_2D(vec)
-    L = Int(sqrt(length(vec)))
-    mat = zeros(L, L)
-    for r in 1:length(vec)
-        x, y = site_to_coordinate(r, L=L)
-        mat[x, y] = vec[r]
-    end
-    return mat
-end
+function site_to_configuration_space(r0; m::ModelParams)
+    L, ndims = m.L, m.ndims
+    ϕx, ϕy, ϕz = m.ϕx, m.ϕy, m.ϕz
 
-function momentum_components(r::Int; L::Int)
-    x, y = site_to_coordinate(r, L=L)
-    return (2 * π * x / L, 2 * π * y / L)
-end
-
-function coordinate_to_configuration_space(x, y; L::Int, Q::Real, θ::Union{Real,Nothing})
     # prepare the vectors 
-    r = [x + floor(Int, L / 2); y + floor(Int, L / 2)]
-    ϕ = [ϕx; ϕy]
+    if ndims == 2
+        x, y = site_to_coordinate(r0, m=m)
+        r = [x + floor(Int, L / 2); y + floor(Int, L / 2)]
+        ϕ = [ϕx; ϕy]
+    elseif ndims == 3
+        x, y, z = site_to_coordinate(r0, m=m)
+        r = [x + floor(Int, L / 2); y + floor(Int, L / 2); z + floor(Int, L / 2)]
+        ϕ = [ϕx; ϕy; ϕz]
+    else
+        println("$ndims dimensions not supported")
+    end
 
     # make the B matrix 
-    BSD = B(L=L, Q=Q, θ=θ)
+    BSD = Bmatrix(m)
     Binv = inv(BSD)
 
     # compute the new ϕ
@@ -174,15 +256,23 @@ function coordinate_to_configuration_space(x, y; L::Int, Q::Real, θ::Union{Real
     ϕ̃ = mod.(ϕ̃, 2π)  # make ϕ periodic in 2π
 end
 
-function site_to_configuration_space(r; L::Int, Q::Real, θ::Union{Real,Nothing})
-    x, y = site_to_coordinate(r, L=L)
-    coordinate_to_configuration_space(x, y, L=L, Q=Q, θ=θ)
-end
-
-function B(; L::Int, Q::Real, θ::Real)
-    # First, construct R(θ) in 2D
+function Bmatrix(m::ModelParams)
+    L, Q, θ, ndims = m.L, m.Q, m.θ, m.ndims
+    if isnothing(θ)
+        θ = π / 2
+    end
     c, s = cos(θ), sin(θ)
-    Rθ = [c s; s -c]
+
+    #Rθ = [c s; s -c]
+    if ndims == 2
+        Rθ = [c -s; s c]
+    elseif ndims == 3
+        Rθ = [c -s 0; s c 0; 0 0 1] # this is around y axis 
+    # Rθ = [1 0 0; 0 c -s; 0 s c] this is around x axis 
+    else
+        println("ndims=$ndims not supported (yet?)")
+        return
+    end
 
     # Multiply by Q (the irrational number) to get B 
     Bmat = Q * Rθ
@@ -196,13 +286,26 @@ function B(; L::Int, Q::Real, θ::Real)
     return BSD
 end
 
-function aubry_andre(x, y; J::Real, Q::Real, L::Union{Int,Nothing}=nothing, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0)
-    if isnothing(θ)
-        Q̃ = floor(Int, Q * L) / L
-        return J * (cos(2 * π * Q̃ * (x + y) + ϕx) - cos(2 * π * Q̃ * (x - y) + ϕy))
+function aubry_andre(r; m::ModelParams)
+    J, Q, L, θ, ϕx, ϕy, ϕz, ndims = m.J, m.Q, m.L, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ndims
+
+    # make the rotation matrix 
+    BSD = Bmatrix(m)
+
+    if ndims == 2
+        x, y = r
+        t1 = 2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕx
+        t2 = 2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕy
+        return J * (cos(t1) + cos(t2))
+    elseif ndims == 3
+        x, y, z = r
+        t1 = 2 * π * (BSD[1, 1] * x + BSD[1, 2] * y + BSD[1, 3] * z) + ϕx
+        t2 = 2 * π * (BSD[2, 1] * x + BSD[2, 2] * y + BSD[2, 3] * z) + ϕy
+        t3 = 2 * π * (BSD[3, 1] * x + BSD[3, 2] * y + BSD[3, 3] * z) + ϕz
+        return J * (cos(t1) + cos(t2) + cos(t3))
     else
-        BSD = B(L=L, Q=Q, θ=θ)
-        return J * (cos(2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕx) + cos(2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕy))
+        println("ndims=$ndims not supported (yet?)")
+        return
     end
 end
 
@@ -211,12 +314,17 @@ function fermi(ε::Real, T::Real)
     1 / (exp(ε / T) + 1)
 end
 
-function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx::Real=0, ϕy::Real=0)
-    potmat = zeros(L, L)
-    for x in 1:L
-        for y in 1:L
-            potmat[x, y] = aubry_andre(x + floor(Int, L / 2), y + floor(Int, L / 2); L=L, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy)
-        end
+function plot_potential(m::ModelParams; slice::Int=1)
+    L, J, θ, ϕx, ϕy, μ = m.L, m.J, m.θ, m.ϕx, m.ϕy, m.μ
+
+    _, rs = coordinate_map(m)
+    potmat = aubry_andre.(rs, m=m)
+    potmat .+= μ # add chemical potential
+    if ndims == 2
+        potmat = reshape(potmat, L, L)
+    elseif ndims == 3
+        potmat = reshape(potmat, L, L, L)
+        potmat = potmat[:, :, slice]
     end
 
     numpts = 10
@@ -224,7 +332,7 @@ function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx
 
     function colour_gradient(x1::Int, x2::Int; arr)
         val = arr[x1, x2]
-        max = 2 * J
+        max = 3 * J
         idx = floor(Int, val / max * numpts + numpts + 1)
         return cm[idx]
     end
@@ -241,7 +349,6 @@ function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx
             scatter!(h, [x], [y], ms=10, c=colour_gradient(x, y, arr=potmat), legend=:false, aspect_ratio=:equal)
         end
     end
-    #h = heatmap(reverse(potmat, dims=1), yflip=false, clims=(-2 * J, 2 * J), aspect_ratio=:equal)
 
     xticks!(h, collect(1:2:L))
     yticks!(h, collect(1:2:L))
@@ -256,8 +363,21 @@ function plot_potential(; L::Int, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx
     return h
 end
 
-function finite_size_gap(; L::Int, t::Real, Q::Real, μ::Real, periodic::Bool=true, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0)
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=0, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+function momentum_components(m::ModelParams; r::Int)
+    ndims = m.ndims
+    if ndims == 2
+        x, y = site_to_coordinate(r, m=m)
+        return (2 * π * x / L, 2 * π * y / L)
+    elseif ndims == 3
+        x, y, z = site_to_coordinate(r, m=m)
+        return (2 * π * x / L, 2 * π * y / L, 2 * π * z / L)
+    else
+        println("$dims dimensions not implemented")
+    end
+end
+
+function finite_size_gap(m::ModelParams)
+    H0 = noninteracting_hamiltonian(m)
     E, _ = diagonalize_hamiltonian(H0)
     sort!(E)
     ΔE = [E[i+1] - E[i] for i in 1:(length(E)-1)]

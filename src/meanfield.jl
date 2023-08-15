@@ -14,58 +14,40 @@ include("results.jl")
 include("model.jl")
 include("results.jl")
 
-function pairfield_correlation(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)
-    # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+function pairfield_correlation(m::ModelParams; T::Real,
+    checkpointpath::Union{String,Nothing}=nothing)
 
-    # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
+    E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
 
-    # Construct the pairfield susceptibility
+    # s-wave case is faster 
     if V1 == 0
-        M = swave(T, E=E, U=U, V0=V0)
-    else
-        M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
+        M = swave(m, T, E=E, U=U)
+        return calculate_λ_Δ(M)
     end
 
+    M = dwave(m, T, E=E, U=U)
     λ, Δ = calculate_λ_Δ(M)
 
-    # the result is only 3N. Need to make it 5N 
-    Δ̃ = to_5N_LGE_Δ(Δ; L=L)
+    # We've only explicitly calculated half the bonds  
+    if ndims == 2
+        Δ̃ = to_5N_LGE_Δ(Δ; L=m.L)
+    elseif ndims == 3
+        Δ̃ = to_7N_LGE_Δ(Δ; L=m.L)
+    else
+        println("$ndims dimensions not yet implemented")
+    end
 
     return λ, Δ̃
 end
 
-function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real,
-    J::Real, Q::Real, θ::Union{Real,Nothing}=nothing,
-    ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true,
-    Λ::Union{Nothing,Real}=nothing, checkpointpath::Union{String,Nothing}=nothing)
+function pairfield_susceptibility(m;
+    T, symmetry::String, Λ::Union{Nothing,Real}=nothing,
+    checkpointpath::Union{String,Nothing}=nothing)
 
-    if !isnothing(checkpointpath)
-        # try to load the Hamiltonian corresponding to these parameters 
-        try
-            DH = load_results(checkpointpath)
-            @assert DH.L == L && DH.t == t && DH.J == J && DH.Q == Q && DH.μ == μ && DH.θ == θ && DH.ϕx == ϕx && DH.ϕy == ϕy && DH.periodic == periodic
-            E, U = DH.E, DH.U
-        catch e
-            @show e
-            # Construct the non-interacting Hamiltonian matrix
-            H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
+    @warn "I need to benchmark this again after implementing 3D system sizes"
 
-            # Diagonalize this Hamiltonian
-            E, U = diagonalize_hamiltonian(H0)
-
-            # save everything to checkpointpath 
-            DH = DiagonalizedHamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic, E=E, U=U)
-            save_structs(DH, checkpointpath)
-        end
-    else
-        # Construct the non-interacting Hamiltonian matrix
-        H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-
-        # Diagonalize this Hamiltonian
-        E, U = diagonalize_hamiltonian(H0)
-    end
+    E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
+    ndims = m.ndims
 
     if !isnothing(Λ)
         @warn "Keeping only states close to εf"
@@ -78,14 +60,24 @@ function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real,
 
     # Construct the pairfield susceptibility
     if symmetry == "s-wave"
-        χ = swave_χ(T, E=E, U=U)
+        χ = swave_χ(m, T, E=E, U=U)
         χ0 = sum(χ)
     elseif symmetry == "d-wave"
-        χ = dwave_χ(T, L=L, E=E, U=U)
-        χ0 = zeros(3, 3)
-        for (b1, i) in enumerate(1:(L*L):(3*L*L))
-            for (b2, j) in enumerate(1:(L*L):(3*L*L))
-                χδδ = χ[i:(i+L*L-1), j:(j+L*L-1)]
+        χ = dwave_χ(m, T, E=E, U=U)
+        if ndims == 2
+            N = L * L
+            nblocks = 3
+        elseif ndims == 3
+            N = L * L * L
+            nblocks = 4
+        else
+            println("$dims dimensions not implemented")
+        end
+
+        χ0 = zeros(nblocks, nblocks)
+        for (b1, i) in enumerate(1:N:nblocks*N)
+            for (b2, j) in enumerate(1:N:nblocks*N)
+                χδδ = χ[i:(i+N-1), j:(j+N-1)]
                 # take the sum of this guy 
                 χ0[b1, b2] = sum(χδδ)
             end
@@ -97,62 +89,58 @@ function pairfield_susceptibility(T, symmetry::String; L::Int, t::Real,
     return χ0
 end
 
-function uniform_susceptibility(T; L::Int, t::Real, J::Real,
-    Q::Real, θ::Union{Real,Nothing}=nothing,
-    ϕx::Real=0, ϕy::Real=0, μ::Real, periodic::Bool=true,
-    Λ::Union{Nothing,Real}=nothing, checkpointpath::Union{String,Nothing}=nothing)
+function uniform_susceptibility(m;
+    T, symmetry::String="d-wave", Λ::Union{Nothing,Real}=nothing,
+    checkpointpath::Union{String,Nothing}=nothing)
 
-    if !isnothing(checkpointpath)
-        # try to load the Hamiltonian corresponding to these parameters 
-        try
-            DH = load_diagonalized_H(checkpointpath)
-            @assert DH.L == L && DH.t == t && DH.J == J && DH.Q == Q && DH.μ == μ && DH.θ == θ && DH.ϕx == ϕx && DH.ϕy == ϕy && DH.periodic == periodic
-            E, U = DH.E, DH.U
-            println("Loading Hamiltonian...")
-        catch e
-            @show e
-            println("Diagonalizing again...")
-            # Construct the non-interacting Hamiltonian matrix
-            H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-
-            # Diagonalize this Hamiltonian
-            E, U = diagonalize_hamiltonian(H0)
-
-            # save everything to checkpointpath 
-            DH = DiagonalizedHamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic, E=E, U=U)
-            save_structs(DH, checkpointpath)
+    ndims = m.ndims
+    if ndims == 2
+        N = L * L
+        nblocks = 3
+        if symmetry == "s-wave"
+            δδp = [(1, 1)]
+        else
+            δδp = [(1, 1), (2, 2), (3, 3), (2, 3), (3, 2)]
+        end
+    elseif ndims == 3
+        N = L * L * L
+        nblocks = 4
+        if symmetry == "s-wave"
+            δδp = [(1, 1)]
+        else
+            δδp = [(1, 1), (2, 2), (3, 3), (4, 4), (2, 3), (3, 2),
+                (2, 4), (4, 2), (3, 4), (4, 3)]
         end
     else
-        println("Diagonalizing again...")
-        # Construct the non-interacting Hamiltonian matrix
-        H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-
-        # Diagonalize this Hamiltonian
-        E, U = diagonalize_hamiltonian(H0)
+        println("$dims dimensions not implemented")
+        return
     end
 
-    rvec = collect(1:L*L)
+    E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
+    rvec = collect(1:N)
 
     # We need to transform each of the eigenvectors into 2D space! 
     function fourier_transform_U(u; minus=false)
         # first, map back to 2D space 
-        u = reshape(u, L, L)
+        if ndims == 2
+            u = reshape(u, L, L)
+        elseif ndims == 3
+            u = reshape(u, L, L, L)
+        else
+            println("$dims dimensions not implemented")
+            return
+        end
 
-        # take FT along both spatial dimensions 
+        # take FT along all spatial dimensions 
         if !minus # this is the expression for U_{q}
             uq = fft(u)
         else # this is the expression for U_{-q}
             uq = conj.(fft(conj.(u)))
         end
 
-        # uq ./= √N
-        # id = conj.(transpose(uq)) * uq
-        # @show maximum(abs.(id - I))
-        # @assert 1 == 0
-
-        # reshape it back 
-        # and normalize. FFTW does not normalize!!
-        uq = reshape(uq, L * L) ./ L
+        # reshape it back and normalize. FFTW does not normalize!!
+        @warn "Check this normalization"
+        uq = reshape(uq, N) ./ √N
 
         return uq
     end
@@ -191,13 +179,13 @@ function uniform_susceptibility(T; L::Int, t::Real, J::Real,
     Pnm = (1 .- fnm) ./ Enm
 
     # I need the x and y components of q for the d-wave prefactor
-    pfs = susceptibility_dwave_prefactors.(rvec, L=L, Q=Q, θ=θ)
+    pfs = susceptibility_dwave_prefactors.(rvec, m=m)
     pfs = hcat(pfs...) # dimensions [δ] x [q]
     pfsneg = conj.(pfs)
 
     # multiply by prefactors 
-    χ0 = zeros(3, 3)
-    δδp = [(1, 1), (2, 2), (1, 2), (2, 1), (3, 3)]
+    χ0 = zeros(nblocks, nblocks)
+    @warn "I changed the location of the s-wave component!!"
     for (δ, δp) in δδp
         # multiply with the prefactor 
         Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
@@ -217,27 +205,11 @@ function uniform_susceptibility(T; L::Int, t::Real, J::Real,
     return χ0
 end
 
-function susceptibility_dwave_prefactors(r::Int; L::Int, Q::Real, θ::Union{Nothing,Real})
-    qx, qy = momentum_components(r, L=L)
-    [exp(1im * qx), exp(1im * qy), 1]
-end
-
-
-function return_M(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)
-    # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-
-    # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
-
-    # Construct the pairfield susceptibility
-    if V1 == 0
-        M = swave(T, E=E, U=U, V0=V0)
-    else
-        M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
-    end
-
-    return M
+function susceptibility_dwave_prefactors(r::Int; m::ModelParams)
+    qs = momentum_components(m, r=r)
+    pfs = [exp(1im * q) for q in qs]
+    pushfirst!(pfs, 1)
+    return pfs
 end
 
 function decomposition_M(M)
@@ -245,14 +217,11 @@ function decomposition_M(M)
     return decomp.R
 end
 
-function swave_χ(T::Real; E, U)
-    return swave(T, E=E, U=U, V0=-1)
-end
+function swave(m::ModelParams, T::Real; E, U)
+    V0 = m.V0
 
-function swave(T::Real; E, U, V0)
-    println("s-wave configuration")
+    println("Computing s-wave configuration")
     Ntot, N = size(U)
-
     Uconj = conj.(U)
 
     # make the prefactor
@@ -272,6 +241,19 @@ function swave(T::Real; E, U, V0)
     χ = PUU * UU
 
     return -V0 * χ
+end
+
+function swave_χ(m::ModelParams, T::Real; E, U)
+    m_copy = copy(m)
+    m_copy.V0 = -1
+    return swave(m_copy, T, E=E, U=U)
+end
+
+function dwave_χ(m::ModelParams, T::Real; E, U)
+    m_copy = copy(m)
+    m_copy.V0 = -1
+    m_copy.V1 = -1
+    return dwave(m_copy, T, E=E, U=U)
 end
 
 function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int, Ntot::Int)
@@ -295,18 +277,20 @@ function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int, Ntot::Int)
     return -V / 2 .* (χ1 .+ χ2)
 end
 
-function dwave_χ(T::Real; L, E, U)
-    return dwave(T, L=L, E=E, U=U, V0=-1, V1=-1)
-end
-
-function dwave(T::Real; L, E, U, V0, V1)
-    println("d-wave configuration")
-    N = size(U)[2]
-    Ntot = L^2
+function dwave(m::ModelParams, T::Real; E, U)
+    V0, V1, ndims = m.V0, m.V1, m.ndims
+    println("Computing d-wave configuration")
+    Ntot, N = size(U)
     Uconj = conj.(U) # This is U^*
 
     # Initialize the M matrix 
-    M = Matrix{Matrix{Float64}}(undef, 3, 3)
+    if ndims == 2
+        M = Matrix{Matrix{Float64}}(undef, 3, 3)
+    elseif ndims == 3
+        M = Matrix{Matrix{Float64}}(undef, 4, 4)
+    else
+        println("$ndims dimensions not supported")
+    end
 
     # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
     fs = fermi.(E, T)
@@ -318,36 +302,123 @@ function dwave(T::Real; L, E, U, V0, V1)
     end
     P = (1 .- fnm) ./ Enm
 
-    # the s-wave sector. This is in the (3,3) block of M matrix
+    # the s-wave sector. This is in the (1,1) block of M matrix
     @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
     @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
     PUU = reshape(PUU, Ntot, N * N)
     UU = reshape(UU, N * N, Ntot)
-    M[3, 3] = -V0 * PUU * UU
+    M[1, 1] = -V0 * PUU * UU
 
     # make lists of the nearest-neighbour sites 
-    Rsites, Usites, onsites = [], [], []
+    xsites, ysites, zsites, onsites = [], [], [], []
     for r in 1:Ntot
-        nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
-        push!(Rsites, nnr[1])
-        push!(Usites, nnr[2])
+        nnr = [nearest_neighbours(r, m=m)...] # get the nearest neighbours
+        push!(xsites, nnr[1])
+        push!(ysites, nnr[2])
         push!(onsites, r)
+        if ndims == 3
+            push!(zsites, nnr[5])
+        end
     end
-    sites = [Rsites, Usites, onsites]
+    if ndims == 2
+        sites = [onsites, xsites, ysites]
+    elseif ndims == 3
+        sites = [onsites, xsites, ysites, zsites]
+    else
+        println("$ndims dimensions is not supported")
+    end
 
-    # iterate through each of the 3×3 blocks
+    # iterate through each of the blocks
     for bd in CartesianIndices(M)
         (b, d) = Tuple(bd)
 
         # don't do the s-wave component (we've done it already)
-        if !(b == 3 && d == 3)
+        if !(b == 1 && d == 1)
             b_sites, d_sites = sites[b], sites[d]
 
-            if b == 3 # only δ=0 term gets V0, not δ'=0! 
+            if b == 1 # only δ=0 term gets V0, not δ'=0! 
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
             else # bond terms have potential V1 
-                # multiply by 2 bc we are only considering a 3×3 matrix
+                # multiply by 2 bc we are only considering 1/2 of each direction
                 Mblock = 2 * dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
+            end
+
+            # fill in the matrix 
+            M[b, d] = Mblock
+        end
+    end
+
+    M = mortar(M)
+
+    return M
+end
+
+function dwave_full(m::ModelParams, T::Real; E, U)
+    V0, V1, ndims = m.V0, m.V1, m.ndims
+    println("Computing d-wave configuration")
+    Ntot, N = size(U)
+    Uconj = conj.(U) # This is U^*
+
+    # Initialize the M matrix 
+    if ndims == 2
+        M = Matrix{Matrix{Float64}}(undef, 5, 5)
+    elseif ndims == 3
+        M = Matrix{Matrix{Float64}}(undef, 7, 7)
+    else
+        println("$ndims dimensions not supported")
+    end
+
+    # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
+    fs = fermi.(E, T)
+    fnm = zeros(N, N)
+    Enm = zeros(N, N)
+    for i in 1:N
+        fnm[:, i] = fs .+ fs[i]
+        Enm[:, i] = E .+ E[i]
+    end
+    P = (1 .- fnm) ./ Enm
+
+    # the s-wave sector. This is in the (1,1) block of M matrix
+    @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
+    @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
+    PUU = reshape(PUU, Ntot, N * N)
+    UU = reshape(UU, N * N, Ntot)
+    M[1, 1] = -V0 * PUU * UU
+
+    # make lists of the nearest-neighbour sites 
+    onsites, xsites, ysites, xmsites, ymsites, zsites, zmsites = [], [], [], [], [], [], []
+    for r in 1:Ntot
+        nnr = [nearest_neighbours(r, m=m)...] # get the nearest neighbours
+        push!(xsites, nnr[1])
+        push!(ysites, nnr[2])
+        push!(xmsites, nnr[3])
+        push!(ymsites, nnr[4])
+        push!(onsites, r)
+        if ndims == 3
+            push!(zsites, nnr[5])
+            push!(zmsites, nnr[6])
+        end
+    end
+    if ndims == 2
+        sites = [onsites, xsites, ysites, xmsites, ymsites]
+    elseif ndims == 3
+        sites = [onsites, xsites, ysites, xmsites, ymsites, zsites, zmsites]
+    else
+        println("$ndims dimensions is not supported")
+    end
+
+    # iterate through each of the blocks
+    for bd in CartesianIndices(M)
+        (b, d) = Tuple(bd)
+
+        # don't do the s-wave component (we've done it already)
+        if !(b == 1 && d == 1)
+            b_sites, d_sites = sites[b], sites[d]
+
+            if b == 1 # only δ=0 term gets V0, not δ'=0! 
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
+            else # bond terms have potential V1 
+                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
             end
 
             # fill in the matrix 
@@ -404,113 +475,23 @@ function calculate_λ_Δ(M)
     end
 end
 
-function dwave_hermitian(T::Real; L, E, U, V0, V1)
-    println("d-wave configuration")
-    N = L^2
-    Uconj = conj.(U) # This is U*
-
-    # Initialize the M matrix 
-    M = Matrix{Matrix{Float64}}(undef, 5, 5)
-
-    # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
-    fs = fermi.(E, T)
-    fnm = zeros(N, N)
-    Enm = zeros(N, N)
-    for i in 1:N
-        fnm[:, i] = fs .+ fs[i]
-        Enm[:, i] = E .+ E[i]
-    end
-    P = (1 .- fnm) ./ Enm
-
-    # the s-wave sector. This is in the (5,5) block of M matrix
-    @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
-    @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
-    PUU = reshape(PUU, N, N * N)
-    UU = reshape(UU, N * N, N)
-    M[5, 5] = -V0 * PUU * UU
-
-    # make lists of the nearest-neighbour sites 
-    Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
-    for r in 1:N
-        nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
-        push!(Rsites, nnr[1])
-        push!(Usites, nnr[2])
-        push!(Lsites, nnr[3])
-        push!(Dsites, nnr[4])
-        push!(onsites, r)
-    end
-    sites = [Rsites, Usites, Lsites, Dsites, onsites]
-
-    # iterate through each of the 5×5 blocks
-    for bd in CartesianIndices(M)
-        (b, d) = Tuple(bd)
-
-        # bc matrix is Hermitian, we only have to fill in lower diagonal
-        # also, don't do the s-wave component (we've done it already)
-        if d <= b && !(b == 5 && d == 5)
-            b_sites, d_sites = sites[b], sites[d]
-
-            if b == 5 || d == 5 # the on-site terms get potential V=V0
-                @error "IT MIGHT JUST BE b==5, not both"
-                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N)
-            else # bond terms have potential V1 
-                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N)
-            end
-
-            # fill in the matrix 
-            M[b, d] = Mblock
-            # if off-diagonal, fill in the hermitian conjugate block
-            if d != b
-                M[d, b] = Mblock'
-            end
-        end
-    end
-    M = mortar(M)
-
-    return M
-end
-
-function LGE_spectrum(T; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true)
-    # Construct the non-interacting Hamiltonian matrix
-    H0 = noninteracting_hamiltonian(L=L, t=t, J=J, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, periodic=periodic)
-
-    # Diagonalize this Hamiltonian
-    E, U = diagonalize_hamiltonian(H0)
-
-    # Construct the pairfield susceptibility
-    if V1 == 0
-        M = swave(T, E=E, U=U, V0=V0)
-    else
-        M = dwave(T, L=L, E=E, U=U, V0=V0, V1=V1)
-    end
-
-    # diagonalize M fully
-    vals, vecs = eigen(M)
-
-    @assert maximum(imag.(vals)) < 1e-14
-    vals = real.(vals)
-
-    # sort the eigenvalues
-    sort!(vals)
-
-    return vals
-end
-
-function LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}=nothing, ϕx::Real=0, ϕy::Real=0, μ::Real, V0::Real, V1::Real=0, periodic::Bool=true, npts=5, tol=1e-4, niter=10, L̃::Int=11)
-    # find the min and max values based on the Tc of a smaller system 
-    Tc0, λ0, Δ0 = _LGE_find_Tc(L=L̃, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, npts=npts, tol=tol)
+function LGE_find_Tc(m; npts=5, tol=1e-4, L̃::Int=11)
+    # find the min and max values based on the Tc of a smaller system
+    m_small = copy(m)
+    m_small.L = L̃
+    Tc0, λ0, Δ0 = _LGE_find_Tc(m_small, npts=npts, tol=tol)
     if isnan(Tc0)
         println("No soln for small system size")
-        return _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=0, max=1, npts=npts, tol=tol)
+        return _LGE_find_Tc(m, min=0, max=1, npts=npts, tol=tol)
     end
 
     min = Tc0 - 0.2 * Tc0
     max = Tc0 + 0.4 * Tc0
-    return _LGE_find_Tc(L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic, min=min, max=max, npts=npts, tol=tol)
+    return _LGE_find_Tc(m, min=min, max=max, npts=npts, tol=tol)
 end
 
-function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothing}, ϕx::Real, ϕy::Real, μ::Real, V0::Real, V1::Real, periodic::Bool=true, min=0, max=1, npts=5, tol=1e-4, niter=10)
-    λ0, Δ0 = pairfield_correlation(0, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10)
+    λ0, Δ0 = pairfield_correlation(m, T=0)
     if λ0 < 1
         return NaN, λ0, Δ0
     end
@@ -522,7 +503,7 @@ function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothin
         λs = []
         for T in Ts
             # find λ at this temperature 
-            λ, Δ = pairfield_correlation(T, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+            λ, Δ = pairfield_correlation(m, T=T)
 
             @show T, λ
             # If λ is close enough to 1, return T as Tc 
@@ -573,7 +554,7 @@ function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothin
         end
 
         # find λ at this temperature 
-        λ, Δ = pairfield_correlation(Tc, L=L, t=t, J=J, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, μ=μ, V0=V0, V1=V1, periodic=periodic)
+        λ, Δ = pairfield_correlation(m, T=Tc)
 
         # If λ is close enough to 1, return T as Tc 
         if abs.(λ - 1) < tol
@@ -587,80 +568,3 @@ function _LGE_find_Tc(; L::Int, t::Real, J::Real, Q::Real, θ::Union{Real,Nothin
 
     return Tc, λ0, Δ0
 end
-
-# function dwave_old(T::Real; L, E, U, V0, V1)
-#     println("d-wave configuration")
-#     N = L^2
-
-#     # make the prefactor
-#     fs = fermi.(E, T)
-#     fnm = zeros(N, N)
-#     Enm = zeros(N, N)
-#     for i in 1:N
-#         fnm[:, i] = fs .+ fs[i]
-#         Enm[:, i] = E .+ E[i]
-#     end
-#     P = (1 .- fnm) ./ Enm
-
-#     Uconj = conj.(U)
-
-#     # put together the M matrix 
-#     M = zeros(N, 5, N, 5)
-#     for r in 1:N
-#         for rp in 1:N
-
-#             # nearest neighbours of r 
-#             nn = [nearest_neighbours(r, L=L)...]
-#             push!(nn, r)
-
-#             # nearest neighbours of r' 
-#             nnrp = [nearest_neighbours(rp, L=L)...]
-#             push!(nnrp, rp)
-
-#             # iterate through δ
-#             for (idx_δ, δ) in enumerate(nn)
-
-#                 # iterate through δ'
-#                 for (idx_δp, δp) in enumerate(nnrp)
-
-#                     Ua = Uconj[r, :]
-#                     Ub = Uconj[δ, :]
-#                     Uc = U[rp, :]
-#                     Ud = U[δp, :]
-
-#                     @einsimd χ1 := P[n, m] * Ua[n] * Uc[n] * Ub[m] * Ud[m]
-#                     @einsimd χ2 := P[n, m] * Ua[n] * Ud[n] * Ub[m] * Uc[m]
-
-#                     χ = 1 / 2 * (χ1 + χ2)
-
-#                     if idx_δ == 5 #|| idx_δp == 5
-#                         M[r, idx_δ, rp, idx_δp] = -V0 * χ
-#                     else
-#                         M[r, idx_δ, rp, idx_δp] = -V1 * χ
-#                     end
-#                 end
-
-#             end
-#         end
-#     end
-
-#     i1 = Index(N)
-#     i2 = Index(5)
-#     i3 = Index(N)
-#     i4 = Index(5)
-#     M = ITensor(M, i1, i2, i3, i4)
-
-#     C1 = combiner(i1, i2; tags="c1")
-#     C2 = combiner(i3, i4; tags="c2")
-
-#     M = M * C1 * C2
-
-#     M = array(M)
-
-#     # reshape M 
-#     # M = reshape(M, 5 * N, 5 * N)
-
-#     @show maximum(M - M')
-
-#     return M
-# end
