@@ -139,7 +139,6 @@ function uniform_susceptibility(m;
         end
 
         # reshape it back and normalize. FFTW does not normalize!!
-        @warn "Check this normalization"
         uq = reshape(uq, N) ./ √N
 
         return uq
@@ -185,7 +184,6 @@ function uniform_susceptibility(m;
 
     # multiply by prefactors 
     χ0 = zeros(nblocks, nblocks)
-    @warn "I changed the location of the s-wave component!!"
     for (δ, δp) in δδp
         # multiply with the prefactor 
         Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]

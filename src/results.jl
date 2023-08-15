@@ -548,6 +548,6 @@ function load_diagonalized_H(loadpath::String)
     @show keys(d)
     close(f)
     return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
-        d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["J"],
-        d["periodic"], d["E"], d["U"])
+        d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["ϕz"], d["J"],
+        d["periodic"], d["ndims"], d["E"], d["U"])
 end

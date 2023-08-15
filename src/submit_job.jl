@@ -6,7 +6,7 @@ function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1,
     mkpath(outpath)
     mkpath(slurmpath)
 
-    name = "$(params.L)L_$(round(params.ϕx, digits=3))ϕx_$(round(params.ϕy, digits=3))ϕy_$(params.V0)V0_$(params.V1)V1_$(params.J)J"
+    name = "$(params.ndims)D_$(params.L)L_$(round(params.ϕx, digits=3))ϕx_$(round(params.ϕy, digits=3))ϕy_$(round(params.ϕz, digits=3))ϕz_$(params.V0)V0_$(params.V1)V1_$(params.J)J"
 
     filestr = """#!/bin/bash
     #SBATCH --job-name=$(job_prefix*"_"*name)
@@ -29,7 +29,7 @@ function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1,
     export JULIA_NUM_THREADS=\$SLURM_CPUS_ON_NODE
 
     # run the script
-    julia $filepath $(params.L) $(params.t) $(params.Q) $(params.μ) $(params.θ) $(params.ϕx) $(params.ϕy) $(params.V0) $(params.V1) $(params.J) $(params.periodic)"""
+    julia $filepath $(params.L) $(params.t) $(params.Q) $(params.μ) $(params.θ) $(params.ϕx) $(params.ϕy) $(params.ϕz) $(params.V0) $(params.V1) $(params.J) $(params.periodic) $(params.ndims)"""
 
     open("$slurmpath/$(name).slurm", "w") do io
         write(io, filestr)

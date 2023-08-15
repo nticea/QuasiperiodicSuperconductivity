@@ -55,8 +55,7 @@ function DiagonalizedHamiltonian(m::ModelParams; E, U)
 end
 
 function DiagonalizedHamiltonian(m::ModelParams)
-    H0 = noninteracting_hamiltonian(m)
-    E, U = diagonalize_hamiltonian(H0)
+    E, U = diagonalize_hamiltonian(m)
     DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, E, U)
 end
 
@@ -94,16 +93,16 @@ function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
 
     # try to load the Hamiltonian corresponding to these parameters 
     try
-        DH = load_results(loadpath)
+        DH = load_diagonalized_H(loadpath)
         @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.periodic == m.periodic
+        return DH.E, DH.U
     catch e
         @show e
         # save everything to checkpointpath 
         DH = DiagonalizedHamiltonian(m)
         save_structs(DH, loadpath)
+        return DH.E, DH.U
     end
-
-    return DH.E, DH.U
 end
 
 function square_lattice_kinetic(m::ModelParams)
