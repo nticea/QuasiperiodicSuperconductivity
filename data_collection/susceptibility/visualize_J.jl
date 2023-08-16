@@ -12,7 +12,8 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 105 # the full system is L × L 
+L = 35 # the full system is L × L 
+ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
@@ -24,7 +25,7 @@ if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
 files = readdir(joinpath(@__DIR__, "data"))
-df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
+df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
     T=[], Λ=[], χ=[])
 for f in files
     if endswith(f, ".csv")
@@ -36,9 +37,11 @@ end
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
-dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q), :]
+dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
 Js = sort(unique(dfL.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
+
+@assert 1 == 0
 
 for (j, J) in enumerate(Js)
     dfJ = dfL[(dfL.J.==J), :]
@@ -48,6 +51,7 @@ for (j, J) in enumerate(Js)
     sortidx = sortperm(Ts)
     Ts = Ts[sortidx]
     χs = χs[sortidx]
+    χs = [reshape(χ, 4, 4) for χ in χs]
 
     # consider only the linear regime 
     # χs = χs[Ts.>=T_cutoff]
@@ -56,14 +60,22 @@ for (j, J) in enumerate(Js)
     if length(Ts) > 0
 
         # on-site
-        χswave = [a[9] for a in χs]
+        χswave = [χ[1, 1] for χ in χs]
 
         # make the d-wave components 
-        xx = [a[1] for a in χs]
-        yy = [a[5] for a in χs]
-        xy = [a[2] for a in χs]
-        yx = [a[4] for a in χs]
-        χdwave = 1 / 4 * (xx + yy - xy - yx)
+        xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
+        xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
+        if ndims == 2
+            χdwave = xx + yy - xy - yx
+        elseif ndims == 3
+            zz = [χ[4, 4] for χ in χs]
+            xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
+            yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
+            χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
+        else
+            println("sorry")
+            χdwave = nothing
+        end
 
         plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
         scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
@@ -104,14 +116,22 @@ for (i, T) in enumerate(Ts)
     χs = χs[sortidx]
 
     # on-site
-    χswave = [a[9] for a in χs]
+    χswave = [χ[1, 1] for χ in χs]
 
     # make the d-wave components 
-    xx = [a[1] for a in χs]
-    yy = [a[5] for a in χs]
-    xy = [a[2] for a in χs]
-    yx = [a[4] for a in χs]
-    χdwave = 1 / 4 * (xx + yy - xy - yx)
+    xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
+    xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
+    if ndims == 2
+        χdwave = xx + yy - xy - yx
+    elseif ndims == 3
+        zz = [χ[4, 4] for χ in χs]
+        xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
+        yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
+        χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
+    else
+        println("sorry")
+        χdwave = nothing
+    end
 
     plot!(ptemp_s, Js, χswave, label=nothing, c=cmap[i])
     scatter!(ptemp_s, Js, χswave, c=cmap[i], label=nothing)
@@ -129,7 +149,6 @@ end
 
 # make a colourbar 
 heatmap!(ptemp_s, zeros(2, 2), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
-
 
 p2 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
         widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility")
