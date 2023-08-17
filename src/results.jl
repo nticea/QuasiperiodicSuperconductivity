@@ -151,8 +151,24 @@ function spatial_profile(m::ModelParams; Δ)
     end
 end
 
+function plot_spatial_profile(m::ModelParams; Δ, title=nothing)
+    if m.ndims == 2
+        return _plot_spatial_profile(m, Δ=Δ, title=title)
+    elseif m.ndims == 3
+        ps = []
+        for slice in 1:L
+            pslice = _plot_spatial_profile(m, Δ=Δ, title=title, slice=slice)
+            title!(pslice, "z=$slice")
+            push!(ps, pslice)
+        end
+        title = "J=$(m.J), V0=$(m.V0), V1=$(m.V1), θ=$(θ_to_π(m.θ)) on $(m.L)×$(m.L)×$(m.L) lattice"
+        p = plot(ps..., layout=Plots.grid(2, 4,
+                widths=[1 / 4, 1 / 4, 1 / 4, 1 / 4]), size=(1500, 1000), plot_title=title)
+        return p
+    end
+end
 
-function plot_spatial_profile(m::ModelParams; Δ, title=nothing, slice::Int=1)
+function _plot_spatial_profile(m::ModelParams; Δ, title=nothing, slice::Int=1)
     evs = spatial_profile(m, Δ=Δ)
     if m.ndims == 3
         evs = evs[:, :, :, slice]
@@ -177,6 +193,8 @@ function plot_spatial_profile(m::ModelParams; Δ, title=nothing, slice::Int=1)
     ylabel!(p, "Site, (y)")
     if !isnothing(title)
         title!(p, title)
+    elseif ndims == 2
+        title!(p, "J=$(m.J), V0=$(m.V0), V1=$(m.V1), θ=$(θ_to_π(m.θ)) on $(m.L)×$(m.L) lattice")
     end
     return p
 end
@@ -437,7 +455,7 @@ function to_7N_LGE_Δ(maxev; L)
 end
 
 function _symmetry_character(m::ModelParams; Δ)
-    L = m.L
+    L, ndims = m.L, m.ndims
 
     # rotation about the ẑ axis 
     Δrot = zeros(size(Δ)...)
@@ -465,6 +483,8 @@ function symmetry_character(m::ModelParams; Δ)
     Δ ./= norm(Δ)
 
     L, ndims = m.L, m.ndims
+    @assert ndims == 2 "There is a bug with the 3D sol'n"
+
     if ndims == 2
         return _symmetry_character(m, Δ=Δ)
     elseif ndims == 3

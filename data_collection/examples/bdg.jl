@@ -11,8 +11,8 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-V0 = -1
-V1 = 0
+V0 = 1.5
+V1 = -1
 ϕx = 0
 ϕy = 0
 ϕz = 0
@@ -36,7 +36,4 @@ plot_spatial_profile(m, Δ=Δ_LGE)
 plot_in_configuration_space(m, Δ=Δ_LGE)
 plot_in_configuration_space(m, Δ=Δ_BdG)
 
-# check the symmetry 
-@show symmetry_character(m, Δ=Δ_BdG)
-@show symmetry_character(m, Δ=Δ_LGE)
 

@@ -395,7 +395,12 @@ function calculate_λ_Δ(M)
     end
 end
 
-function LGE_find_Tc(m; npts=5, tol=1e-4, L̃::Int=11)
+function LGE_find_Tc(m; npts=5, tol=1e-4)
+    if m.ndims == 2
+        L̃ = 11
+    elseif m.ndims == 3
+        L̃ = 3
+    end
     # find the min and max values based on the Tc of a smaller system
     m_small = ModelParams(L̃, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.J, m.periodic, m.ndims)
     Tc0, λ0, Δ0 = _LGE_find_Tc(m_small, npts=npts, tol=tol)

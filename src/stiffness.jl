@@ -1,20 +1,13 @@
 include("BdG.jl")
-include("BdG_dwave.jl")
 
 using Interpolations
 using Polynomials
 
-function superfluid_stiffness_finiteT(T; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, Δ_init)
+function superfluid_stiffness_finiteT(m::ModelParams; T::Real, niter::Int=100, tol::Real=1e-12, Δ_init=nothing)
 
-    # get the BdG coefficients 
-    if V1 == 0
-        U, V, E, Δ = BdG_coefficients_swave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
-    else
-        U, V, E, Δ = BdG_coefficients_dwave(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
-    end
+    U, V, E, Δ = BdG_coefficients(m, T=T, niter=niter, tol=tol, Δ_init=Δ_init)
 
-    # number of sites (L × L)
+    # number of sites
     N, _ = size(U)
 
     # the fermi distribution (vector over all sites)

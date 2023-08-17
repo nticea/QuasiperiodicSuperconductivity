@@ -1,6 +1,6 @@
 include("model.jl")
 
-function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1, ntasks=1, cpus_per_task=8, mem=256, partition="owners,simes")
+function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1, ntasks=1, cpus_per_task=8, mem=256, partition="owners,simes", kwargs="")
     outpath = joinpath(dirpath, "out")
     slurmpath = joinpath(dirpath, "slurmfiles")
     mkpath(outpath)
@@ -29,7 +29,7 @@ function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1,
     export JULIA_NUM_THREADS=\$SLURM_CPUS_ON_NODE
 
     # run the script
-    julia $filepath $(params.L) $(params.t) $(params.Q) $(params.μ) $(params.θ) $(params.ϕx) $(params.ϕy) $(params.ϕz) $(params.V0) $(params.V1) $(params.J) $(params.periodic) $(params.ndims)"""
+    julia $filepath $(params.L) $(params.t) $(params.Q) $(params.μ) $(params.θ) $(params.ϕx) $(params.ϕy) $(params.ϕz) $(params.V0) $(params.V1) $(params.J) $(params.periodic) $(params.ndims) $kwargs"""
 
     open("$slurmpath/$(name).slurm", "w") do io
         write(io, filestr)

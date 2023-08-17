@@ -18,13 +18,16 @@ ndims = 3
 
 Ls = [35, 30, 25, 20]
 Js = collect(0:0.25:3)
+Ts = expspace(-3, 1, 30) # temperature 
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "susceptibility"
 
 for L in Ls
     for J in Js
-        ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=500)
+        for T in Ts
+            ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=200, kwargs="$T")
+        end
     end
 end
