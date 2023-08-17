@@ -1,6 +1,6 @@
 include("model.jl")
 
-function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1, ntasks=1, cpus_per_task=8, mem=256, partition="owners,simes", kwargs="")
+function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1, ntasks=1, cpus_per_task=8, mem=256, partition="owners,simes", kwargs="", time="24:00:00")
     outpath = joinpath(dirpath, "out")
     slurmpath = joinpath(dirpath, "slurmfiles")
     mkpath(outpath)
@@ -11,7 +11,7 @@ function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1,
     filestr = """#!/bin/bash
     #SBATCH --job-name=$(job_prefix*"_"*name)
     #SBATCH --partition=$partition
-    #SBATCH --time=48:00:00
+    #SBATCH --time=$time
     #SBATCH --nodes=$nodes
     #SBATCH --ntasks=$ntasks
     #SBATCH --cpus-per-task=$cpus_per_task
