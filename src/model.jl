@@ -63,13 +63,25 @@ function expspace(start, stop, length)
     exp10.(range(start, stop, length=length))
 end
 
-function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false)
+function numsites(m::ModelParams)
+    L, ndims = m.L, m.ndims
+    if ndims == 2
+        return L * L
+    elseif ndims == 3
+        return L * L * L
+    else
+        println("$ndims dimensions not implemented yet :((")
+        return
+    end
+end
+
+function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin=true)
     # construct the kinetic part 
     Ht = square_lattice_kinetic(m)
 
     # interaction
     _, rs = coordinate_map(m)
-    pot = aubry_andre.(rs, m=m)
+    pot = aubry_andre.(rs, m=m, shift_origin=shift_origin)
     pot .+= μ # add chemical potential 
     Hint = spdiagm(pot)
     H0 = Ht + Hint
@@ -228,19 +240,34 @@ function site_to_coordinate(r; m::ModelParams)
     return vec[r]
 end
 
-function site_to_configuration_space(r0; m::ModelParams)
+function site_to_configuration_space(r0; m::ModelParams, shift_origin::Bool=true)
     L, ndims = m.L, m.ndims
     ϕx, ϕy, ϕz = m.ϕx, m.ϕy, m.ϕz
 
     # prepare the vectors 
     if ndims == 2
         x, y = site_to_coordinate(r0, m=m)
-        r = [x + floor(Int, L / 2); y + floor(Int, L / 2)]
+
+        if shift_origin
+            x += floor(Int, L / 2)
+            y += floor(Int, L / 2)
+        end
+
+        r = [x; y]
         ϕ = [ϕx; ϕy]
+
     elseif ndims == 3
         x, y, z = site_to_coordinate(r0, m=m)
-        r = [x + floor(Int, L / 2); y + floor(Int, L / 2); z + floor(Int, L / 2)]
+
+        if shift_origin
+            x += floor(Int, L / 2)
+            y += floor(Int, L / 2)
+            z += floor(Int, L / 2)
+        end
+
+        r = [x; y; z]
         ϕ = [ϕx; ϕy; ϕz]
+
     else
         println("$ndims dimensions not supported")
     end
@@ -257,9 +284,6 @@ end
 
 function Bmatrix(m::ModelParams)
     L, Q, θ, ndims = m.L, m.Q, m.θ, m.ndims
-    if isnothing(θ)
-        θ = π / 2
-    end
     c, s = cos(θ), sin(θ)
 
     #Rθ = [c s; s -c]
@@ -285,19 +309,23 @@ function Bmatrix(m::ModelParams)
     return BSD
 end
 
-function aubry_andre(r; m::ModelParams)
+function aubry_andre(xy; m::ModelParams, shift_origin::Bool=true)
     J, Q, L, θ, ϕx, ϕy, ϕz, ndims = m.J, m.Q, m.L, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ndims
+
+    if shift_origin
+        xy = [a + floor(Int, L / 2) for a in xy]
+    end
 
     # make the rotation matrix 
     BSD = Bmatrix(m)
 
     if ndims == 2
-        x, y = r
+        x, y = xy
         t1 = 2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕx
         t2 = 2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕy
         return J * (cos(t1) + cos(t2))
     elseif ndims == 3
-        x, y, z = r
+        x, y, z = xy
         t1 = 2 * π * (BSD[1, 1] * x + BSD[1, 2] * y + BSD[1, 3] * z) + ϕx
         t2 = 2 * π * (BSD[2, 1] * x + BSD[2, 2] * y + BSD[2, 3] * z) + ϕy
         t3 = 2 * π * (BSD[3, 1] * x + BSD[3, 2] * y + BSD[3, 3] * z) + ϕz

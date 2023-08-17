@@ -4,41 +4,32 @@ using HDF5
 include("IndexMatrix.jl")
 include("model.jl")
 
-function update_results!(df::DataFrame; L, λ, J, θ, ϕx, ϕy, V0, V1, T, Δ)
-    if isnothing(θ)
-        θ = 0
-    end
-    df2 = DataFrame(L=[L], λ=[λ], J=[J], θ=[θ], ϕx=[ϕx], ϕy=[ϕy], V0=[V0], V1=[V1], T=[T], Δ=[Δ])
+function update_results!(m::ModelParams, df::DataFrame; T, Δ, λ)
+    L, t, Q, μ, J, θ, ϕx, ϕy, ϕz, V0, V1, ndims, periodic = m.L, m.t, m.Q, m.μ, m.J, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.ndims, m.periodic
+    df2 = DataFrame(L=[L], t=[t], Q=[Q], μ=[μ], J=[J], θ=[θ], ϕx=[ϕx],
+        ϕy=[ϕy], ϕz=[ϕz], V0=[V0], V1=[V1], ndims=[ndims], periodic=[periodic],
+        T=[T], Δ=[Δ], λ=[λ])
     append!(df, df2)
 end
 
-function update_results!(df::DataFrame; L, λ, J, Q, θ, ϕx, ϕy, V0, V1, T, Δ, K=zeros(4), Π=zeros(4))
-    if isnothing(θ)
-        θ = 0
-    end
-    df2 = DataFrame(L=[L], λ=[λ], J=[J], Q=[Q], θ=[θ], ϕx=[ϕx], ϕy=[ϕy], V0=[V0], V1=[V1], T=[T], Δ=[Δ], K=[K], Π=[Π])
+function update_results!(m::ModelParams, df::DataFrame; λ, T, Δ, K=zeros(4), Π=zeros(4))
+    L, t, Q, μ, J, θ, ϕx, ϕy, ϕz, V0, V1, ndims, periodic = m.L, m.t, m.Q, m.μ, m.J, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.ndims, m.periodic
+    df2 = DataFrame(L=[L], t=[t], Q=[Q], μ=[μ], J=[J], θ=[θ], ϕx=[ϕx],
+        ϕy=[ϕy], ϕz=[ϕz], V0=[V0], V1=[V1], ndims=[ndims], periodic=[periodic],
+        T=[T], Δ=[Δ], λ=[λ], K=[K], Π=[Π])
     append!(df, df2)
 end
 
-function already_calculated(df::DataFrame; L, J, θ, ϕx, ϕy, V0, V1, T)
-    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.T.==T), :]
-    return size(sub)[1] > 0
-end
-
-function already_calculated(df::DataFrame; L, J, Q, θ, ϕx, ϕy, V0, V1, T)
-    sub = df[(df.L.==L).&(df.J.==J).&(df.Q.==Q).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.T.==T), :]
+function already_calculated(m::ModelParams, df::DataFrame; T)
+    L, t, Q, μ, J, θ, ϕx, ϕy, ϕz, V0, V1, ndims, periodic = m.L, m.t, m.Q, m.μ, m.J, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.ndims, m.periodic
+    sub = df[(df.L.==L).&(df.t.==t).&(df.μ.==μ).&(df.J.==J).&(df.Q.==Q).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.ϕz.==ϕz).&(df.T.==T).&(df.ndims.==ndims).&(df.periodic.==periodic), :]
     return size(sub)[1] > 0
 end
 
 # same as above, but without T (this is for finding Tc using LGE method)
-function already_calculated(df::DataFrame; L, J, θ, ϕx, ϕy, V0, V1)
-    sub = df[(df.L.==L).&(df.J.==J).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy), :]
-    return size(sub)[1] > 0
-end
-
-# same as above, but without T (this is for finding Tc using LGE method)
-function already_calculated(df::DataFrame; L, J, Q, θ, ϕx, ϕy, V0, V1)
-    sub = df[(df.L.==L).&(df.J.==J).&(df.Q.==Q).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy), :]
+function already_calculated(m::ModelParams, df::DataFrame)
+    L, μ, J, θ, ϕx, ϕy, ϕz, V0, V1, ndims = m.L, m.μ, m.J, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.ndims
+    sub = df[(df.L.==L).&(df.t.==t).&(df.μ.==μ).&(df.J.==J).&(df.Q.==Q).&(df.V0.==V0).&(df.V1.==V1).&(df.θ.==θ).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.ϕz.==ϕz).&(df.ndims.==ndims).&(df.periodic.==periodic), :]
     return size(sub)[1] > 0
 end
 
@@ -58,119 +49,43 @@ function convert_df_arrays(df::DataFrame, col_name::String, delims=r"[,; ]")
     return dfcut
 end
 
-function load_dataframe(path)
-    try # try loading the DataFrames
-        df = DataFrame(CSV.File(path))
-
-        all_evs_new = []
-        for (i, evs) in enumerate(df.Δ)
-            # Split the string by multiple delimiters
-            result = split(chop(evs; head=1, tail=1), r"[,; ]")
-            new_array = result[result.!=""]
-            evs_new = parse.(Float64, new_array)
-            push!(all_evs_new, evs_new)
-        end
-        dfcut = df[:, collect(1:size(df)[2]-1)]
-        dfcut.Δ = all_evs_new
-
-        return dfcut
-    catch error_reading_dataframe # if the file does not exist, create a new dataframe
-        @show error_reading_dataframe
-        return DataFrame(L=Int64[], J=Float64[], Q=Float64[], θ=Float64[],
-            ϕx=Float64[], ϕy=Float64[], V0=Float64[], V1=Float64[],
-            T=Float64[], λ=Float64[], Δ=[], K=[], Π=[])
-    end
-end
-
-function find_Tc_LGE(df::DataFrame; interp_value::Real=1)
-
-    # Get the unique Js, V1s from the dataframe 
-    Js, V0s, V1s = unique(df.J), unique(df.V0), unique(df.V1)
-    L = df.L[1]
-
-    # Make the new dataframe 
-    nodenames = ["L", "J", "V0", "V1", "Tc"]
-    Tc_df = DataFrame([name => [] for name in nodenames])
-
-    # For each unique (J,V0) pair... extract the corresponding data across all Ts 
-    for J in Js
-        for V0 in V0s
-            for V1 in V1s
-
-                # Extract the corresponding data across all Ts
-                dfsub = df[(df.J.==J).&(df.V0.==V0).&(df.V1.==V1), :]
-                λs, Ts = dfsub.λ, dfsub.T
-
-                # Compute the interpolated Tc for this (J,V0) pair
-                idxlist = sortperm(λs)
-                knots = λs[idxlist]
-                if length(knots) > 1
-                    Interpolations.deduplicate_knots!(knots, move_knots=true)
-                    try
-                        interp_linear = linear_interpolation(knots, Ts[idxlist])
-                        Tc = interp_linear(interp_value)
-                        # Put it into a new dataframe indexed by (J,V0,Tc)
-                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
-                        append!(Tc_df, df2)
-                    catch e
-                        Tc = NaN
-                        # Put it into a new dataframe indexed by (J,V0,Tc)
-                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
-                        append!(Tc_df, df2)
-                    end
-                end
+function find_Tc_from_dataframe(df::DataFrame; interp_value::Real=1)
+    println("TODO: Implement this using grouped dataframes")
+    Tc_df = DataFrame([name => [] for name in names(df)])
+    grouped = groupby(df, select(df, Not(:T)))
+    for dfsub in grouped
+        λs, Ts = dfsub.λ, dfsub.T
+        # Compute the interpolated Tc for this (J,V0) pair
+        idxlist = sortperm(λs)
+        knots = λs[idxlist]
+        if length(knots) > 1
+            Interpolations.deduplicate_knots!(knots, move_knots=true)
+            df2 = DataFrame([name => [dfsub[name][1]] for name in names(dfsub)])
+            try
+                interp_linear = linear_interpolation(knots, Ts[idxlist])
+                df2.Tc = interp_linear(interp_value)
+                append!(Tc_df, df2)
+            catch e
+                Tc = NaN
+                df2.Tc = NaN
+                append!(Tc_df, df2)
             end
         end
     end
     return Tc_df
 end
 
-function find_Tc_BdG(df::DataFrame; interp_value::Real=1)
+function find_Tc_from_LGE_df(df)
+    return find_Tc_from_dataframe(df, interp_value=1)
+end
 
-    # Get the unique Js, V1s from the dataframe 
-    Js, V0s, V1s = unique(df.J), unique(df.V0), unique(df.V1)
-    L = df.L[1]
-
-    # Make the new dataframe 
-    nodenames = ["L", "J", "V0", "V1", "Tc"]
-    Tc_df = DataFrame([name => [] for name in nodenames])
-
-    # For each unique (J,V0) pair... extract the corresponding data across all Ts 
-    for J in Js
-        for V0 in V0s
-            for V1 in V1s
-
-                # Extract the corresponding data across all Ts
-                dfsub = df[(df.J.==J).&(df.V0.==V0).&(df.V1.==V1), :]
-                Δs, Ts = maximum.(dfsub.Δ), dfsub.T
-
-                # Compute the interpolated Tc for this (J,V0) pair
-                idxlist = sortperm(Δs)
-                knots = Δs[idxlist]
-                if length(knots) > 1
-                    Interpolations.deduplicate_knots!(knots, move_knots=true)
-                    try
-                        interp_linear = linear_interpolation(knots, Ts[idxlist])
-                        Tc = interp_linear(interp_value)
-                        # Put it into a new dataframe indexed by (J,V0,Tc)
-                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
-                        append!(Tc_df, df2)
-                    catch e
-                        Tc = NaN
-                        # Put it into a new dataframe indexed by (J,V0,Tc)
-                        df2 = DataFrame(L=[L], Tc=[Tc], J=[J], V0=[V0], V1=[V1])
-                        append!(Tc_df, df2)
-                    end
-                end
-            end
-        end
-    end
-    return Tc_df
+function find_Tc_from_BdG_df(df)
+    return find_Tc_from_dataframe(df, interp_value=1e-5)
 end
 
 function θ_to_π(θ)
     if isnothing(θ)
-        return "Untilted"
+        return "untilted"
     end
     for n in 1:10
         if isapprox(n * θ, π)
@@ -181,9 +96,9 @@ function θ_to_π(θ)
 end
 
 function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
-    if ndims(all_evs) == 3
+    if Base.ndims(all_evs) == 3
         val = all_evs[x1, x2, x3]
-    elseif ndims(all_evs) == 2
+    elseif Base.ndims(all_evs) == 2
         val = all_evs[x2, x3]
     end
     if val < 0
@@ -193,40 +108,71 @@ function colour_phase(x1::Int, x2::Int, x3::Int; all_evs, numpts::Int=10)
     end
 end
 
-function spatial_profile(maxev; L)
-    if length(maxev) == 5 * L * L
-        evs = zeros(5, L, L)
-        for (n, i) in enumerate(1:(L*L):(5*L*L))
-            evi = maxev[i:(i+L*L-1)]
-            evs[n, :, :] = reshape(evi, L, L)
+function spatial_profile(m::ModelParams; Δ)
+    L, ndims = m.L, m.ndims
+
+    # check to see if we are already in spatial profile form 
+    if Base.ndims(Δ) == 3 && ndims == 2
+        println("Returning Δ as is")
+        return Δ
+    elseif Base.ndims(Δ) == 4 && ndims == 3
+        println("Returning Δ as is")
+        return Δ
+    end
+
+    if ndims == 2
+        N = L * L
+        if length(Δ) == N # swave 
+            evs = zeros(5, L, L)
+            evs[1, :, :] = reshape(Δ, L, L)
+            return evs
+        else # dwave 
+            evs = zeros(5, L, L)
+            for (n, i) in enumerate(1:N:5N)
+                evi = Δ[i:(i+N-1)]
+                evs[n, :, :] = reshape(evi, L, L)
+            end
+            return evs
         end
-        return evs
+
+    elseif ndims == 3
+        evs = zeros(7, L, L, L)
+        N = L * L * L
+        if length(Δ) == N
+            evs[1, :, :] = reshape(Δ, L, L, L)
+            return evs
+        else
+            for (n, i) in enumerate(1:N:7N)
+                evi = Δ[i:(i+N-1)]
+                evs[n, :, :, :] = reshape(evi, L, L, L)
+            end
+            return evs
+        end
     else
-        evs = zeros(5, L, L)
-        evs[5, :, :] = reshape(maxev, L, L)
-        return evs
+        println("$ndims not implemented yet")
     end
 end
 
 
-function plot_spatial_profile(evs; L, title=nothing)
+function plot_spatial_profile(m::ModelParams; Δ, title=nothing)
+    @assert m.ndims == 2 "Can only visualize in 2D"
 
-    if ndims(evs) != 3
-        evs = spatial_profile(evs, L=L)
+    if Base.ndims(Δ) != 3
+        evs = spatial_profile(m, Δ=Δ)
     end
 
-    p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
+    p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false, aspect_ratio=true)
     for x in 1:L
         for y in 1:L
 
             # bonds 
-            plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[1, x, y]), alpha=10 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
-            plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
-            plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
-            plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
+            plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
+            plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
+            plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
+            plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[5, x, y]), alpha=10 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
 
             # onsite dot 
-            scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
+            scatter!(p, [x], [y], ms=100 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
         end
     end
 
@@ -238,180 +184,186 @@ function plot_spatial_profile(evs; L, title=nothing)
     return p
 end
 
-function plot_in_config_space(toplot; L::Int, Q::Real, θ::Union{Real,Nothing}, title::Union{String,Nothing})
+function plot_in_configuration_space(m::ModelParams; Δ, title::Union{String,Nothing}=nothing, slice::Int=1)
 
-    @assert ndims(toplot) == 2
+    Δ = spatial_profile(m, Δ=Δ)
+    N = numsites(m)
 
-    p = plot(xlims=(0, 2 * π), ylims=(0, 2 * π), grid=false, aspect_ratio=true)
-    for x in 1:L
-        for y in 1:L
-            ϕ1, ϕ2 = coordinate_to_configuration_space(x, y, L=L, Q=Q, θ=θ)
-            if toplot[x, y] < 0
-                col = "blue"
-            else
-                col = "red"
-            end
-
-            scatter!(p, [ϕ1], [ϕ2], ms=100 * abs(toplot[x, y]), c=col, legend=:false)
-        end
-    end
-
-    xlabel!(p, "ϕ₁")
-    ylabel!(p, "ϕ₂")
-    if !isnothing(title)
-        title!(p, title)
-    end
-    return p
-end
-
-function plot_LGE_Δ(df; idx)
-    L = df.L[idx]
-    J = df.J[idx]
-    V0 = df.V0[idx]
-    V1 = df.V1[idx]
-    T = df.T[idx]
-    θ = θ_to_π(df.θ[idx])
-    ϕx = θ_to_π(df.ϕx[idx])
-    ϕy = θ_to_π(df.ϕy[idx])
-
-    if length(df.Δ[1]) == 5 * L^2
-        symmetry = "d-wave"
-    elseif length(df.Δ[1]) == L^2
-        symmetry = "s-wave"
+    if m.ndims == 2
+        titles = ["on-site", "-x̂ bond", "ŷ bond", "x̂ bond", "-ŷ bond"]
+    elseif m.ndims == 3
+        titles = ["on-site", "-x̂ bond", "ŷ bond", "x̂ bond", "-ŷ bond",
+            "ẑ bond", "-ẑ bond"]
     else
-        @error "Symmetry not recognized"
-        @assert 1 == 0
+        println("sorry, hun")
+        return
     end
 
-    maxev = df.Δ[idx]
-    λ = df.λ[idx]
-    if symmetry == "d-wave"
-        evs = zeros(5, L, L)
-        for (n, i) in enumerate(1:(L*L):(5*L*L))
-            evi = maxev[i:(i+L*L-1)]
-            evs[n, :, :] = reshape(evi, L, L)
-        end
-    elseif symmetry == "s-wave"
-        evs = reshape(maxev, L, L)
-    end
+    ps = [] # list of plots 
+    for b in 1:length(titles)
+        p = plot(xlims=(0, 2 * π), ylims=(0, 2 * π), grid=false, aspect_ratio=true)
 
-    p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
-    if λ > 0 && symmetry == "d-wave"
-        for x in 1:L
-            for y in 1:L
+        if ndims == 2
+            Δbond = Δ[b, :, :]
 
-                # bonds 
-                plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[1, x, y]), alpha=10 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
-                plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
-                plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
-                plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
-
-                # onsite dot 
-                if abs.(maximum(evs[5, x, y])) > 1e-6
-                    scatter!(p, [x], [y], ms=100 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
-                end
-
+            for r0 in 1:N
+                ϕ1, ϕ2 = site_to_configuration_space(r0; m=m)
+                x, y = site_to_coordinate(r0, m=m)
+                col = Δbond[x, y] < 0 ? "blue" : "red"
+                scatter!(p, [ϕ1], [ϕ2], ms=100 * abs(Δbond[x, y]), c=col, legend=:false)
             end
-        end
-    elseif λ > 0 && symmetry == "s-wave"
-        for x in 1:L
-            for y in 1:L
-                if abs.(maximum(evs[x, y])) > 1e-6
-                    scatter!(p, [x], [y], ms=100 * abs(evs[x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
+
+        elseif ndims == 3
+            Δbond = Δ[b, :, :, slice]
+
+            for r0 in 1:N
+                ϕ1, ϕ2, ϕ3 = site_to_configuration_space(r0; m=m)
+                x, y, z = site_to_coordinate(r0, m=m)
+                if z == slice
+                    col = Δbond[x, y] < 0 ? "blue" : "red"
+                    scatter!(p, [ϕ1], [ϕ2], ms=100 * abs(Δbond[x, y]), c=col, legend=:false)
                 end
             end
+
+        else
+            println("Tough luck")
+            return
         end
+
+        xlabel!(p, "ϕ₁")
+        ylabel!(p, "ϕ₂")
+        title!(p, titles[b])
+        push!(ps, p)
     end
 
-    xlabel!(p, "Site (x)")
-    ylabel!(p, "Site, (y)")
-    title!(p, "T=$(round(T,digits=4)), λ=$(round(λ,digits=2)) \n Δ(J=$J, θ=$θ, ϕx=$ϕx, ϕy=$ϕy, \n V0=$V0, V1=$(round(V1,digits=2)))", fontsize=4)
+    if ndims == 2
+        p = plot(ps..., layout=Plots.grid(2, 3,
+                widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), plot_title="Configuration space")
+    elseif ndims == 3
+        p = plot(ps..., layout=Plots.grid(2, 4,
+                widths=[1 / 4, 1 / 4, 1 / 4]), size=(1500, 1000), plot_title="Configuration space")
+    end
+
     return p
 end
 
-function plot_all_Δs(loadpath)
-    df = load_dataframe(loadpath)
-    df = sort(df, :V0)
+function ΔLGE_to_ΔBdG(m::ModelParams; Δ)
 
-    J = df.J[1]
-    V1 = df.V1[1]
+    L, ndims = m.L, m.ndims
+    N = numsites(m)
 
-    # for every unique V1, find the Δ with the λ closest to 0 
-    V0s = unique(df.V0)
-    global hmaps = []
-    for V0 in V0s
-        # get the corresponding data
-        subdf = df[(df.V0.==V0), :]
-        λs = subdf.λ
-        idx = argmin(abs.(λs .- 1))
-        Ts = subdf.T
+    # get the spatial profile out of the flat thing 
+    evs = spatial_profile(m, Δ=Δ)
 
-        @show J, V0, V1
-        @show Ts
-        @show λs
+    Δ_BdG = zeros(N, N)
+    for r in 1:N
+        coords = site_to_coordinate(r, m=m)
 
-        println("")
-        push!(hmaps, plot_LGE_Δ(subdf; idx=idx))
-    end
-    p = plot(hmaps..., layout=Plots.grid(3, 3, widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1500), aspect_ratio=:equal)
-end
-
-function ΔLGE_to_ΔBdG(Δ_LGE; L::Int)
-    evs = zeros(5, L, L)
-    for (n, i) in enumerate(1:(L*L):(5*L*L))
-        evi = Δ_LGE[i:(i+L*L-1)]
-        evs[n, :, :] = reshape(evi, L, L)
-    end
-
-    Δ_BdG = zeros(L * L, L * L)
-    for x in 1:L
-        for y in 1:L
-            # coordinate 
-            r = coordinate_to_site(x, y, L=L)
+        if ndims == 2
+            # coordinates
+            x, y = site_to_coordinate(r, m=m)
 
             # get the nearest neighbours 
-            rL, rU, rR, rD = nearest_neighbours(r, L=L)
+            rL, rU, rR, rD = nearest_neighbours(r, m=m)
 
             # fill in the Δ matrix 
-            Δ_BdG[r, rL] = evs[1, x, y] # left 
-            Δ_BdG[r, rU] = evs[2, x, y] # up 
-            Δ_BdG[r, rR] = evs[3, x, y] # right
-            Δ_BdG[r, rD] = evs[4, x, y] # down
-            Δ_BdG[r, r] = evs[5, x, y] # on-site 
+            Δ_BdG[r, r] = evs[1, x, y] # on-site 
+            Δ_BdG[r, rL] = evs[2, x, y] # left 
+            Δ_BdG[r, rU] = evs[3, x, y] # up 
+            Δ_BdG[r, rR] = evs[4, x, y] # right
+            Δ_BdG[r, rD] = evs[5, x, y] # down
+        elseif ndims == 3
+            # coordinates
+            x, y, z = site_to_coordinate(r, m=m)
+
+            # get the nearest neighbours 
+            rL, rU, rR, rD, rzU, rzD = nearest_neighbours(r, m=m)
+
+            # fill in the Δ matrix 
+            Δ_BdG[r, r] = evs[1, x, y, z] # on-site 
+            Δ_BdG[r, rL] = evs[2, x, y, z] # left 
+            Δ_BdG[r, rU] = evs[3, x, y, z] # up 
+            Δ_BdG[r, rR] = evs[4, x, y, z] # right
+            Δ_BdG[r, rD] = evs[5, x, y, z] # down
+            Δ_BdG[r, rzU] = evs[6, x, y, z] # ẑ up 
+            Δ_BdG[r, rzD] = evs[7, x, y, z] # ẑ down
+        else
+            println("Bummer. $ndims dimensions not yet implemented")
         end
     end
 
     return Δ_BdG
 end
 
-function ΔBdG_to_ΔLGE(Δ_BdG; L::Int)
+function ΔBdG_to_ΔLGE(m::ModelParams; Δ)
     # and now, go backwards 
-    evs_rec = zeros(5, L, L)
+    if m.ndims == 2
+        evs_rec = zeros(5, L, L)
+    elseif m.ndims == 3
+        evs_rec = zeros(7, L, L, L)
+    else
+        println("Sorry, $ndims dims not available")
+    end
 
-    for r in 1:(L*L)
-        # coordinates
-        x, y = site_to_coordinate(r, L=L)
+    N = numsites(m)
+    for r in 1:N
 
-        # get the nearest neighbours 
-        rL, rU, rR, rD = nearest_neighbours(r, L=L)
+        if ndims == 2
+            # coordinates
+            x, y = site_to_coordinate(r, m=m)
 
-        evs_rec[1, x, y] = Δ_BdG[r, rL] # left 
-        evs_rec[2, x, y] = Δ_BdG[r, rU]# up 
-        evs_rec[3, x, y] = Δ_BdG[r, rR] # right
-        evs_rec[4, x, y] = Δ_BdG[r, rD] # down
-        evs_rec[5, x, y] = Δ_BdG[r, r] # on-site 
+            # get the nearest neighbours 
+            rL, rU, rR, rD = nearest_neighbours(r, m=m)
+
+            evs_rec[1, x, y] = Δ[r, r] # on-site 
+            evs_rec[2, x, y] = Δ[r, rL] # left 
+            evs_rec[3, x, y] = Δ[r, rU]# up 
+            evs_rec[4, x, y] = Δ[r, rR] # right
+            evs_rec[5, x, y] = Δ[r, rD] # down
+
+        elseif ndims == 3
+            # coordinates
+            x, y, z = site_to_coordinate(r, m=m)
+
+            # get the nearest neighbours 
+            rL, rU, rR, rD, rzU, rzD = nearest_neighbours(r, m=m)
+
+            # fill in the Δ matrix 
+            evs[1, x, y, z] = Δ[r, r] # on-site 
+            evs[2, x, y, z] = Δ[r, rL]# left 
+            evs[3, x, y, z] = Δ[r, rU]# up 
+            evs[4, x, y, z] = Δ[r, rR] # right
+            evs[5, x, y, z] = Δ[r, rD]# down
+            evs[6, x, y, z] = Δ[r, rzU] # ẑ up 
+            evs[7, x, y, z] = Δ[r, rzD] # ẑ down
+        else
+            println("No can do, sorry")
+            return
+        end
     end
 
     return evs_rec
 end
 
-function ΔBdG_to_ΔLGE_flat(Δ_BdG; L::Int)
-    evs_rec = ΔBdG_to_ΔLGE(Δ_BdG, L=L)
+function ΔBdG_to_ΔLGE_flat(m::ModelParams; Δ)
+    ndims = m.ndims
+    evs_rec = ΔBdG_to_ΔLGE(m, Δ=Δ)
+    N = numsites(m)
 
-    evs_flat = zeros(5 * L * L)
-    for (n, i) in enumerate(1:(L*L):(5*L*L))
-        evi = evs_rec[n, :, :]
-        evs_flat[i:(i+L*L-1)] = reshape(evi, L * L)
+    if ndims == 2
+        evs_flat = zeros(5 * N)
+        for (n, i) in enumerate(1:N:(5N))
+            evi = evs_rec[n, :, :]
+            evs_flat[i:(i+N-1)] = reshape(evi, N)
+        end
+    elseif ndims == 3
+        evs_flat = zeros(7 * N)
+        for (n, i) in enumerate(1:N:(7N))
+            evi = evs_rec[n, :, :, :]
+            evs_flat[i:(i+N-1)] = reshape(evi, N)
+        end
+    else
+        println("Sucks to suck. Sorry :(")
     end
 
     return evs_flat
@@ -430,8 +382,10 @@ function to_5N_LGE_Δ(maxev; L)
     Δy = evs[3, :, :]
     Δxminus = circshift(Δx, (-1, 0)) # mapping between +x̂ and -x̂
     Δyminus = circshift(Δy, (0, 1)) # mapping between +ŷ and -ŷ
+
+    # construc new eigenvector 
     new_evs = zeros(5, L, L)
-    new_evs[1, :, :] = evs[1, :, :]
+    new_evs[1, :, :] = evs[1, :, :] # on-site
     new_evs[2, :, :] = Δx
     new_evs[3, :, :] = Δy
     new_evs[4, :, :] = Δxminus
@@ -481,9 +435,10 @@ function to_7N_LGE_Δ(maxev; L)
     return evs_flat
 end
 
-function symmetry_character(Δ; L::Int)
-    if ndims(Δ) == 1
-        Δ = spatial_profile(Δ, L=L)
+function symmetry_character(m::ModelParams; Δ)
+    L, ndims = m.L, m.ndims
+    if Base.ndims(Δ) == 1
+        Δ = spatial_profile(m, Δ=Δ)
     end
 
     # normalize 
@@ -501,10 +456,10 @@ function symmetry_character(Δ; L::Int)
     end
 
     # on-site terms
-    os = dot(Δ[5, :, :], Δrot[5, :, :])
+    os = dot(Δ[1, :, :], Δrot[1, :, :])
 
     # now for the bonds
-    bds = dot(Δrot[2, :, :], Δ[1, :, :]) + dot(Δrot[3, :, :], Δ[2, :, :]) + dot(Δrot[4, :, :], Δ[3, :, :]) + dot(Δrot[1, :, :], Δ[4, :, :])
+    bds = dot(Δrot[3, :, :], Δ[2, :, :]) + dot(Δrot[4, :, :], Δ[3, :, :]) + dot(Δrot[5, :, :], Δ[4, :, :]) + dot(Δrot[2, :, :], Δ[5, :, :])
 
     return os + bds
 
