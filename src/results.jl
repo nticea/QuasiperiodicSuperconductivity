@@ -113,10 +113,8 @@ function spatial_profile(m::ModelParams; Δ)
 
     # check to see if we are already in spatial profile form 
     if Base.ndims(Δ) == 3 && ndims == 2
-        println("Returning Δ as is")
         return Δ
     elseif Base.ndims(Δ) == 4 && ndims == 3
-        println("Returning Δ as is")
         return Δ
     end
 
@@ -138,8 +136,8 @@ function spatial_profile(m::ModelParams; Δ)
     elseif ndims == 3
         evs = zeros(7, L, L, L)
         N = L * L * L
-        if length(Δ) == N
-            evs[1, :, :] = reshape(Δ, L, L, L)
+        if length(Δ) == N # s wave case 
+            evs[1, :, :, :] = reshape(Δ, L, L, L)
             return evs
         else
             for (n, i) in enumerate(1:N:7N)
@@ -154,11 +152,10 @@ function spatial_profile(m::ModelParams; Δ)
 end
 
 
-function plot_spatial_profile(m::ModelParams; Δ, title=nothing)
-    @assert m.ndims == 2 "Can only visualize in 2D"
-
-    if Base.ndims(Δ) != 3
-        evs = spatial_profile(m, Δ=Δ)
+function plot_spatial_profile(m::ModelParams; Δ, title=nothing, slice::Int=1)
+    evs = spatial_profile(m, Δ=Δ)
+    if m.ndims == 3
+        evs = evs[:, :, :, slice]
     end
 
     p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false, aspect_ratio=true)
@@ -237,9 +234,11 @@ function plot_in_configuration_space(m::ModelParams; Δ, title::Union{String,Not
     end
 
     if ndims == 2
+        push!(ps, plot_spatial_profile(m, Δ=Δ, title="Real space"))
         p = plot(ps..., layout=Plots.grid(2, 3,
                 widths=[1 / 3, 1 / 3, 1 / 3]), size=(1500, 1000), plot_title="Configuration space")
     elseif ndims == 3
+        push!(ps, plot_spatial_profile(m, Δ=Δ[:, :, :, slice], title="Real space"))
         p = plot(ps..., layout=Plots.grid(2, 4,
                 widths=[1 / 4, 1 / 4, 1 / 4]), size=(1500, 1000), plot_title="Configuration space")
     end
@@ -296,6 +295,7 @@ function ΔLGE_to_ΔBdG(m::ModelParams; Δ)
 end
 
 function ΔBdG_to_ΔLGE(m::ModelParams; Δ)
+    ndims, L = m.ndims, m.L
     # and now, go backwards 
     if m.ndims == 2
         evs_rec = zeros(5, L, L)
@@ -304,11 +304,11 @@ function ΔBdG_to_ΔLGE(m::ModelParams; Δ)
     else
         println("Sorry, $ndims dims not available")
     end
-
     N = numsites(m)
     for r in 1:N
 
         if ndims == 2
+
             # coordinates
             x, y = site_to_coordinate(r, m=m)
 
@@ -321,7 +321,9 @@ function ΔBdG_to_ΔLGE(m::ModelParams; Δ)
             evs_rec[4, x, y] = Δ[r, rR] # right
             evs_rec[5, x, y] = Δ[r, rD] # down
 
+
         elseif ndims == 3
+
             # coordinates
             x, y, z = site_to_coordinate(r, m=m)
 
@@ -329,19 +331,18 @@ function ΔBdG_to_ΔLGE(m::ModelParams; Δ)
             rL, rU, rR, rD, rzU, rzD = nearest_neighbours(r, m=m)
 
             # fill in the Δ matrix 
-            evs[1, x, y, z] = Δ[r, r] # on-site 
-            evs[2, x, y, z] = Δ[r, rL]# left 
-            evs[3, x, y, z] = Δ[r, rU]# up 
-            evs[4, x, y, z] = Δ[r, rR] # right
-            evs[5, x, y, z] = Δ[r, rD]# down
-            evs[6, x, y, z] = Δ[r, rzU] # ẑ up 
-            evs[7, x, y, z] = Δ[r, rzD] # ẑ down
+            evs_rec[1, x, y, z] = Δ[r, r] # on-site 
+            evs_rec[2, x, y, z] = Δ[r, rL]# left 
+            evs_rec[3, x, y, z] = Δ[r, rU]# up 
+            evs_rec[4, x, y, z] = Δ[r, rR] # right
+            evs_rec[5, x, y, z] = Δ[r, rD]# down
+            evs_rec[6, x, y, z] = Δ[r, rzU] # ẑ up 
+            evs_rec[7, x, y, z] = Δ[r, rzD] # ẑ down
         else
             println("No can do, sorry")
             return
         end
     end
-
     return evs_rec
 end
 
@@ -435,15 +436,10 @@ function to_7N_LGE_Δ(maxev; L)
     return evs_flat
 end
 
-function symmetry_character(m::ModelParams; Δ)
-    L, ndims = m.L, m.ndims
-    if Base.ndims(Δ) == 1
-        Δ = spatial_profile(m, Δ=Δ)
-    end
+function _symmetry_character(m::ModelParams; Δ)
+    L = m.L
 
-    # normalize 
-    Δ ./= norm(Δ)
-
+    # rotation about the ẑ axis 
     Δrot = zeros(size(Δ)...)
     for x in 1:L
         for y in 1:L
@@ -462,8 +458,53 @@ function symmetry_character(m::ModelParams; Δ)
     bds = dot(Δrot[3, :, :], Δ[2, :, :]) + dot(Δrot[4, :, :], Δ[3, :, :]) + dot(Δrot[5, :, :], Δ[4, :, :]) + dot(Δrot[2, :, :], Δ[5, :, :])
 
     return os + bds
-
 end
+
+function symmetry_character(m::ModelParams; Δ)
+    Δ = spatial_profile(m, Δ=Δ)
+    Δ ./= norm(Δ)
+
+    L, ndims = m.L, m.ndims
+    if ndims == 2
+        return _symmetry_character(m, Δ=Δ)
+    elseif ndims == 3
+        @warn "We are assuming a rotation about the ẑ axis"
+        χs = []
+        for slice in 1:L
+            Δslice = Δ[:, :, :, slice]
+            push!(χs, _symmetry_character(m, Δ=Δslice))
+        end
+        return χs
+    else
+    end
+end
+
+# function symmetry_character(m::ModelParams; Δ)
+#     L, ndims = m.L, m.ndims
+#     if Base.ndims(Δ) == 1
+#         Δ = spatial_profile(m, Δ=Δ)
+#     end
+#     Δ ./= norm(Δ)
+
+#     Δrot = zeros(size(Δ)...)
+#     for x in 1:L
+#         for y in 1:L
+#             for n in 1:5
+#                 x̃ = -y + L + 1
+#                 ỹ = x
+#                 Δrot[n, x̃, ỹ] = Δ[n, x, y]
+#             end
+#         end
+#     end
+
+#     # on-site terms
+#     os = dot(Δ[1, :, :], Δrot[1, :, :])
+
+#     # now for the bonds
+#     bds = dot(Δrot[3, :, :], Δ[2, :, :]) + dot(Δrot[4, :, :], Δ[3, :, :]) + dot(Δrot[5, :, :], Δ[4, :, :]) + dot(Δrot[2, :, :], Δ[5, :, :])
+
+#     return os + bds
+# end
 
 function finite_minimum(matrix)
     fins = matrix[isfinite.(matrix)]
