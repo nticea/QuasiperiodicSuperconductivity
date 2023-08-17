@@ -351,84 +351,6 @@ function dwave(m::ModelParams, T::Real; E, U)
     return M
 end
 
-function dwave_full(m::ModelParams, T::Real; E, U)
-    V0, V1, ndims = m.V0, m.V1, m.ndims
-    println("Computing d-wave configuration")
-    Ntot, N = size(U)
-    Uconj = conj.(U) # This is U^*
-
-    # Initialize the M matrix 
-    if ndims == 2
-        M = Matrix{Matrix{Float64}}(undef, 5, 5)
-    elseif ndims == 3
-        M = Matrix{Matrix{Float64}}(undef, 7, 7)
-    else
-        println("$ndims dimensions not supported")
-    end
-
-    # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
-    fs = fermi.(E, T)
-    fnm = zeros(N, N)
-    Enm = zeros(N, N)
-    for i in 1:N
-        fnm[:, i] = fs .+ fs[i]
-        Enm[:, i] = E .+ E[i]
-    end
-    P = (1 .- fnm) ./ Enm
-
-    # the s-wave sector. This is in the (1,1) block of M matrix
-    @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
-    @tullio UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
-    PUU = reshape(PUU, Ntot, N * N)
-    UU = reshape(UU, N * N, Ntot)
-    M[1, 1] = -V0 * PUU * UU
-
-    # make lists of the nearest-neighbour sites 
-    onsites, xsites, ysites, xmsites, ymsites, zsites, zmsites = [], [], [], [], [], [], []
-    for r in 1:Ntot
-        nnr = [nearest_neighbours(r, m=m)...] # get the nearest neighbours
-        push!(xsites, nnr[1])
-        push!(ysites, nnr[2])
-        push!(xmsites, nnr[3])
-        push!(ymsites, nnr[4])
-        push!(onsites, r)
-        if ndims == 3
-            push!(zsites, nnr[5])
-            push!(zmsites, nnr[6])
-        end
-    end
-    if ndims == 2
-        sites = [onsites, xsites, ysites, xmsites, ymsites]
-    elseif ndims == 3
-        sites = [onsites, xsites, ysites, xmsites, ymsites, zsites, zmsites]
-    else
-        println("$ndims dimensions is not supported")
-    end
-
-    # iterate through each of the blocks
-    for bd in CartesianIndices(M)
-        (b, d) = Tuple(bd)
-
-        # don't do the s-wave component (we've done it already)
-        if !(b == 1 && d == 1)
-            b_sites, d_sites = sites[b], sites[d]
-
-            if b == 1 # only δ=0 term gets V0, not δ'=0! 
-                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
-            else # bond terms have potential V1 
-                Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
-            end
-
-            # fill in the matrix 
-            M[b, d] = Mblock
-        end
-    end
-
-    M = mortar(M)
-
-    return M
-end
-
 function mortar(M::Matrix)
     (n, _) = size(M)
     (N, _) = size(M[1, 1])
@@ -475,8 +397,7 @@ end
 
 function LGE_find_Tc(m; npts=5, tol=1e-4, L̃::Int=11)
     # find the min and max values based on the Tc of a smaller system
-    m_small = copy(m)
-    m_small.L = L̃
+    m_small = ModelParams(L̃, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.J, m.periodic, m.ndims)
     Tc0, λ0, Δ0 = _LGE_find_Tc(m_small, npts=npts, tol=tol)
     if isnan(Tc0)
         println("No soln for small system size")
