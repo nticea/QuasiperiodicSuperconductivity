@@ -28,7 +28,6 @@ mkpath(datapath)
 # for saving the Hamiltonian
 stamp = "diagonalized_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q.h5"
 scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians")
-
 mkpath(scratchbase)
 scratchpath = joinpath(scratchbase, stamp)
 
