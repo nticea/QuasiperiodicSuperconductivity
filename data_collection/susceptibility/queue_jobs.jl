@@ -16,7 +16,7 @@ V1 = 0
 periodic = 1
 ndims = 3
 
-Ls = [21]#[35, 30, 25, 20]
+Ls = [23]#[35, 30, 25, 20]
 Js = collect(0:0.25:3)
 Ts = expspace(-3, 1, 30) # temperature 
 

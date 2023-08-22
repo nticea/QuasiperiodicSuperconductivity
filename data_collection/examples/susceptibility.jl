@@ -6,14 +6,13 @@ using CSV, DataFrames, Dates, Plots
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ## 
-L = 7
-J = 0.1
-t = 1
+L = 23
+t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-V0 = 1
-V1 = -1.5
+V0 = 0
+V1 = 0
 ϕx = 0
 ϕy = 0
 ϕz = 0
@@ -21,7 +20,8 @@ periodic = true
 ndims = 3
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-
+H0 = noninteracting_hamiltonian(m)
+@assert 1 == 0
 Ts = expspace(-2, 1.3, 20)
 χswave = []
 χdwave = []
