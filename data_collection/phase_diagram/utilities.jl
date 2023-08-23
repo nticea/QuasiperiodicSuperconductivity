@@ -18,10 +18,13 @@ function load_dfs()
         T=Float64[], λ=Float64[], Δ=[], K=[], Π=[])
     for f in files
         if endswith(f, ".csv") && contains(f, "LGE")
-            dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
-            # process all of the arrays 
-            if size(dfi)[1] == 1 && size(dfi)[2] == size(df_LGE)[2]
-                append!(df_LGE, dfi)
+            try
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                # process all of the arrays 
+                if size(dfi)[1] == 1 && size(dfi)[2] == size(df_LGE)[2]
+                    append!(df_LGE, dfi)
+                end
+            catch e
             end
         end
     end

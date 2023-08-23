@@ -18,14 +18,15 @@ function load_dfs()
         T=[], Λ=[], χ=[])
     for f in files
         if endswith(f, ".csv")
-            dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
-            dfi = convert_df_arrays(dfi, "χ")
             try
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = convert_df_arrays(dfi, "χ")
                 append!(df, dfi)
             catch e
             end
         end
     end
+    dropmissing!(df)
 
     return df
 end

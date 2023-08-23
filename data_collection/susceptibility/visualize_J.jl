@@ -25,15 +25,7 @@ if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
 files = readdir(joinpath(@__DIR__, "data"))
-df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
-    T=[], Λ=[], χ=[])
-for f in files
-    if endswith(f, ".csv")
-        dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
-        dfi = convert_df_arrays(dfi, "χ")
-        append!(df, dfi)
-    end
-end
+df = load_dfs()
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
