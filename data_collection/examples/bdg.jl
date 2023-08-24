@@ -5,14 +5,14 @@ using CSV, DataFrames, Dates, Plots
 include("../../src/BdG.jl")
 
 ## PARAMETERS ## 
-L = 7
+L = 23
 J = 0.8
 t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-V0 = -1.2 #(2,-1.5 has Tc approx 0.02)
-V1 = 0
+V0 = 1.5
+V1 = -1
 ϕx = 0
 ϕy = 0
 ϕz = 0
@@ -25,11 +25,19 @@ tol = 1e-12
 
 # initialize model 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+Ls = []
+for L in collect(15:35)
+    try
+        m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+        H0 = noninteracting_hamiltonian(m)
+        push!(Ls, L)
+    catch
+    end
+end
+@assert 1 == 0
 
 # find Δ
 Tc, λ, Δ_LGE = LGE_find_Tc(m)
-
-@assert 1 == 0
 Δ_BdG, hist = compute_Δ(m, T=Tc, niter=niter, tol=tol, Δ_init=Δ_LGE)
 
 # plot things 
