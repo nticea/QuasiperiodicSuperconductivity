@@ -29,9 +29,9 @@ BdG_tol = 1e-15
 LGE_tol = 1e-2
 
 ## SAVING ## 
+mkpath(joinpath(@__DIR__, "data"))
 dfs = load_dfs()
 timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
-mkpath(joinpath(@__DIR__, "data"))
 savepath_BdG = joinpath(@__DIR__, "data", "$(L)L_ΦQ_BdG_" * timestamp * ".csv")
 savepath_LGE = joinpath(@__DIR__, "data", "$(L)L_ΦQ_LGE_" * timestamp * ".csv")
 df_BdG = DataFrame(L=[], t=[], μ=[], J=[], Q=[], θ=[],
