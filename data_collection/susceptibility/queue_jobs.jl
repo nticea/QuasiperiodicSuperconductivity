@@ -16,7 +16,7 @@ V1 = 0
 periodic = 1
 ndims = 3
 
-Ls = [35, 31, 29, 27]
+Ls = [35, 31]
 Js = collect(0:0.25:3)
 Ts = expspace(-3, 1, 30) # temperature 
 
@@ -27,7 +27,7 @@ for L in Ls
     for J in Js
         for T in Ts
             ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="1:00:00")
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=256, kwargs="$T", time="15:00:00")
         end
     end
 end
