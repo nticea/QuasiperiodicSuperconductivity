@@ -28,6 +28,8 @@ m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V
 
 # find Δ
 Tc, λ, Δ_LGE = LGE_find_Tc(m)
+
+@assert 1 == 0
 Δ_BdG, hist = compute_Δ(m, T=Tc, niter=niter, tol=tol, Δ_init=Δ_LGE)
 
 # plot things 
