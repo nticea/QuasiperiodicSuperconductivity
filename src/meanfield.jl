@@ -40,55 +40,6 @@ function pairfield_correlation(m::ModelParams; T::Real,
     return λ, Δ̃
 end
 
-function pairfield_susceptibility(m;
-    T, symmetry::String, Λ::Union{Nothing,Real}=nothing,
-    checkpointpath::Union{String,Nothing}=nothing)
-
-    @warn "I need to benchmark this again after implementing 3D system sizes"
-
-    E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
-    ndims = m.ndims
-
-    if !isnothing(Λ)
-        @warn "Keeping only states close to εf"
-        sortidx = sortperm(E)
-        Ẽ = E[sortidx]
-        Ũ = U[:, sortidx]
-        E = Ẽ[Ẽ.<Λ.&&Ẽ.>-Λ]
-        U = Ũ[:, Ẽ.<Λ.&&Ẽ.>-Λ]
-    end
-
-    # Construct the pairfield susceptibility
-    if symmetry == "s-wave"
-        χ = swave_χ(m, T, E=E, U=U)
-        χ0 = sum(χ)
-    elseif symmetry == "d-wave"
-        χ = dwave_χ(m, T, E=E, U=U)
-        if ndims == 2
-            N = L * L
-            nblocks = 3
-        elseif ndims == 3
-            N = L * L * L
-            nblocks = 4
-        else
-            println("$dims dimensions not implemented")
-        end
-
-        χ0 = zeros(nblocks, nblocks)
-        for (b1, i) in enumerate(1:N:nblocks*N)
-            for (b2, j) in enumerate(1:N:nblocks*N)
-                χδδ = χ[i:(i+N-1), j:(j+N-1)]
-                # take the sum of this guy 
-                χ0[b1, b2] = sum(χδδ)
-            end
-        end
-    else
-        @error "Symmetry $symmetry not recognized"
-    end
-
-    return χ0
-end
-
 function uniform_susceptibility(m;
     T, symmetry::String="d-wave", Λ::Union{Nothing,Real}=nothing,
     checkpointpath::Union{String,Nothing}=nothing)
@@ -241,19 +192,6 @@ function swave(m::ModelParams, T::Real; E, U)
     return -V0 * χ
 end
 
-function swave_χ(m::ModelParams, T::Real; E, U)
-    m_copy = copy(m)
-    m_copy.V0 = -1
-    return swave(m_copy, T, E=E, U=U)
-end
-
-function dwave_χ(m::ModelParams, T::Real; E, U)
-    m_copy = copy(m)
-    m_copy.V0 = -1
-    m_copy.V1 = -1
-    return dwave(m_copy, T, E=E, U=U)
-end
-
 function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int, Ntot::Int)
     Uconjb = [Uconj[r, :] for r in b_sites]
     Ud = [U[r, :] for r in d_sites]
@@ -334,7 +272,7 @@ function dwave(m::ModelParams, T::Real; E, U)
         if !(b == 1 && d == 1)
             b_sites, d_sites = sites[b], sites[d]
 
-            if b == 1 # only δ=0 term gets V0, not δ'=0! 
+            if b == 1# only δ=0 term gets V0, not δ'=0! 
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
             else # bond terms have potential V1 
                 # multiply by 2 bc we are only considering 1/2 of each direction
@@ -491,4 +429,83 @@ function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10)
     end
 
     return Tc, λ0, Δ0
+end
+
+function susceptibility_eigenvalue(m::ModelParams; T::Real,
+    symmetry::String, checkpointpath::Union{String,Nothing}=nothing)
+
+    E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
+
+    if symmetry == "s-wave"
+        χ = swave_χ(m, T, E=E, U=U)
+    elseif symmetry == "d-wave"
+        χ = dwave_χ(m, T, E=E, U=U)
+    else
+        println("Symmetry not recognized, bruv")
+        return
+    end
+
+    # diagonalize and find leading eigenvalue 
+    λ, _ = calculate_λ_Δ(χ)
+
+    return λ
+end
+
+function swave_χ(m::ModelParams, T::Real; E, U)
+    m_copy = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, -1, 0, m.J, m.periodic, m.ndims)
+    return swave(m_copy, T, E=E, U=U)
+end
+
+function dwave_χ(m::ModelParams, T::Real; E, U)
+    ndims = m.ndims
+    Ntot, N = size(U)
+    Uconj = conj.(U) # This is U^*
+
+    # Initialize the M matrix 
+    if ndims == 2
+        M = Matrix{Matrix{Float64}}(undef, 2, 2)
+    elseif ndims == 3
+        M = Matrix{Matrix{Float64}}(undef, 3, 3)
+    else
+        println("$ndims dimensions not supported")
+    end
+
+    # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
+    fs = fermi.(E, T)
+    fnm = zeros(N, N)
+    Enm = zeros(N, N)
+    for i in 1:N
+        fnm[:, i] = fs .+ fs[i]
+        Enm[:, i] = E .+ E[i]
+    end
+    P = (1 .- fnm) ./ Enm
+
+    # make lists of the nearest-neighbour sites 
+    xsites, ysites, zsites = [], [], []
+    for r in 1:Ntot
+        nnr = [nearest_neighbours(r, m=m)...] # get the nearest neighbours
+        push!(xsites, nnr[1])
+        push!(ysites, nnr[2])
+        if ndims == 3
+            push!(zsites, nnr[5])
+        end
+    end
+    if ndims == 2
+        sites = [xsites, ysites]
+    elseif ndims == 3
+        sites = [xsites, ysites, zsites]
+    else
+        println("$ndims dimensions is not supported")
+    end
+
+    # iterate through each of the blocks
+    for bd in CartesianIndices(M)
+        (b, d) = Tuple(bd)
+        b_sites, d_sites = sites[b], sites[d]
+        Mblock = 2 * dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=-1, N=N, Ntot=Ntot)
+        # fill in the matrix 
+        M[b, d] = Mblock
+    end
+    M = mortar(M)
+    return M
 end

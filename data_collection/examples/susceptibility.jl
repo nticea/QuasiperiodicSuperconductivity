@@ -6,9 +6,10 @@ using CSV, DataFrames, Dates, Plots
 include("../../src/meanfield.jl")
 
 ## PARAMETERS ## 
-L = 23
+L = 7
 t = 1 # hopping 
 Q = (√5 - 1) / 2
+J = 0.8
 μ = 1e-8
 θ = π / 7
 V0 = 0
@@ -20,9 +21,36 @@ periodic = true
 ndims = 3
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-Ts = expspace(-2, 1.3, 20)
+
+d = susceptibility_eigenvalue(m, T=0.05734, symmetry="d-wave")
+@show d
+@assert 1 == 0
+
+Ts = expspace(-3.2, 1.3, 50)
 χswave = []
 χdwave = []
+for T in Ts
+    @show T
+    s = susceptibility_eigenvalue(m, T=T, symmetry="s-wave")
+    d = susceptibility_eigenvalue(m, T=T, symmetry="d-wave")
+
+    push!(χswave, s)
+    push!(χdwave, d)
+end
+
+p = plot(Ts, χdwave, xaxis=:log10, c="blue", label=nothing)
+scatter!(p, Ts, χdwave, xaxis=:log10, c="blue", label="d-wave")
+plot!(p, Ts, χswave, xaxis=:log10, c="red", label=nothing)
+scatter!(p, Ts, χswave, xaxis=:log10, c="red", label="s-wave")
+if ndims == 3
+    size_str = "$L×$L×$L"
+elseif ndims == 2
+    size_str = "$L×$L"
+end
+title!(p, "λ(χ) for $size_str lattice with J=$J, Q=$(round(Q,digits=3)), θ=$(θ_to_π(θ))")
+xlabel!(p, "T")
+ylabel!(p, "λ")
+@assert 1 == 0
 
 for T in Ts
     @show T

@@ -561,7 +561,6 @@ end
 function load_diagonalized_H(loadpath::String)
     f = h5open(loadpath, "r")
     d = read(f)
-    @show keys(d)
     close(f)
     return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
         d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["ϕz"], d["J"],
