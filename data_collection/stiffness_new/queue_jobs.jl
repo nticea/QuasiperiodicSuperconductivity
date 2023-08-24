@@ -4,25 +4,27 @@ Pkg.activate(joinpath(@__DIR__, "../.."))
 include("../../src/model.jl")
 include("../../src/submit_job.jl")
 
-L = 17 # the full system is L × L 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
+ϕx = 0
+ϕy = 0
+ϕz = 0
 μ = 1e-8
 θ = π / 7
-V0 = -2.3
+V0 = -1.2
 V1 = 0
 periodic = 1
+ndims = 3
 
-Js = collect(0:0.1:3)
-ϕxs, ϕys = LinRange(0, 3, 2), LinRange(0, 3, 2)
+Js = collect(0:0.25:3)
 filepath = joinpath(@__DIR__, "collect_data.jl")
-job_prefix = "sweep"
+job_prefix = "stiffness"
 
-for ϕx in ϕxs
-    for ϕy in ϕys
-        for J in Js
-            ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, V0=V0, V1=V1, J=J, periodic=periodic)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=10)
-        end
-    end
+for J in Js
+    ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=256, time="6:00:00")
+    ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="4:00:00")
+    ps = ModelParams(L=7, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="1:00:00")
 end

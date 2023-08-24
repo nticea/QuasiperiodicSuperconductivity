@@ -82,10 +82,15 @@ for (j, J) in enumerate(Js)
     end
 end
 
+if ndims == 3
+    size_str = "$L × $L × $L"
+elseif ndims == 2
+    size_str = "$L × $L"
+end
 p1 = plot(px, pos, layout=Plots.grid(1, 2,
         widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
 if savefigs
-    savefig(p, joinpath(figpath, "susceptibility_J_$(L)L.pdf"))
+    savefig(p1, joinpath(figpath, "susceptibility_J_$(L)L.pdf"))
 end
 
 # also, plot the value of each J at various temperatures 
@@ -140,12 +145,6 @@ end
 
 # make a colourbar 
 heatmap!(ptemp_s, zeros(2, 2), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
-
-if ndims == 3
-    size_str = "$L × $L × $L"
-elseif ndims == 2
-    size_str = "$L × $L"
-end
 
 p2 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
         widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")

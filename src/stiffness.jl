@@ -9,57 +9,51 @@ function superfluid_stiffness_finiteT(m::ModelParams; T::Real, niter::Int=100, t
 
     # number of sites
     N, _ = size(U)
+    ndims = m.ndims
 
     # the fermi distribution (vector over all sites)
     f = fermi.(E; T=T)
 
     # make lists of the nearest-neighbour sites 
-    Rsites, Usites, Lsites, Dsites, onsites = [], [], [], [], []
-    xcoords, ycoords = [], []
+    Rsites, Usites, zsites, onsites = [], [], [], []
+    xcoords, ycoords, zcoords = [], [], []
     for r in 1:N
-        nnr = [nearest_neighbours(r, L=L)...] # get the nearest neighbours
-        push!(Rsites, nnr[1])
-        push!(Usites, nnr[2])
-        push!(Lsites, nnr[3])
-        push!(Dsites, nnr[4])
+        nnr = [nearest_neighbours(r, m=m)...] # get the nearest neighbours
         push!(onsites, r)
+        push!(Rsites, nnr[3])
+        push!(Usites, nnr[2])
+        push!(zsites, nnr[5])
 
-        x, y = site_to_coordinate(r, L=L)
-        push!(xcoords, x)
-        push!(ycoords, y)
+        if ndims == 2
+            x, y = site_to_coordinate(r, m=m)
+            push!(xcoords, x)
+            push!(ycoords, y)
+        elseif ndims == 3
+            x, y, z = site_to_coordinate(r, m=m)
+            push!(xcoords, x)
+            push!(ycoords, y)
+            push!(zcoords, z)
+        else
+            println("sorry, bruv")
+            return
+        end
     end
 
-    sites = [Rsites, Usites, Lsites, Dsites, onsites]
-    coords = [xcoords, ycoords]
+    if ndims == 2
+        sites = [onsites, Rsites, Usites]
+        coords = [xcoords, ycoords]
+    elseif ndims == 3
+        sites = [onsites, Rsites, Usites, zsites]
+        coords = [xcoords, ycoords, zcoords]
+    else
+        println("tough.")
+        return
+    end
 
-    @time K = kinetic_term(sites, U=U, V=V, E=E, f=f, t=t)
-    @time Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, t=t)
+    @time K = kinetic_term(sites, U=U, V=V, E=E, f=f, m=m)
+    @time Π = current_current_term(sites, coords, U=U, V=V, E=E, f=f, m=m)
 
     return K, Π, Δ
-end
-
-function superfluid_stiffness(; L::Int, t::Real, J::Real, Q::Real, μ::Real, periodic::Bool, V0::Real, V1::Real, θ::Union{Real,Nothing},
-    ϕx::Real=0, ϕy::Real=0, niter::Int=100, tol::Union{Real,Nothing}=nothing, noise::Real=0, npts::Int=5, Δ_init)
-
-    Ts = expspace(-1, -9, npts)
-    Ds = zeros(npts, 4)
-    # collect data points at various T 
-    for (i, T) in enumerate(Ts)
-        print(i, "-")
-        K, Π = superfluid_stiffness_finiteT(T, L=L, t=t, J=J, Q=Q, μ=μ, V0=V0, V1=V1, tol=tol, θ=θ, ϕx=ϕx, ϕy=ϕy, niter=niter, periodic=periodic, noise=noise, Δ_init=Δ_init)
-        @show K, Π
-        @show -K + Π
-        Ds[i, :] = -K + Π
-    end
-
-    # perform extrapolation T → 0
-    Ds_extrapolated = []
-    for x in 1:4
-        model = Polynomials.fit(Ts, Ds[:, x], npts)
-        push!(Ds_extrapolated, model(0))
-    end
-
-    return Ds_extrapolated
 end
 
 function ij_blocks(i_sites, j_sites, A, Aconj)
@@ -76,10 +70,11 @@ function ij_blocks(i_sites, j_sites, A, Aconj)
     return Aconj_i, A_i, Aconj_j, A_j
 end
 
-function kinetic_term(sites; U, V, E, f, t)
+function kinetic_term(sites; U, V, E, f, m)
+    t, ndims = m.t, m.ndims
 
     N, _ = size(U)
-    i_sites = sites[5] # these are the on-sites 
+    i_sites = sites[1] # these are the on-sites 
 
     # take only the positive eigenvalues
     En_idx = findall(x -> x >= 0, E)
@@ -87,8 +82,16 @@ function kinetic_term(sites; U, V, E, f, t)
     V = V[:, En_idx]
     f = f[En_idx]
 
-    K = zeros(4)
-    for j in 1:2 #iterate through the nearest neighbours in all directions 
+    if ndims == 2
+        K = zeros(2)
+    elseif ndims == 3
+        K = zeros(3)
+    else
+        println("rough")
+        return
+    end
+
+    for j in 2:length(sites) #iterate through the nearest neighbours in all directions 
         j_sites = sites[j]
 
         # make the blocks of i sites and j sites 
@@ -104,20 +107,25 @@ function kinetic_term(sites; U, V, E, f, t)
 
         Kx = -2 * t / N * (t1 + t2 + t3 + t4) # factor of 2 from spin 
 
-        K[j] = Kx
+        K[j-1] = Kx
     end
-    K[3] = copy(K[1])
-    K[4] = copy(K[2])
 
     return K
 end
 
-function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8, porder=3)
+function current_current_term(sites, coords; U, V, E, f, m::ModelParams, npts=5, δ=1e-8, porder=3)
+    ndims = m.ndims
+
     # the minimum q I can consider is 1/L
-    N, _ = size(U)
-    L = √N
-    qs = expspace(1, -9, npts)#1 / L * collect(1:npts)
-    Πs = zeros(npts, 4)
+    qs = expspace(1, -9, npts)
+    if ndims == 2
+        Πs = zeros(npts, 2)
+    elseif ndims == 3
+        Πs = zeros(npts, 3)
+    else
+        println(":(")
+        return
+    end
 
     # the diagonals have ΔE=0, which causes divergence 
     @einsimd En1n2[n1, n2] := E[n1] - E[n2] + δ * 1im
@@ -133,7 +141,7 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8, por
     # perform extrapolation qy → 0
     Threads.@threads for (i, q) in collect(enumerate(qs))
         print(i, "-")
-        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, pf=pf, t=t, q=q))
+        Πs[i, :] = real.(Πq(sites, coords; U=U, V=V, pf=pf, q=q, m=m))
     end
 
     @show Πs[:, 1]
@@ -142,7 +150,7 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8, por
         porder = npts - 2
     end
     Πs_extrapolated = []
-    for x in 1:4
+    for x in 1:size(Πs)[2]
         Πxx = Πs[:, x]
         model = Polynomials.fit(qs, Πxx, porder)
         push!(Πs_extrapolated, model(0))
@@ -153,53 +161,93 @@ function current_current_term(sites, coords; U, V, E, f, t, npts=5, δ=1e-8, por
     return Πs_extrapolated
 end
 
-function Πq(sites, coords; U, V, pf, t, q)
-    N, _ = size(U)
-    i_sites = sites[5] # these are the on-sites 
+function Πq(sites, coords; U, V, pf, q, m::ModelParams)
+    t, ndims = m.t, m.ndims
 
-    Π = zeros(4)
-    Threads.@threads for j in 1:2#1:4
+    N, _ = size(U)
+    i_sites = sites[1] # these are the on-sites 
+
+    if ndims == 2
+        Π = zeros(2)
+    elseif ndims == 3
+        Π = zeros(3)
+    else
+        println("sad.")
+        return
+    end
+
+    Threads.@threads for j in 2:length(sites)
         j_sites = sites[j]
 
-        if j == 1 || j == 3
-            # For Πxx, we set qx = 0 and take qy → 0
-            qx = 0
-            qy = q
+        if ndims == 2
+            if j == 2
+                # For Πxx, we set qx = 0 and take qy → 0
+                qx = 0
+                qy = q
+            elseif j == 3
+                # For Πyy, we set qy = 0 and take qx → 0
+                qx = q
+                qy = 0
+            else
+                println("Something is off with indexing...")
+            end
+            A = Aq((qx, qy), i_sites, j_sites, coords, U=U, m=m)
+            D = Dq((-qx, -qy), i_sites, j_sites, coords, V=V, m=m)
+        elseif ndims == 3
+            if j == 2
+                # For Πxx, we set qx = 0 and take qy → 0
+                qx = 0
+                qy = q
+                qz = q
+            elseif j == 3
+                # For Πyy, we set qy = 0 and take qx → 0
+                qx = q
+                qy = 0
+                qz = q
+            elseif j == 4
+                qx = q
+                qy = q
+                qz = 0
+            else
+                println("Not sure how you got here. Good job!")
+                return
+            end
+            A = Aq((qx, qy, qz), i_sites, j_sites, coords, U=U, m=m)
+            D = Dq((-qx, -qy, -qz), i_sites, j_sites, coords, V=V, m=m)
         else
-            # For Πyy, we set qy = 0 and take qx → 0
-            qx = q
-            qy = 0
+            println("boop")
+            return
         end
-
-        A = Aq((qx, qy), i_sites, j_sites, coords, U=U)
-        D = Dq((-qx, -qy), i_sites, j_sites, coords, V=V)
+        
         Aconj = conj.(A)
-
-        # @einsimd Πxx := 2 * t^2 / N * (A[n1, n2] * (Aconj[n1, n2] + D[n1, n2]) * (fn1n2[n1, n2]) / En1n2[n1, n2])
         AplusD = Aconj + D
         @einsimd Πxx := 2 * t^2 / N * A[n1, n2] * AplusD[n1, n2] * pf[n1, n2]
         Πxx = real.(Πxx)
-        Π[j] = Πxx
+        Π[j-1] = Πxx
     end
-    Π[3] = copy(Π[1])
-    Π[4] = copy(Π[2])
-
     return Π
 end
 
-function Aq(q, i_sites, j_sites, coords; U)
-    # unpack some of the arguments 
-    qx, qy = q
-    x, y = coords
+function Aq(q, i_sites, j_sites, coords; U, m::ModelParams)
+    if m.ndims == 2
+        # unpack some of the arguments 
+        qx, qy = q
+        x, y = coords
+        # make the exponential prefactor 
+        exp_pf = exp.(-1im .* (qx .* x + qy .* y))
+    elseif m.ndims == 3
+        # unpack some of the arguments 
+        qx, qy, qz = q
+        x, y, z = coords
+        # make the exponential prefactor 
+        exp_pf = exp.(-1im .* (qx .* x + qy .* y + qz .* z))
+    else
+        println("no.")
+        return
+    end
 
     # make the blocks of i sites and j sites 
     Uconj_i, U_i, Uconj_j, U_j = ij_blocks(i_sites, j_sites, U, conj.(U))
-
-    # make the exponential prefactor 
-    exp_pf = exp.(-1im .* (qx .* x + qy .* y))
-
-    # multiply everything together 
-    # @einsimd A[n1, n2] := exp_pf[r] * (Uconj_j[r, n1] * U_i[r, n2] - Uconj_i[r, n1] * U_j[r, n2])
 
     # this is way faster! 
     U1 = Uconj_j .* exp_pf
@@ -211,20 +259,25 @@ function Aq(q, i_sites, j_sites, coords; U)
     return A
 end
 
-function Dq(q, i_sites, j_sites, coords; V)
-
-    # unpack some of the arguments 
-    qx, qy = q
-    x, y = coords
-
+function Dq(q, i_sites, j_sites, coords; V, m::ModelParams)
+    if m.ndims == 2
+        # unpack some of the arguments 
+        qx, qy = q
+        x, y = coords
+        # make the exponential prefactor 
+        exp_pf = exp.(-1im .* (qx .* x + qy .* y))
+    elseif m.ndims == 3
+        # unpack some of the arguments 
+        qx, qy, qz = q
+        x, y, z = coords
+        # make the exponential prefactor 
+        exp_pf = exp.(-1im .* (qx .* x + qy .* y + qz .* z))
+    else
+        println("no.")
+        return
+    end
     # make the blocks of i sites and j sites 
     Vconj_i, V_i, Vconj_j, V_j = ij_blocks(i_sites, j_sites, V, conj.(V))
-
-    # make the exponential prefactor
-    exp_pf = exp.(-1im .* (qx .* x + qy .* y))
-
-    # factor of 2 is for the spin ??
-    # @einsimd D[n1, n2] := exp_pf[r] * (V_j[r, n1] * Vconj_i[r, n2] - V_i[r, n1] * Vconj_j[r, n2])
 
     # this is way faster! 
     U1 = V_j .* exp_pf
