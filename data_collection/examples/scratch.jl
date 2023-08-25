@@ -19,21 +19,9 @@ V1 = -1
 periodic = true
 ndims = 3
 
-# simulation parameters
-niter = 500
-tol = 1e-12
-
 # initialize model 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+E, U = @time diagonalize_hamiltonian(m)
+plot(E)
 
-# find Δ
-Tc, λ, Δ_LGE = LGE_find_Tc(m)
-Δ_BdG, hist = compute_Δ(m, T=Tc, niter=niter, tol=tol, Δ_init=Δ_LGE)
-
-# plot things 
-plot_spatial_profile(m, Δ=Δ_BdG)
-plot_spatial_profile(m, Δ=Δ_LGE)
-plot_in_configuration_space(m, Δ=Δ_LGE)
-plot_in_configuration_space(m, Δ=Δ_BdG)
-
-
+histogram(E, bins=100, xlabel="E", ylabel="Frequency", title="Histogram")
