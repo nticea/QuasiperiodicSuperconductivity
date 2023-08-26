@@ -5,7 +5,7 @@ using CSV, DataFrames, Dates, Plots
 include("../../src/BdG.jl")
 
 ## PARAMETERS ## 
-L = 23
+L = 7
 J = 0.8
 t = 1
 Q = (√5 - 1) / 2
@@ -32,6 +32,7 @@ Tc, λ, Δ_LGE = LGE_find_Tc(m)
 
 # plot things 
 plot_spatial_profile(m, Δ=Δ_BdG)
+
 plot_spatial_profile(m, Δ=Δ_LGE)
 plot_in_configuration_space(m, Δ=Δ_LGE)
 plot_in_configuration_space(m, Δ=Δ_BdG)

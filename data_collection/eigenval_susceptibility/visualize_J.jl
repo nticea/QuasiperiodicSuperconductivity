@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 23 # the full system is L × L 
+L = 11 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -24,7 +24,6 @@ T_cutoff = 1e-2
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-files = readdir(joinpath(@__DIR__, "data"))
 df = load_dfs()
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
@@ -36,37 +35,19 @@ cmap = cgrad(:matter, length(Js), categorical=true)
 for (j, J) in enumerate(Js)
     dfJ = dfL[(dfL.J.==J), :]
     Ts = dfJ.T
-    χs = dfJ.χ
+    χswave = dfJ.χswave
+    χdwave = dfJ.χdwave
 
     sortidx = sortperm(Ts)
     Ts = Ts[sortidx]
-    χs = χs[sortidx]
-    χs = [reshape(χ, 4, 4) for χ in χs]
+    χswave = χswave[sortidx]
+    χdwave = χdwave[sortidx]
 
     # consider only the linear regime 
     # χs = χs[Ts.>=T_cutoff]
     # Ts = Ts[Ts.>=T_cutoff]
 
     if length(Ts) > 0
-
-        # on-site
-        χswave = [χ[1, 1] for χ in χs]
-
-        # make the d-wave components 
-        xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
-        xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
-        if ndims == 2
-            χdwave = xx + yy - xy - yx
-        elseif ndims == 3
-            zz = [χ[4, 4] for χ in χs]
-            xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
-            yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
-            χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
-        else
-            println("sorry")
-            χdwave = nothing
-        end
-
         plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
         scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
 
@@ -104,30 +85,12 @@ ptemp_d = plot(margin=10Plots.mm)
 for (i, T) in enumerate(Ts)
     dfT = dfL[(dfL.T.==T), :]
     Js = dfT.J
-    χs = dfT.χ
-
+    χswave = dfT.χswave
+    χdwave = dfT.χdwave
     sortidx = sortperm(Js)
     Js = Js[sortidx]
-    χs = χs[sortidx]
-    χs = [reshape(χ, 4, 4) for χ in χs]
-
-    # on-site
-    χswave = [χ[1, 1] for χ in χs]
-
-    # make the d-wave components 
-    xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
-    xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
-    if ndims == 2
-        χdwave = xx + yy - xy - yx
-    elseif ndims == 3
-        zz = [χ[4, 4] for χ in χs]
-        xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
-        yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
-        χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
-    else
-        println("sorry")
-        χdwave = nothing
-    end
+    χswave = χswave[sortidx]
+    χdwave = χdwave[sortidx]
 
     plot!(ptemp_s, Js, χswave, label=nothing, c=cmap[i])
     scatter!(ptemp_s, Js, χswave, c=cmap[i], label=nothing)

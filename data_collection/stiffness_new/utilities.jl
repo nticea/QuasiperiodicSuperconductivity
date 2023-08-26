@@ -27,8 +27,57 @@ function load_dfs()
                 dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
                 dfi = convert_df_arrays(dfi, "K")
                 dfi = convert_df_arrays(dfi, "Π")
+                dfi = convert_df_arrays(dfi, "Δ")
                 append!(df, dfi)
             catch e
+            end
+        end
+    end
+    dropmissing!(df)
+
+    return df
+end
+
+function load_LGE()
+    # read files 
+    files = readdir(joinpath(@__DIR__, "data"))
+    df = DataFrame(L=[], λ=[], Δ=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
+        ϕz=[], ndims=[], V0=[], V1=[], t=[], μ=[], periodic=[], T=[],
+        K=[], Π=[])
+    for f in files
+        if endswith(f, ".csv") && contains(f, "LGE")
+            try
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = convert_df_arrays(dfi, "K")
+                dfi = convert_df_arrays(dfi, "Π")
+                dfi = convert_df_arrays(dfi, "Δ")
+                append!(df, dfi)
+            catch e
+                println("file $f not valid...?")
+            end
+        end
+    end
+    dropmissing!(df)
+
+    return df
+end
+
+function load_BdG()
+    # read files 
+    files = readdir(joinpath(@__DIR__, "data"))
+    df = DataFrame(L=[], λ=[], Δ=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
+        ϕz=[], ndims=[], V0=[], V1=[], t=[], μ=[], periodic=[], T=[],
+        K=[], Π=[])
+    for f in files
+        if endswith(f, ".csv") && contains(f, "BdG")
+            try
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = convert_df_arrays(dfi, "K")
+                dfi = convert_df_arrays(dfi, "Π")
+                dfi = convert_df_arrays(dfi, "Δ")
+                append!(df, dfi)
+            catch e
+                println("file $f not valid...?")
             end
         end
     end
