@@ -112,9 +112,7 @@ function spatial_profile(m::ModelParams; Δ)
     L, ndims = m.L, m.ndims
 
     # check to see if we are already in spatial profile form 
-    if Base.ndims(Δ) == 3 && ndims == 2
-        return Δ
-    elseif Base.ndims(Δ) == 4 && ndims == 3
+    if Base.ndims(Δ) == 3 || Base.ndims(Δ) == 4
         return Δ
     end
 
@@ -152,9 +150,9 @@ function spatial_profile(m::ModelParams; Δ)
 end
 
 function plot_spatial_profile(m::ModelParams; Δ, title=nothing)
-    if m.ndims == 2
+    if Base.ndims(Δ) == 3
         return _plot_spatial_profile(m, Δ=Δ, title=title)
-    elseif m.ndims == 3
+    elseif Base.ndims(Δ) == 4
         ps = []
         for slice in 1:L
             pslice = _plot_spatial_profile(m, Δ=Δ, title=title, slice=slice)
@@ -170,7 +168,7 @@ end
 
 function _plot_spatial_profile(m::ModelParams; Δ, title=nothing, slice::Int=1)
     evs = spatial_profile(m, Δ=Δ)
-    if m.ndims == 3
+    if Base.ndims(Δ) == 4
         evs = evs[:, :, :, slice]
     end
 
