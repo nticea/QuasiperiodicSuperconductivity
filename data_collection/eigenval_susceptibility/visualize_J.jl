@@ -110,7 +110,7 @@ end
 heatmap!(ptemp_s, zeros(2, 2), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
 
 p2 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
-        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Eigenvalue χ for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
 if savefigs
     savefig(p2, joinpath(figpath, "susceptibility_temp_$(L)L.pdf"))
 end
