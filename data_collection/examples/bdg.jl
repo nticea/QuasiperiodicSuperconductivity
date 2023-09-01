@@ -5,7 +5,7 @@ using CSV, DataFrames, Dates, Plots
 include("../../src/BdG.jl")
 
 ## PARAMETERS ## 
-L = 7
+L = 31
 J = 0.8
 t = 1
 Q = (√5 - 1) / 2
@@ -25,7 +25,8 @@ tol = 1e-12
 
 # initialize model 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-
+H0 = noninteracting_hamiltonian(m)
+@assert 1 == 0
 # find Δ
 Tc, λ, Δ_LGE = LGE_find_Tc(m)
 Δ_BdG, hist = compute_Δ(m, T=Tc, niter=niter, tol=tol, Δ_init=Δ_LGE)
