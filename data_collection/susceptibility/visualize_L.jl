@@ -12,26 +12,21 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-Ls = [89] # the full system is L × L 
+L = 29 # the full system is L × L 
+ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
-savefigs = true
+savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
+T_cutoff = 1e-2
 
 # read files 
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
 files = readdir(joinpath(@__DIR__, "data"))
-df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
-    T=[], χ=[])
-for f in files
-    if endswith(f, ".csv")
-        dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
-        dfi = convert_df_arrays(dfi, "χ")
-        append!(df, dfi)
-    end
-end
+df = load_dfs()
+Js = sort(unique(df.J))
 
 if length(Ls) == 1
     cmap = ["red"]
@@ -39,44 +34,47 @@ else
     cmap = cgrad(:matter, length(Ls), categorical=true)
 end
 
-px, pos = plot(), plot()
-for (l, L) in enumerate(Ls)
-    # extract only the parameters we are interested in 
-    dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q), :]
-    Js = sort(unique(dfL.J))
+ps = []
+for J in Js
+    px, pos = plot(), plot()
+    for (l, L) in enumerate(Ls)
+        # extract only the parameters we are interested in 
+        dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q), :]
 
-    for (j, J) in enumerate(Js)
         dfJ = dfL[(dfL.J.==J), :]
         Ts = dfJ.T
         χs = dfJ.χ
+        χs = [reshape(χ, 4, 4) for χ in χs]
 
-        #sortidx = sortperm(Ts)
-        #Ts = Ts[sortidx]
-        #χx = χs[sortidx]
+        sortidx = sortperm(Ts)
+        Ts = Ts[sortidx]
+        χs = χs[sortidx]
 
         if length(Ts) > 0
 
             # on-site
-            χswave = [a[9] for a in χs]
+            χswave = [χ[1, 1] for χ in χs]
 
             # make the d-wave components 
-            xx = [a[1] for a in χs]
-            yy = [a[5] for a in χs]
-            xy = [a[2] for a in χs]
-            yx = [a[4] for a in χs]
-            χdwave = 1 / 4 * (xx + yy - xy - yx)
+            xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
+            xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
+            if ndims == 2
+                χdwave = xx + yy - xy - yx
+            elseif ndims == 3
+                zz = [χ[4, 4] for χ in χs]
+                xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
+                yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
+                χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
+            else
+                println("sorry")
+                χdwave = nothing
+            end
 
-            #plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
+            plot!(px, Ts, χdwave, color=cmap[l], label=nothing, xaxis=:log10)
             scatter!(px, Ts, χdwave, color=cmap[l], label="J=$J, L=$L", xaxis=:log10)
-            # now plot the error
-            T̂, χ̂, a, b, err = fit_χ(Ts, χdwave)
-            #plot!(px, T̂, χ̂, color="red", xaxis=:log10, label="Error: $(round(err,digits=2))")
 
-            #plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+            plot!(pos, Ts, χswave, color=cmap[l], label=nothing, xaxis=:log10)
             scatter!(pos, Ts, χswave, color=cmap[l], label="J=$J, L=$L", xaxis=:log10)
-            # now plot the error
-            T̂, χ̂, a, b, err = fit_χ(Ts, χswave)
-            #plot!(pos, T̂, χ̂, color="red", xaxis=:log10, label="Error: $(round(err,digits=2))")
 
             title!(px, "Susceptibility (d-wave)")
             xlabel!(px, "T")
@@ -86,10 +84,11 @@ for (l, L) in enumerate(Ls)
             ylabel!(pos, "χ")
         end
     end
-end
 
-p = plot(px, pos, layout=Plots.grid(1, 2,
-        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility")
-if savefigs
-    savefig(p, joinpath(figpath, "susceptibility.pdf"))
+    p = plot(px, pos, layout=Plots.grid(1, 2,
+            widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility")
+    push!(ps, p)
 end
+# if savefigs
+#     savefig(p, joinpath(figpath, "susceptibility.pdf"))
+# end
