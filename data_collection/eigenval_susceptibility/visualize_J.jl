@@ -16,7 +16,7 @@ L = 11 # the full system is L × L
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
-savefigs = true
+savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_cutoff = 1e-2
 

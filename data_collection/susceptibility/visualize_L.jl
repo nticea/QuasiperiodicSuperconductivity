@@ -12,7 +12,6 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 29 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -27,6 +26,7 @@ end
 files = readdir(joinpath(@__DIR__, "data"))
 df = load_dfs()
 Js = sort(unique(df.J))
+Ls = sort(unique(df.L))
 
 if length(Ls) == 1
     cmap = ["red"]

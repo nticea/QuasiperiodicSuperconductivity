@@ -21,7 +21,7 @@ Js = collect(0:0.25:3)
 Ts = expspace(-4, 1, 30) # temperature 
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
-job_prefix = "susceptibility"
+job_prefix = "eigenval_sus"
 
 for L in Ls
     for J in Js
