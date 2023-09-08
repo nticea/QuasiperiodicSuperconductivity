@@ -49,7 +49,7 @@ end
 df_LGE_Tc = df_LGE[df_LGE.T.>0, :]
 df_BdG_Tc = df_BdG[df_BdG.T.>0, :]
 
-p1 = plot(ylims=(-0.1, 1))
+p1 = plot(ylims=(-0.1, 0.75))
 Js = sort(unique(df_LGE_Tc.J))
 Tcs = zeros(length(Js))
 for (j, J) in enumerate(Js)
@@ -91,7 +91,7 @@ if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))
 end
 
-p2 = plot(ylims=(-0.1, 1))
+p2 = plot(ylims=(-0.1, 0.75))
 grouped = groupby(df_LGE_Tc, [:ϕx, :ϕy])
 if length(grouped) > 1
     grouped = groupby(df_BdG_0, [:ϕx, :ϕy])

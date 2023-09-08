@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 23 # the full system is L × L 
+L = 29 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -67,11 +67,11 @@ for (j, J) in enumerate(Js)
             χdwave = nothing
         end
 
-        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
-        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
+        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
 
-        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
-        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
+        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
 
         title!(px, "d-wave")
         xlabel!(px, "T")

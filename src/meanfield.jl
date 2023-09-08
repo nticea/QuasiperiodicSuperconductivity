@@ -135,6 +135,7 @@ function uniform_susceptibility(m;
 
     # multiply by prefactors 
     χ0 = zeros(nblocks, nblocks)
+    normf = numsites(m)
     for (δ, δp) in δδp
         # multiply with the prefactor 
         Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
@@ -145,7 +146,7 @@ function uniform_susceptibility(m;
         Tl2 = transpose(Uq) * Uminusq_δ
         # sum them together 
         Tl = Tl1 + Tl2
-        @einsimd χ := 1 / (2 * L * L) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
+        @einsimd χ := 1 / (2 * normf) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
         # store the data 
         χ0[δ, δp] = real.(χ)
     end

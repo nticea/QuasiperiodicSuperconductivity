@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 11 # the full system is L × L 
+L = 13 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -27,6 +27,7 @@ end
 df = load_dfs()
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
+pxd, posd = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
 dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
 Js = sort(unique(dfL.J))
@@ -48,11 +49,11 @@ for (j, J) in enumerate(Js)
     # Ts = Ts[Ts.>=T_cutoff]
 
     if length(Ts) > 0
-        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
-        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
+        plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
 
-        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10, yaxis=:log10)
-        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10, yaxis=:log10)
+        plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
 
         title!(px, "d-wave")
         xlabel!(px, "T")
@@ -63,6 +64,8 @@ for (j, J) in enumerate(Js)
     end
 end
 
+ylims!(pos, (0, 7))
+ylims!(px, (0, 10))
 if ndims == 3
     size_str = "$L × $L × $L"
 elseif ndims == 2
