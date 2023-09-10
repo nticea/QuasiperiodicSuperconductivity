@@ -18,7 +18,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 1e-2
+Tcutoff = 1e-2
 
 # read files 
 files = readdir(joinpath(@__DIR__, "data"))
@@ -29,7 +29,7 @@ df = df[(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
 df = df[(df.L.!=27), :]
 
 # set a χ* so that we can determine Tc 
-χstar = 0.25
+χstar = 0.35
 
 function Tc_and_deriv(arr, Ts, val)
     Tc = NaN
@@ -135,6 +135,9 @@ for L in Ls
     for J in Js
         dfJ = dfL[(dfL.J.==J), :]
         χs, Ts = dfJ.χ, dfJ.T
+        χs = χs[Ts.>=Tcutoff]
+        Ts = Ts[Ts.>=Tcutoff]
+
         χswave, χdwave, Ts = get_χswave_dwave(χs, Ts)
 
         Tc_swave, dχ_swave = Tc_and_deriv(χswave, Ts, χstar)
@@ -190,16 +193,44 @@ for (j, J) in enumerate(Js)
             #scatter!(p, Ts_dwave, dχ_dwave_all, c=cmapb[l], label="d-wave, L=$L")
 
             plot!(pswave, Ts_swave, dχ_swave_all, c=cmap[j], label="J=$J")
-            plot!(pdwave, Ts_dwave, dχ_dwave_all, c=cmap[j], label=nothing)
+            plot!(pdwave, Ts_dwave, dχ_dwave_all, c=cmap[j], label="J=$J")
             #hmap = heatmap(zeros(1, 1), xlims=xlims(pdwave), ylims=ylims(pdwave), clims=(minimum(Js), maximum(Js)), cmap=:viridis, alpha=0)
         end
     end
     push!(ps, p)
 end
 
-# make a colourbar 
 p2 = plot(pswave, pdwave, layout=Plots.grid(1, 2,
         widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="dχ/dlog10T with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
 
-# plot to make: T*(dchi/dT) as a function of T, plotted for all the different L on same plot 
-# make a different plot for each J 
+
+numlines = 30
+pswave = plot(title="s-wave", xlabel="J", ylabel="dχ/dlog10T")
+pdwave = plot(title="d-wave", xlabel="J", ylabel="dχ/dlog10T")
+for (l, L) in enumerate(Ls)
+    dfL = df_Tc[(df_Tc.L.==L), :]
+    if size(dfL)[1] > 0
+        Ts_swave, Ts_dwave = dfL.Ts_swave[1], dfL.Ts_dwave[1]
+        dχ_swave_all, dχ_dwave_all = dfL.dχ_swave_all, dfL.dχ_dwave_all
+
+        Js = dfL.J
+        idxs = LinRange(1, length(Ts_swave), numlines)
+        idxs = floor.(Int, collect(idxs))
+        cmaps = cgrad(:viridis, length(idxs), categorical=true)
+        cmapd = cgrad(:viridis, length(idxs), categorical=true)
+        for (c, i) in enumerate(idxs)
+            T_s = Ts_swave[i]
+            T_d = Ts_dwave[i]
+            if T_s > log10(Tcutoff)
+                dχ_s = [x[i] for x in dχ_swave_all]
+                plot!(pswave, Js, dχ_s, label=nothing, c=cmaps[c])
+            end
+            if T_d > log10(Tcutoff)
+                dχ_d = [x[i] for x in dχ_dwave_all]
+                plot!(pdwave, Js, dχ_d, label=nothing, c=cmapd[c])
+            end
+        end
+    end
+end
+p3 = plot(pswave, pdwave, layout=Plots.grid(1, 2,
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="dχ/dlog10T with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
