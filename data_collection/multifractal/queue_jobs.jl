@@ -5,7 +5,7 @@ include("../../src/model.jl")
 include("../../src/submit_job.jl")
 
 ## PARAMETERS ## 
-Js = LinRange(0, 3, 20)
+Js = LinRange(0, 3, 10)
 ℓ = 3
 E₀ = 1
 t = 1
@@ -14,8 +14,8 @@ Q = (√5 - 1) / 2
 θ = π / 7
 V0 = -1
 V1 = -1
-ϕxs = LinRange(0, 2π, 5)
-ϕys = LinRange(0, 2π, 5)
+ϕxs = LinRange(0, 2π, 3)
+ϕys = LinRange(0, 2π, 3)
 ϕz = 0
 periodic = 1
 ndims = 3
