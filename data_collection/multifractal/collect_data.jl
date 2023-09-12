@@ -19,8 +19,8 @@ periodic = Bool(periodic)
 
 # for saving hamiltonian
 stamp = "diagonalized_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q_$(round(ϕx,digits=3))ϕx_$(round(ϕy,digits=3))ϕy_$(round(ϕz,digits=3))ϕz.h5"
-# scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians")
-scratchbase = joinpath(@__DIR__, "diagonalized_hamiltonians")
+scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians")
+# scratchbase = joinpath(@__DIR__, "diagonalized_hamiltonians")
 mkpath(scratchbase)
 scratchpath = joinpath(scratchbase, stamp)
 
