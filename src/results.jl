@@ -1,5 +1,6 @@
 using DataFrames
 using HDF5
+using Statistics
 
 include("IndexMatrix.jl")
 include("model.jl")
@@ -563,4 +564,32 @@ function load_diagonalized_H(loadpath::String)
     return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
         d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["ϕz"], d["J"],
         d["periodic"], d["ndims"], d["E"], d["U"])
+end
+
+function bin_results(arr; nbins)
+    δbin = ceil(Int, length(arr) / nbins)
+    red = zeros(nbins)
+    for (bin, idx) in enumerate(1:δbin:length(arr))
+        if idx + δbin > length(arr)
+            subarr = arr[idx:end]
+        else
+            subarr = arr[idx:idx+δbin]
+        end
+        red[bin] = mean(subarr)
+    end
+    return red
+end
+
+function hist_counts(arr; nbins::Int, normalize::Bool=false)
+    δbin = (maximum(arr) - minimum(arr)) / nbins
+    counts = zeros(nbins)
+    for (bin, idx) in enumerate(minimum(arr)+δbin:δbin:maximum(arr))
+        prev = idx - δbin
+        subarr = arr[arr.>=prev.&&arr.<idx]
+        counts[bin] = length(subarr)
+    end
+    if normalize
+        counts /= δbin
+    end
+    return counts
 end

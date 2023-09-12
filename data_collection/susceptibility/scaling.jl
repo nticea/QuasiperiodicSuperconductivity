@@ -26,7 +26,7 @@ df = load_dfs()
 df = df[(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
 
 # drop L=27 for now
-df = df[(df.L.!=27), :]
+df = df[(df.L.!=31).&(df.L.!=27), :]
 
 # set a χ* so that we can determine Tc 
 χstar = 0.35
@@ -157,8 +157,13 @@ end
 
 # plotting 
 Tc_p, dχ_p = plot(xlabel="J", ylabel="Tc"), plot(xlabel="J", ylabel="dχ/dlog10T")
-cmapb = cgrad(:blues, length(Ls), categorical=true)
-cmapr = cgrad(:reds, length(Ls), categorical=true)
+if length(Ls) == 1
+    cmapb = ["blue"]
+    cmapr = ["red"]
+else
+    cmapb = cgrad(:blues, length(Ls), categorical=true)
+    cmapr = cgrad(:reds, length(Ls), categorical=true)
+end
 
 for (l, L) in enumerate(Ls)
     dfL = df_Tc[(df_Tc.L.==L), :]

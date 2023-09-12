@@ -1,4 +1,4 @@
-using LinearAlgebra
+using LinearAlgebra, StatsBase
 using SparseArrays
 using Graphs
 using ArnoldiMethod
@@ -7,6 +7,9 @@ using Tullio
 using Einsum
 using Interpolations
 import Base.copy
+using FFTW
+
+include("utilities.jl")
 
 struct ModelParams
     L::Int
@@ -109,7 +112,6 @@ function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
         @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.periodic == m.periodic
         return DH.E, DH.U
     catch e
-        @show e
         # save everything to checkpointpath 
         DH = DiagonalizedHamiltonian(m)
         save_structs(DH, loadpath)
@@ -309,7 +311,7 @@ function Bmatrix(m::ModelParams)
     return BSD
 end
 
-function aubry_andre(xy; m::ModelParams, shift_origin::Bool=true)
+function aubry_andre(xy; m::ModelParams, shift_origin::Bool=true, normalize_SD_to_1::Bool=true)
     J, Q, L, θ, ϕx, ϕy, ϕz, ndims = m.J, m.Q, m.L, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ndims
 
     if shift_origin
@@ -408,4 +410,134 @@ function finite_size_gap(m::ModelParams)
     E, _ = diagonalize_hamiltonian(H0)
     sort!(E)
     ΔE = [E[i+1] - E[i] for i in 1:(length(E)-1)]
+end
+
+function density_of_states(H::DiagonalizedHamiltonian; nbins::Int)
+    return hist_counts(H.E, nbins=nbins, normalize=true)
+    # h = fit(Histogram, E, nbins=nbins)
+    # return h.weights
+end
+
+function IPR_momentum(H::DiagonalizedHamiltonian)
+    # transform to momentum space
+    Uq = fourier_transform_eigenstates(H)
+
+    # IPR = ∑ₖ |ψ(k)|⁴ 
+    function _IPR_calc(u)
+        u2 = u .* conj.(u)
+        u4 = u2 .^ 2
+        return real(sum(u4))
+    end
+
+    ipr = _IPR_calc.(eachcol(Uq))
+    return ipr
+end
+
+function IPR_real(H::DiagonalizedHamiltonian)
+    U = H.U
+
+    # IPR = ∑ₓ |ψ(x)|⁴ 
+    function _IPR_calc(u)
+        u2 = u .* conj.(u)
+        u4 = u2 .^ 2
+        return real(sum(u4))
+    end
+
+    ipr = _IPR_calc.(eachcol(U))
+    return ipr
+end
+
+function IPR_momentum(m::ModelParams)
+    DH = DiagonalizedHamiltonian(m)
+    return IPR_momentum(DH)
+end
+
+function IPR_real(m::ModelParams)
+    DH = DiagonalizedHamiltonian(m)
+    return IPR_real(DH)
+end
+
+function mean_level_spacing(H::DiagonalizedHamiltonian)
+    E = H.E
+
+    # get spacings
+    δns = zeros(length(E) - 1)
+    for i in 2:length(E)
+        δns[i-1] = E[i] - E[i-1]
+    end
+
+    # take ratios 
+    rs = []
+    for i in 2:length(δns)
+        r = minimum([δns[i], δns[i-1]]) / maximum([δns[i], δns[i-1]])
+        push!(rs, r)
+    end
+
+    return rs
+end
+
+function mean_level_spacing(m::ModelParams)
+    DH = DiagonalizedHamiltonian(m)
+    return mean_level_spacing(DH)
+end
+
+function multifractal_mean(m::ModelParams; E₀::Real, loadpath::String=nothing)
+    E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
+    idx = argmin(abs.(E .- E₀)) # eigenstate closest in energy to E₀
+    u = U[:, idx]
+
+    function cg_weight(uᵢ)
+        return sum(uᵢ .* conj.(uᵢ))
+    end
+
+    # iterate this for each column of U 
+    ndims, L = m.ndims, m.L
+    nsites = numsites(m)
+    if ndims == 2
+        u = reshape(u, L, L)
+        ucubes = split_into_squares(u, ℓ)
+    elseif ndims == 3
+        u = reshape(u, L, L, L)
+        ucubes = split_into_cubes(u, ℓ)
+    end
+    # then compute the sum within each square 
+    uvec = reshape(ucubes, prod(size(ucubes)))
+    μk = [cg_weight(uᵢ) for uᵢ in uvec]
+    α̃ = log.(μk) ./ log(ℓ / L)
+    return mean(α̃)
+end
+
+# We need to transform each of the eigenvectors into 2D space! 
+function fourier_transform_eigenstates(DH; minus=false)
+
+    ndims, L, U = DH.ndims, DH.L, DH.U
+
+    function FT_vec(u)
+        # first, map back to 2D space 
+        if ndims == 2
+            N = L * L
+            u = reshape(u, L, L)
+        elseif ndims == 3
+            N = L * L * L
+            u = reshape(u, L, L, L)
+        else
+            println("$dims dimensions not implemented")
+            return
+        end
+
+        # take FT along all spatial dimensions 
+        if !minus # this is the expression for U_{q}
+            uq = fft(u)
+        else # this is the expression for U_{-q}
+            uq = conj.(fft(conj.(u)))
+        end
+
+        # reshape it back and normalize. FFTW does not normalize!!
+        uq = reshape(uq, N) ./ √N
+
+        return uq
+    end
+
+    Uq = FT_vec.(eachcol(U))
+    return hcat(Uq...)
 end

@@ -20,8 +20,12 @@ periodic = true
 ndims = 3
 
 # initialize model 
-m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-E, U = @time diagonalize_hamiltonian(m)
-plot(E)
-
-histogram(E, bins=100, xlabel="E", ylabel="Frequency", title="Histogram")
+Ls = collect(1:30)
+for L in Ls
+    m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+    try
+        H0 = noninteracting_hamiltonian(m)
+        print("$L-")
+    catch
+    end
+end
