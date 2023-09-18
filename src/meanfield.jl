@@ -1,4 +1,4 @@
-using LinearAlgebra
+using LinearAlgebra, Statistics
 using SparseArrays
 using Graphs
 using ArnoldiMethod
@@ -42,7 +42,7 @@ end
 
 function uniform_susceptibility(m;
     T, symmetry::String="d-wave", Λ::Union{Nothing,Real}=nothing,
-    checkpointpath::Union{String,Nothing}=nothing)
+    checkpointpath::Union{String,Nothing}=nothing, calculate_dχdlogT=false)
 
     ndims = m.ndims
     if ndims == 2
@@ -120,21 +120,28 @@ function uniform_susceptibility(m;
 
     # make the prefactor
     fs = fermi.(E, T)
+    # we also want to construct the dχ/dT prefactors
+    fs_logT = (fs .* exp.(fs ./ T)) ./ (T .* (exp.(fs ./ T) .+ 1) .^ 2)
+    replace!(fs_logT, NaN => 0)
+
     fnm = zeros(N, N)
+    fnm_logT = zeros(N, N)
     Enm = zeros(N, N)
     for i in 1:N
         fnm[:, i] = fs .+ fs[i]
+        fnm_logT[:, i] = fs_logT .+ fs_logT[i]
         Enm[:, i] = E .+ E[i]
     end
     Pnm = (1 .- fnm) ./ Enm
+    Pnm_logT = (1 .- fnm_logT) ./ Enm
 
     # I need the x and y components of q for the d-wave prefactor
     pfs = susceptibility_dwave_prefactors.(rvec, m=m)
     pfs = hcat(pfs...) # dimensions [δ] x [q]
     pfsneg = conj.(pfs)
 
-    # multiply by prefactors 
     χ0 = zeros(nblocks, nblocks)
+    dχdlogT = zeros(nblocks, nblocks)
     normf = numsites(m)
     for (δ, δp) in δδp
         # multiply with the prefactor 
@@ -147,8 +154,17 @@ function uniform_susceptibility(m;
         # sum them together 
         Tl = Tl1 + Tl2
         @einsimd χ := 1 / (2 * normf) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
-        # store the data 
         χ0[δ, δp] = real.(χ)
+
+        if calculate_dχdlogT
+            @einsimd dχ := 1 / (2 * normf) * Pnm_logT[n, m] * Tq[n, m] * Tl[n, m]
+            dχdlogT[δ, δp] = real.(dχ)
+        end
+    end
+
+    if calculate_dχdlogT
+        @show χ0, dχdlogT
+        return χ0, dχdlogT
     end
 
     @show χ0

@@ -76,13 +76,14 @@ function calculate_dχdT(arr, Ts)
     idxlist = sortperm(Ts)
     y = arr[idxlist]
     x = log10.(Ts[idxlist])
-    x̂ = LinRange(minimum(x), maximum(x), 1000)
+    return y[2:end] .* diff(y), x[2:end]
+    # x̂ = LinRange(minimum(x), maximum(x), 1000)
 
-    model = loess(x, y, span=0.5)
-    data = Loess.predict(model, x̂)
-    window_size = length(x̂ / 20)
-    ŷ = [mean(data[i:min(i + window_size - 1, end)]) for i in 1:length(data)]
-    return diff(ŷ), x̂[2:end]
+    # model = loess(x, y, span=0.5)
+    # data = Loess.predict(model, x̂)
+    # window_size = length(x̂ / 20)
+    # ŷ = [mean(data[i:min(i + window_size - 1, end)]) for i in 1:length(data)]
+    # return diff(ŷ), x̂[2:end]
 
     # deg = 5
     # model = Polynomials.fit(x, y, deg)
@@ -181,8 +182,8 @@ for (l, L) in enumerate(Ls)
 end
 
 ps = []
-pswave = plot(title="s-wave", xlabel="log10T", ylabel="dχ/dlog10T")
-pdwave = plot(title="d-wave", xlabel="log10T", ylabel="dχ/dlog10T")
+pswave = plot(title="s-wave", xlabel="log10T", ylabel="dχ/dlog10T", ylims=(-0.04, 0))
+pdwave = plot(title="d-wave", xlabel="log10T", ylabel="dχ/dlog10T", ylims=(-0.05, 0))
 Js = unique(df.J)
 cmap = cgrad(:viridis, length(Js), categorical=true)
 

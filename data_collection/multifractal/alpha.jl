@@ -8,7 +8,7 @@ include("../../src/utilities.jl")
 
 ## PARAMETERS ## 
 Ls = [18, 27, 30]
-Js = LinRange(1, 3, 20)
+Js = LinRange(3, 5, 30)
 ℓ = 3
 E₀ = 1
 t = 1
@@ -17,13 +17,14 @@ Q = (√5 - 1) / 2
 θ = π / 7
 V0 = -1
 V1 = -1
-ϕx = rand(0:2π, 5)
-ϕy = rand(0:2π, 5)
+ϕx = 0#rand(0:2π, 5)
+ϕy = 0#rand(0:2π, 5)
 ϕz = 0
-periodic = true
+periodic = false
 ndims = 2
 nbins = 31
 
+αs = zeros(length(Ls), length(Js))
 for (l, L) in enumerate(Ls)
     print("$l-")
     for (j, J) in enumerate(Js)
@@ -31,13 +32,14 @@ for (l, L) in enumerate(Ls)
         α₀ = multifractal_mean(m; E₀=E₀)
 
         # save it out 
-        save_results(m, ℓ=ℓ, E₀=E₀, α₀=α₀)
+        αs[l, j] = α₀
+        #save_results(m, ℓ=ℓ, E₀=E₀, α₀=α₀)
     end
 end
 
-# p = plot()
-# cmap = ["red", "blue", "green", "orange", "black"]
-# for (l, L) in enumerate(Ls)
-#     p = plot!(Js, αs[l, :], c=cmap[l])
-#     p = scatter!(p, Js, αs[l, :], c=cmap[l], label="L=$L")
-# end
+p = plot()
+cmap = ["red", "blue", "green", "orange", "black"]
+for (l, L) in enumerate(Ls)
+    p = plot!(Js, αs[l, :], c=cmap[l])
+    p = scatter!(p, Js, αs[l, :], c=cmap[l], label="L=$L")
+end

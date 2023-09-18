@@ -302,11 +302,14 @@ function Bmatrix(m::ModelParams)
     # Multiply by Q (the irrational number) to get B 
     Bmat = Q * Rθ
 
-    # Make periodic in L 
-    BSD = round.(Int, Bmat .* L) / L
-
-    # Perform checks
-    @assert gcd(round(Int, det(L .* BSD)), L) == 1
+    # Make periodic in L
+    if m.periodic
+        BSD = round.(Int, Bmat .* L) / L
+        # Perform checks
+        @assert gcd(round(Int, det(L .* BSD)), L) == 1
+    else
+        BSD = Bmat
+    end
 
     return BSD
 end
@@ -481,8 +484,12 @@ function mean_level_spacing(m::ModelParams)
     return mean_level_spacing(DH)
 end
 
-function multifractal_mean(m::ModelParams; E₀::Real, loadpath::String=nothing)
+function multifractal_mean(m::ModelParams; E₀::Real, loadpath::Union{String,Nothing}=nothing)
     E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
+    sortidx = sortperm(E)
+    E = E[sortidx]
+    U = U[:, sortidx]
+
     idx = argmin(abs.(E .- E₀)) # eigenstate closest in energy to E₀
     u = U[:, idx]
 

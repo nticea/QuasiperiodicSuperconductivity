@@ -15,12 +15,13 @@ function load_dfs()
     # read files 
     files = readdir(joinpath(@__DIR__, "data"))
     df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
-        T=[], Λ=[], χ=[])
+        T=[], Λ=[], χ=[], dχdlogT=[])
     for f in files
         if endswith(f, ".csv")
             try
                 dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
                 dfi = convert_df_arrays(dfi, "χ")
+                dfi = convert_df_arrays(dfi, "dχdlogT")
                 append!(df, dfi)
             catch e
             end

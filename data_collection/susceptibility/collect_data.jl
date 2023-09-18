@@ -28,6 +28,8 @@ mkpath(datapath)
 # for saving the Hamiltonian
 stamp = "diagonalized_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q.h5"
 scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians")
+scratchbase = @__DIR__
+println("DELETE THIS!!!")
 mkpath(scratchbase)
 scratchpath = joinpath(scratchbase, stamp)
 
@@ -39,7 +41,7 @@ if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims
 
     ## CALCULATION ## 
     println("Finding χ")
-    χ = @time uniform_susceptibility(m, T=T, checkpointpath=scratchpath)
+    χ, dχdlogT = @time uniform_susceptibility(m, T=T, checkpointpath=scratchpath, calculate_dχdlogT=true)
 
     ## SAVING ##  
     timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
@@ -47,7 +49,7 @@ if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims
     savepath = joinpath(datapath, "$(L)L_$(J)J" * timestamp * ".csv")
     df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
         ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims],
-        T=[T], χ=[χ], Λ=[Λ])
+        T=[T], χ=[χ], dχdlogT=[dχdlogT], Λ=[Λ])
     CSV.write(savepath, df)
     flush(stdout)
 end
