@@ -120,9 +120,13 @@ function uniform_susceptibility(m;
 
     # make the prefactor
     fs = fermi.(E, T)
-    # we also want to construct the dχ/dT prefactors
-    fs_logT = (fs .* exp.(fs ./ T)) ./ (T .* (exp.(fs ./ T) .+ 1) .^ 2)
-    replace!(fs_logT, NaN => 0)
+    # we also want to construct the dχ/dT prefactors. 
+    # Need to use logsumexp trick
+    texp = 2 * log.(exp.(E ./ T) .+ 1)
+    texp_replace = 2 .* E ./ T
+    texp_stable = [isfinite(texp[i]) ? texp[i] : texp_replace[i] for i in 1:length(texp)]
+    logsum = (E ./ T) .- log(T) .- texp_stable
+    fs_logT = E .* exp.(logsum)
 
     fnm = zeros(N, N)
     fnm_logT = zeros(N, N)
