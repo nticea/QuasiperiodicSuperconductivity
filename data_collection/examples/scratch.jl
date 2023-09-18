@@ -18,7 +18,7 @@ V1 = 0
 periodic = true
 ndims = 3
 
-J = 0.3
+J = 2
 T = 1e-2
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims)

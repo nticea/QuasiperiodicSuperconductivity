@@ -20,7 +20,7 @@ ndims = 3
 # L = 27, time = 4 hrs, mem = 256
 # L = 23, time = 1.5 hrs, mem = 100
 
-Ls = [29]
+Ls = [23]
 Js = collect(0:0.25:3)
 Ts = expspace(-3, 1, 30) # temperature 
 
