@@ -122,9 +122,9 @@ function uniform_susceptibility(m;
     fs = fermi.(E, T)
     # we also want to construct the dχ/dT prefactors. 
     # Need to use logsumexp trick
-    texp = 2 * log.(exp.(E ./ T) .+ 1)
-    texp_replace = 2 .* E ./ T
-    texp_stable = [isfinite(texp[i]) ? texp[i] : texp_replace[i] for i in 1:length(texp)]
+    texp_stable = 2 * log.(exp.(E ./ T) .+ 1)
+    #texp_replace = 2 .* E ./ T
+    #texp_stable = [isfinite(texp[i]) ? texp[i] : texp_replace[i] for i in 1:length(texp)]
     logsum = (E ./ T) .- log(T) .- texp_stable
     fs_logT = E .* exp.(logsum)
 
@@ -137,7 +137,7 @@ function uniform_susceptibility(m;
         Enm[:, i] = E .+ E[i]
     end
     Pnm = (1 .- fnm) ./ Enm
-    Pnm_logT = (1 .- fnm_logT) ./ Enm
+    Pnm_logT = -fnm_logT ./ Enm
 
     # I need the x and y components of q for the d-wave prefactor
     pfs = susceptibility_dwave_prefactors.(rvec, m=m)
