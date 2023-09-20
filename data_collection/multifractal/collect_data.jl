@@ -28,7 +28,7 @@ scratchpath = joinpath(scratchbase, stamp)
 ## END DELETE ##
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims)
-@time α₀ = multifractal_mean(m; E₀=E₀, loadpath=scratchpath)
+@time α₀ = multifractal_mean(m; E₀=E₀, ℓ=ℓ, loadpath=scratchpath)
 
 # save it out 
 save_results(m, ℓ=ℓ, E₀=E₀, α₀=α₀)
