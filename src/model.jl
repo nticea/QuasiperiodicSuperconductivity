@@ -484,24 +484,22 @@ function mean_level_spacing(m::ModelParams)
     return mean_level_spacing(DH)
 end
 
-function closest_elements(arr, value, n)
+function closest_indices(arr, value, n)
     # Calculate the absolute differences between each element and the value
     abs_diff = abs.(arr .- value)
     # Sort the indices of the array based on the absolute differences
     sorted_indices = sortperm(abs_diff)
     # Take the first `n` indices from the sorted list
-    closest_indices = sorted_indices[1:n]
-    # Extract the corresponding elements from the original array
-    return arr[closest_indices]
+    return sorted_indices[1:n]
 end
 
-function multifractal_mean(m::ModelParams; E₀::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
+function multifractal_mean(m::ModelParams; E₀::Real, ℓ::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
     E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
     sortidx = sortperm(E)
     E = E[sortidx]
     U = U[:, sortidx]
 
-    idxs = closest_elements(E, E₀, num_avg)
+    idxs = closest_indices(E, E₀, num_avg)
     us = U[:, idxs]
 
     # iterate this for each column of U 
@@ -528,7 +526,7 @@ function multifractal_mean(m::ModelParams; E₀::Real, loadpath::Union{String,No
         return mean(α̃)
     end
 
-    all_α̃s = get_α̃(eachcol(us))
+    all_α̃s = get_α̃.(eachcol(us))
     return mean(all_α̃s)
 end
 
