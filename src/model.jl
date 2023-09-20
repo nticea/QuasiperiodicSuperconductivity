@@ -484,34 +484,52 @@ function mean_level_spacing(m::ModelParams)
     return mean_level_spacing(DH)
 end
 
-function multifractal_mean(m::ModelParams; E₀::Real, loadpath::Union{String,Nothing}=nothing)
+function closest_elements(arr, value, n)
+    # Calculate the absolute differences between each element and the value
+    abs_diff = abs.(arr .- value)
+    # Sort the indices of the array based on the absolute differences
+    sorted_indices = sortperm(abs_diff)
+    # Take the first `n` indices from the sorted list
+    closest_indices = sorted_indices[1:n]
+    # Extract the corresponding elements from the original array
+    return arr[closest_indices]
+end
+
+function multifractal_mean(m::ModelParams; E₀::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
     E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
     sortidx = sortperm(E)
     E = E[sortidx]
     U = U[:, sortidx]
 
-    idx = argmin(abs.(E .- E₀)) # eigenstate closest in energy to E₀
-    u = U[:, idx]
-
-    function cg_weight(uᵢ)
-        return sum(uᵢ .* conj.(uᵢ))
-    end
+    idxs = closest_elements(E, E₀, num_avg)
+    us = U[:, idxs]
 
     # iterate this for each column of U 
     ndims, L = m.ndims, m.L
     nsites = numsites(m)
-    if ndims == 2
-        u = reshape(u, L, L)
-        ucubes = split_into_squares(u, ℓ)
-    elseif ndims == 3
-        u = reshape(u, L, L, L)
-        ucubes = split_into_cubes(u, ℓ)
+
+    function get_α̃(u)
+        function cg_weight(uᵢ)
+            return sum(uᵢ .* conj.(uᵢ))
+        end
+
+        if ndims == 2
+            u = reshape(u, L, L)
+            ucubes = split_into_squares(u, ℓ)
+        elseif ndims == 3
+            u = reshape(u, L, L, L)
+            ucubes = split_into_cubes(u, ℓ)
+        end
+
+        # then compute the sum within each square 
+        uvec = reshape(ucubes, prod(size(ucubes)))
+        μk = [cg_weight(uᵢ) for uᵢ in uvec]
+        α̃ = log.(μk) ./ log(ℓ / L)
+        return mean(α̃)
     end
-    # then compute the sum within each square 
-    uvec = reshape(ucubes, prod(size(ucubes)))
-    μk = [cg_weight(uᵢ) for uᵢ in uvec]
-    α̃ = log.(μk) ./ log(ℓ / L)
-    return mean(α̃)
+
+    all_α̃s = get_α̃(eachcol(us))
+    return mean(all_α̃s)
 end
 
 # We need to transform each of the eigenvectors into 2D space! 

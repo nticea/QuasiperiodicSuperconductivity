@@ -5,7 +5,7 @@ include("../../src/model.jl")
 include("../../src/submit_job.jl")
 
 ## PARAMETERS ## 
-Js = LinRange(0, 3, 10)
+Js = LinRange(0, 5, 30)
 ℓ = 3
 E₀ = 1
 t = 1
