@@ -495,7 +495,7 @@ end
 
 function susceptibility_eigenvalue(m::ModelParams; T::Real,
     symmetry::String, checkpointpath::Union{String,Nothing}=nothing,
-    calculate_dχdlogT::Bool=true)
+    calculate_dχdlogT::Bool=true, return_evec::Bool=false)
 
     E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
 
@@ -521,7 +521,15 @@ function susceptibility_eigenvalue(m::ModelParams; T::Real,
 
     if calculate_dχdlogT
         dλ = evec' * dχdlogT * evec
-        return λ, dλ
+        if return_evec
+            return λ, dλ, evec
+        else
+            return λ, dλ
+        end
+    end
+
+    if return_evec
+        return λ, evec
     end
 
     return λ

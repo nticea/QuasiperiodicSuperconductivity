@@ -161,8 +161,8 @@ function plot_spatial_profile(m::ModelParams; Δ, title=nothing)
             push!(ps, pslice)
         end
         title = "J=$(m.J), V0=$(m.V0), V1=$(m.V1), θ=$(θ_to_π(m.θ)) on $(m.L)×$(m.L)×$(m.L) lattice"
-        p = plot(ps..., layout=Plots.grid(2, 4,
-                widths=[1 / 4, 1 / 4, 1 / 4, 1 / 4]), size=(1500, 1000), plot_title=title)
+        p = plot(ps..., layout=Plots.grid(3, 5,
+                widths=[1 / 5, 1 / 5, 1 / 5, 1 / 5, 1 / 5]), size=(1500, 1000), plot_title=title)
         return p
     end
 end
