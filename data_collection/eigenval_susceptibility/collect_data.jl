@@ -37,9 +37,8 @@ if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims
 
     ## CALCULATION ## 
     println("Finding χ")
-    s = @time susceptibility_eigenvalue(m, T=T, checkpointpath=scratchpath, symmetry="s-wave")
-    d = @time susceptibility_eigenvalue(m, T=T, checkpointpath=scratchpath, symmetry="d-wave")
-    χ = [s, d]
+    s, ds = @time susceptibility_eigenvalue(m, T=T, checkpointpath=scratchpath, symmetry="s-wave", calculate_dχdlogT=true)
+    d, dd = @time susceptibility_eigenvalue(m, T=T, checkpointpath=scratchpath, symmetry="d-wave", calculate_dχdlogT=true)
 
     ## SAVING ##  
     timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
@@ -47,7 +46,8 @@ if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims
     savepath = joinpath(datapath, "$(L)L_$(J)J" * timestamp * ".csv")
     df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
         ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims],
-        T=[T], χswave=[s], χdwave=[d])
+        T=[T], χswave=[s], χdwave=[d], dχswave=[ds],
+        dχdwave=[dd])
     CSV.write(savepath, df)
     flush(stdout)
 end

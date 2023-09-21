@@ -121,10 +121,7 @@ function uniform_susceptibility(m;
     # make the prefactor
     fs = fermi.(E, T)
     # we also want to construct the dχ/dT prefactors. 
-    # Need to use logsumexp trick
     texp_stable = 2 * log.(exp.(E ./ T) .+ 1)
-    #texp_replace = 2 .* E ./ T
-    #texp_stable = [isfinite(texp[i]) ? texp[i] : texp_replace[i] for i in 1:length(texp)]
     logsum = (E ./ T) .- log(T) .- texp_stable
     fs_logT = E .* exp.(logsum)
 
@@ -187,7 +184,7 @@ function decomposition_M(M)
     return decomp.R
 end
 
-function swave(m::ModelParams, T::Real; E, U)
+function swave(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
     V0 = m.V0
 
     println("Computing s-wave configuration")
@@ -196,19 +193,34 @@ function swave(m::ModelParams, T::Real; E, U)
 
     # make the prefactor
     fs = fermi.(E, T)
+    # we also want to construct the dχ/dT prefactors. 
+    texp_stable = 2 * log.(exp.(E ./ T) .+ 1)
+    logsum = (E ./ T) .- log(T) .- texp_stable
+    fs_logT = E .* exp.(logsum)
+
     fnm = zeros(N, N)
+    fnm_logT = zeros(N, N)
     Enm = zeros(N, N)
     for i in 1:N
         fnm[:, i] = fs .+ fs[i]
+        fnm_logT[:, i] = fs_logT .+ fs_logT[i]
         Enm[:, i] = E .+ E[i]
     end
     P = (1 .- fnm) ./ Enm
+    P_logT = -fnm_logT ./ Enm
 
     @einsimd PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
     @einsimd UU[m, n, rprime] := U[rprime, n] * U[rprime, m]
     PUU = reshape(PUU, Ntot, N * N)
     UU = reshape(UU, N * N, Ntot)
     χ = PUU * UU
+
+    if calculate_dlogT
+        @einsimd dPUU[r, n, m] := Uconj[r, n] * P_logT[n, m] * Uconj[r, m]
+        dPUU = reshape(dPUU, Ntot, N * N)
+        dχ = dPUU * UU
+        return -V0 * χ, -V0 * dχ
+    end
 
     return -V0 * χ
 end
@@ -234,7 +246,7 @@ function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int, Ntot::Int)
     return -V / 2 .* (χ1 .+ χ2)
 end
 
-function dwave(m::ModelParams, T::Real; E, U)
+function dwave(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
     V0, V1, ndims = m.V0, m.V1, m.ndims
     println("Computing d-wave configuration")
     Ntot, N = size(U)
@@ -243,21 +255,31 @@ function dwave(m::ModelParams, T::Real; E, U)
     # Initialize the M matrix 
     if ndims == 2
         M = Matrix{Matrix{Float64}}(undef, 3, 3)
+        dM = Matrix{Matrix{Float64}}(undef, 3, 3)
     elseif ndims == 3
         M = Matrix{Matrix{Float64}}(undef, 4, 4)
+        dM = Matrix{Matrix{Float64}}(undef, 4, 4)
     else
         println("$ndims dimensions not supported")
     end
 
     # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
     fs = fermi.(E, T)
+    # we also want to construct the dχ/dT prefactors. 
+    texp_stable = 2 * log.(exp.(E ./ T) .+ 1)
+    logsum = (E ./ T) .- log(T) .- texp_stable
+    fs_logT = E .* exp.(logsum)
+
     fnm = zeros(N, N)
+    fnm_logT = zeros(N, N)
     Enm = zeros(N, N)
     for i in 1:N
         fnm[:, i] = fs .+ fs[i]
+        fnm_logT[:, i] = fs_logT .+ fs_logT[i]
         Enm[:, i] = E .+ E[i]
     end
     P = (1 .- fnm) ./ Enm
+    P_logT = -fnm_logT ./ Enm
 
     # the s-wave sector. This is in the (1,1) block of M matrix
     @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconj[r, m]
@@ -265,6 +287,12 @@ function dwave(m::ModelParams, T::Real; E, U)
     PUU = reshape(PUU, Ntot, N * N)
     UU = reshape(UU, N * N, Ntot)
     M[1, 1] = -V0 * PUU * UU
+
+    if calculate_dlogT
+        @tullio dPUU[r, n, m] := Uconj[r, n] * P_logT[n, m] * Uconj[r, m]
+        dPUU = reshape(dPUU, Ntot, N * N)
+        dM[1, 1] = -V0 * dPUU * UU
+    end
 
     # make lists of the nearest-neighbour sites 
     xsites, ysites, zsites, onsites = [], [], [], []
@@ -295,17 +323,30 @@ function dwave(m::ModelParams, T::Real; E, U)
 
             if b == 1# only δ=0 term gets V0, not δ'=0! 
                 Mblock = dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
+                if calculate_dlogT
+                    dMblock = dwave_blocks(b_sites, d_sites; P=P_logT, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
+                end
             else # bond terms have potential V1 
                 # multiply by 2 bc we are only considering 1/2 of each direction
                 Mblock = 2 * dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
+                if calculate_dlogT
+                    dMblock = 2 * dwave_blocks(b_sites, d_sites; P=P_logT, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
+                end
             end
 
             # fill in the matrix 
             M[b, d] = Mblock
+            if calculate_dlogT
+                dM[b, d] = dMblock
+            end
         end
     end
 
     M = mortar(M)
+    if calculate_dlogT
+        dM = mortar(dM)
+        return M, dM
+    end
 
     return M
 end
@@ -453,31 +494,45 @@ function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10)
 end
 
 function susceptibility_eigenvalue(m::ModelParams; T::Real,
-    symmetry::String, checkpointpath::Union{String,Nothing}=nothing)
+    symmetry::String, checkpointpath::Union{String,Nothing}=nothing,
+    calculate_dχdlogT::Bool=true)
 
     E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
 
     if symmetry == "s-wave"
-        χ = swave_χ(m, T, E=E, U=U)
+        if calculate_dχdlogT
+            χ, dχdlogT = swave_χ(m, T, E=E, U=U, calculate_dlogT=true)
+        else
+            χ = swave_χ(m, T, E=E, U=U)
+        end
     elseif symmetry == "d-wave"
-        χ = dwave_χ(m, T, E=E, U=U)
+        if calculate_dχdlogT
+            χ, dχdlogT = dwave_χ(m, T, E=E, U=U, calculate_dlogT=true)
+        else
+            χ = dwave_χ(m, T, E=E, U=U)
+        end
     else
         println("Symmetry not recognized, bruv")
         return
     end
 
     # diagonalize and find leading eigenvalue 
-    λ, _ = calculate_λ_Δ(χ)
+    λ, evec = calculate_λ_Δ(χ)
+
+    if calculate_dχdlogT
+        dλ = evec' * dχdlogT * evec
+        return λ, dλ
+    end
 
     return λ
 end
 
-function swave_χ(m::ModelParams, T::Real; E, U)
+function swave_χ(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
     m_copy = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, -1, 0, m.J, m.periodic, m.ndims)
-    return swave(m_copy, T, E=E, U=U)
+    return swave(m_copy, T, E=E, U=U, calculate_dlogT=calculate_dlogT)
 end
 
-function dwave_χ(m::ModelParams, T::Real; E, U)
+function dwave_χ(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
     ndims = m.ndims
     Ntot, N = size(U)
     Uconj = conj.(U) # This is U^*
@@ -485,21 +540,31 @@ function dwave_χ(m::ModelParams, T::Real; E, U)
     # Initialize the M matrix 
     if ndims == 2
         M = Matrix{Matrix{Float64}}(undef, 2, 2)
+        dM = Matrix{Matrix{Float64}}(undef, 2, 2)
     elseif ndims == 3
         M = Matrix{Matrix{Float64}}(undef, 3, 3)
+        dM = Matrix{Matrix{Float64}}(undef, 3, 3)
     else
         println("$ndims dimensions not supported")
     end
 
     # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
     fs = fermi.(E, T)
+    # we also want to construct the dχ/dT prefactors. 
+    texp_stable = 2 * log.(exp.(E ./ T) .+ 1)
+    logsum = (E ./ T) .- log(T) .- texp_stable
+    fs_logT = E .* exp.(logsum)
+
     fnm = zeros(N, N)
+    fnm_logT = zeros(N, N)
     Enm = zeros(N, N)
     for i in 1:N
         fnm[:, i] = fs .+ fs[i]
+        fnm_logT[:, i] = fs_logT .+ fs_logT[i]
         Enm[:, i] = E .+ E[i]
     end
     P = (1 .- fnm) ./ Enm
+    P_logT = -fnm_logT ./ Enm
 
     # make lists of the nearest-neighbour sites 
     xsites, ysites, zsites = [], [], []
@@ -524,9 +589,18 @@ function dwave_χ(m::ModelParams, T::Real; E, U)
         (b, d) = Tuple(bd)
         b_sites, d_sites = sites[b], sites[d]
         Mblock = 2 * dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=-1, N=N, Ntot=Ntot)
+        if calculate_dlogT
+            dMblock = 2 * dwave_blocks(b_sites, d_sites; P=P_logT, U=U, Uconj=Uconj, V=-1, N=N, Ntot=Ntot)
+            dM[b, d] = dMblock
+        end
         # fill in the matrix 
         M[b, d] = Mblock
     end
+
     M = mortar(M)
+    if calculate_dlogT
+        dM = mortar(dM)
+        return M, dM
+    end
     return M
 end

@@ -15,7 +15,7 @@ function load_dfs()
     # read files 
     files = readdir(joinpath(@__DIR__, "data"))
     df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
-        T=[], χswave=[], χdwave=[])
+        T=[], χswave=[], χdwave=[], dχswave=[], dχdwave=[])
     for f in files
         if endswith(f, ".csv")
             try
