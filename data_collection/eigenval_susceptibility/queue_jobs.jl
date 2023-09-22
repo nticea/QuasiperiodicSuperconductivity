@@ -16,9 +16,9 @@ V1 = 0
 periodic = 1
 ndims = 3
 
-Ls = [13] # [11,13,7]
+Ls = [11]#[11, 13, 7]
 Js = collect(0:0.25:3)
-Ts = expspace(-4, 1, 30) # temperature 
+Ts = expspace(-3, 1, 30) # temperature 
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "eigenval_sus"
@@ -27,7 +27,7 @@ for L in Ls
     for J in Js
         for T in Ts
             ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=300, kwargs="$T", time="5:00:00")
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="90:00")
         end
     end
 end

@@ -15,11 +15,13 @@ function load_dfs()
     # read files 
     files = readdir(joinpath(@__DIR__, "data"))
     df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
-        T=[], χswave=[], χdwave=[], dχswave=[], dχdwave=[])
+        T=[], χswave=[], χdwave=[], dχswave=[], dχdwave=[], Δswave=[], Δdwave=[])
     for f in files
         if endswith(f, ".csv")
             try
                 dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = convert_df_arrays(dfi, "Δswave")
+                dfi = convert_df_arrays(dfi, "Δdwave")
                 append!(df, dfi)
             catch e
                 println("file $f could not be loaded...")
