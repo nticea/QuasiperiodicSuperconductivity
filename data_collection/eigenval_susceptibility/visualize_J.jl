@@ -18,20 +18,24 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 1e-2
+T_cutoff = 1e-1
 
 # read files 
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
 df = load_dfs()
+get_IPRs!(df) # in place!
 
 # extract only the parameters we are interested in 
 dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
+dfL = dfL[(df.T.>=T_cutoff), :]
 
 # use split-apply-combine
 gdf = groupby(dfL, [:J, :T])
-dfL = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :dχdwave => mean])
+dfL = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :dχdwave => mean,
+    :IPR_swave_real => mean, :IPR_swave_momentum => mean, :IPR_x_real => mean, :IPR_x_momentum => mean,
+    :IPR_y_real => mean, :IPR_y_momentum => mean, :IPR_z_real => mean, :IPR_z_momentum => mean])
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 pxd, posd = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
@@ -210,3 +214,68 @@ p4 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
 if savefigs
     savefig(p2, joinpath(figpath, "susceptibility_temp_$(L)L.pdf"))
 end
+
+
+## IPRS 
+
+# also, plot the value of each J at various temperatures 
+Ts = sort(unique(dfL.T))
+T_min = Ts[1]
+cmapreal = cgrad(:reds, 4, categorical=true)
+cmapmomentum = cgrad(:blues, 4, categorical=true)
+p_d = plot(margin=10Plots.mm, ylims=(-0.01, 1.1))
+p_s = plot(margin=10Plots.mm, ylims=(-0.01, 1.1))
+dfT = dfL[(dfL.T.==T_min), :]
+Js = dfT.J
+
+realIPR = dfT.IPR_swave_real_mean
+kIPR = dfT.IPR_swave_momentum_mean
+xrealIPR = dfT.IPR_x_real_mean
+xmomentumIPR = dfT.IPR_x_momentum_mean
+yrealIPR = dfT.IPR_x_real_mean
+ymomentumIPR = dfT.IPR_x_momentum_mean
+zrealIPR = dfT.IPR_x_real_mean
+zmomentumIPR = dfT.IPR_x_momentum_mean
+
+sortidx = sortperm(Js)
+Js = Js[sortidx]
+realIPR = realIPR[sortidx]
+kIPR = kIPR[sortidx]
+xrealIPR = xrealIPR[sortidx]
+xmomentumIPR = xmomentumIPR[sortidx]
+yrealIPR = yrealIPR[sortidx]
+ymomentumIPR = ymomentumIPR[sortidx]
+zrealIPR = zrealIPR[sortidx]
+zmomentumIPR = zmomentumIPR[sortidx]
+
+plot!(p_s, Js, realIPR, label=nothing, c=cmapreal[1])
+scatter!(p_s, Js, realIPR, c=cmapreal[1], label="On-site real space")
+plot!(p_d, Js, xrealIPR, label=nothing, c=cmapreal[2])
+scatter!(p_d, Js, xrealIPR, c=cmapreal[2], label="x̂ real space")
+plot!(p_d, Js, yrealIPR, label=nothing, c=cmapreal[3])
+scatter!(p_d, Js, yrealIPR, c=cmapreal[3], label="ŷ real space")
+plot!(p_d, Js, zrealIPR, label=nothing, c=cmapreal[4])
+scatter!(p_d, Js, zrealIPR, c=cmapreal[4], label="ẑ real space")
+
+plot!(p_s, Js, kIPR, label=nothing, c=cmapmomentum[1])
+scatter!(p_s, Js, kIPR, c=cmapmomentum[1], label="On-site momentum space")
+plot!(p_d, Js, xmomentumIPR, label=nothing, c=cmapmomentum[2])
+scatter!(p_d, Js, xmomentumIPR, c=cmapmomentum[2], label="x̂ momentum space")
+plot!(p_d, Js, ymomentumIPR, label=nothing, c=cmapmomentum[3])
+scatter!(p_d, Js, ymomentumIPR, c=cmapmomentum[3], label="ŷ momentum space")
+plot!(p_d, Js, zmomentumIPR, label=nothing, c=cmapmomentum[4])
+scatter!(p_d, Js, zmomentumIPR, c=cmapmomentum[4], label="ẑ momentum space")
+
+title!(p_d, "d-wave")
+xlabel!(p_d, "J")
+ylabel!(p_d, "IPR")
+title!(p_s, "s-wave")
+xlabel!(p_s, "J")
+ylabel!(p_s, "IPR")
+
+
+# # make a colourbar 
+# heatmap!(p_real, zeros(1, 1), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
+
+p5 = plot(p_s, p_d, layout=Plots.grid(1, 2,
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="IPR for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
