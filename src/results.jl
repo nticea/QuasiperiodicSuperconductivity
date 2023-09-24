@@ -111,7 +111,10 @@ end
 
 function spatial_profile(m::ModelParams; Δ)
     L, ndims = m.L, m.ndims
+    return _spatial_profile(Δ, L, ndims)
+end
 
+function _spatial_profile(Δ, L, ndims)
     # check to see if we are already in spatial profile form 
     if Base.ndims(Δ) == 3 || Base.ndims(Δ) == 4
         return Δ
@@ -401,7 +404,7 @@ function to_5N_LGE_Δ(maxev; L)
     Δxminus = circshift(Δx, (-1, 0)) # mapping between +x̂ and -x̂
     Δyminus = circshift(Δy, (0, 1)) # mapping between +ŷ and -ŷ
 
-    # construc new eigenvector 
+    # construct new eigenvector 
     new_evs = zeros(5, L, L)
     new_evs[1, :, :] = evs[1, :, :] # on-site
     new_evs[2, :, :] = Δx
