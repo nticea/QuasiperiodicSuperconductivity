@@ -20,6 +20,9 @@ struct ModelParams
     ϕx::Real
     ϕy::Real
     ϕz::Real
+    ϕBx::Real
+    ϕBy::Real
+    ϕBz::Real
     V0::Real
     V1::Real
     J::Real
@@ -36,6 +39,9 @@ struct DiagonalizedHamiltonian
     ϕx::Real
     ϕy::Real
     ϕz::Real
+    ϕBx::Real
+    ϕBy::Real
+    ϕBz::Real
     J::Real
     periodic::Real
     ndims::Int
@@ -45,21 +51,21 @@ struct DiagonalizedHamiltonian
     U
 end
 
-function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims)
-    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims)
+function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims, ϕBx=0, ϕBy=0, ϕBz=0)
+    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, ϕz, ϕBx, ϕBy, ϕBz, V0, V1, J, periodic, ndims)
 end
 
 function copy(m::ModelParams)
-    mnew = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.J, m.periodic, m.ndims)
+    mnew = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.V0, m.V1, m.J, m.periodic, m.ndims)
 end
 
 function DiagonalizedHamiltonian(m::ModelParams; E, U)
-    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, E, U)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, E, U)
 end
 
 function DiagonalizedHamiltonian(m::ModelParams)
     E, U = diagonalize_hamiltonian(m)
-    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, E, U)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, E, U)
 end
 
 function expspace(start, stop, length)
@@ -79,8 +85,11 @@ function numsites(m::ModelParams)
 end
 
 function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin=true)
-    # construct the kinetic part 
-    Ht = square_lattice_kinetic(m)
+    if m.ϕBx == 0 && m.ϕBy == 0 && m.ϕBz == 0
+        Ht = square_lattice_kinetic(m)
+    else
+        Ht = lattice_with_flux(m, ϕ1=m.ϕBx, ϕ2=m.ϕBy, ϕ3=m.ϕBz)
+    end
 
     # interaction
     _, rs = coordinate_map(m)
@@ -135,8 +144,48 @@ function square_lattice_kinetic(m::ModelParams)
     return -t .* H
 end
 
+"""
+NOTE: ϕᵢ are the magnetic fluxes being threaded through each unit cell,
+NOT the potential offsets 
+"""
+function lattice_with_flux(m::ModelParams; ϕ1::Real=0, ϕ2::Real=0, ϕ3::Real=0)
+    ndims, t = m.ndims, m.t
+    nsites = numsites(m)
+    H = zeros(ComplexF64, nsites, nsites)  # Initialize Hamiltonian matrix
+    nni = nearest_neighbours.(collect(1:nsites), m=m)
+    if ndims == 3
+        for i in 1:nsites
+            rL, rU, rR, rD, rzU, rzD = nni[i]
+            for j in 1:nsites
+                if j == rL || j == rR
+                    H[i, j] = -t * exp(1im * ϕ1)
+                elseif j == rU || j == rD
+                    H[i, j] = -t * exp(1im * ϕ2)
+                elseif j == rzU || j == rzD
+                    H[i, j] = -t * exp(1im * ϕ3)
+                end
+            end
+        end
+    elseif ndims == 2
+        for i in 1:nsites
+            rL, rU, rR, rD = nni[i]
+            for j in 1:nsites
+                rL, rU, rR, rD, = nearest_neighbours(i, m=m)
+                if j == rL || j == rR
+                    H[i, j] = -t * exp(1im * ϕ1)
+                elseif j == rU || j == rD
+                    H[i, j] = -t * exp(1im * ϕ2)
+                end
+            end
+        end
+    else
+        println("the worst")
+    end
+    return sparse(H)
+end
+
 function nearest_neighbours(r::Int; m::ModelParams)
-    L, ndims = m.L, m.ndims
+    L, ndims, periodic = m.L, m.ndims, m.periodic
 
     if ndims == 2
         x, y = site_to_coordinate(r, m=m)
@@ -148,25 +197,25 @@ function nearest_neighbours(r::Int; m::ModelParams)
     end
 
     # left 
-    if x == 1
+    if x == 1 && periodic
         xL = L
     else
         xL = x - 1
     end
     # right 
-    if x == L
+    if x == L && periodic
         xR = 1
     else
         xR = x + 1
     end
     # up 
-    if y == L
+    if y == L && periodic
         yU = 1
     else
         yU = y + 1
     end
     # down 
-    if y == 1
+    if y == 1 && periodic
         yD = L
     else
         yD = y - 1
@@ -183,14 +232,14 @@ function nearest_neighbours(r::Int; m::ModelParams)
 
     elseif ndims == 3
         # up 
-        if z == L
+        if z == L && periodic
             zU = 1
         else
             zU = z + 1
         end
 
         # down 
-        if z == 1
+        if z == 1 && periodic
             zD = L
         else
             zD = z - 1

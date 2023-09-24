@@ -16,6 +16,9 @@ V1 = -1
 ϕxs = LinRange(0, π + 0.01, 3)
 ϕys = LinRange(0, π + 0.1, 3)
 ϕzs = LinRange(0, π - 0.01, 3)
+ϕBx = 1e-3
+ϕBy = 2e-3
+ϕBz = 3e-3
 periodic = true
 ndims = 3
 
@@ -39,7 +42,7 @@ for (j, J) in enumerate(Js)
         for (iy, ϕy) in enumerate(ϕys)
             for (iz, ϕz) in enumerate(ϕzs)
                 # initialize model 
-                m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+                m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ϕBx=ϕBx, ϕBy=ϕBy, ϕBz=ϕBz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
                 H = DiagonalizedHamiltonian(m)
 
                 # calculate the real IPR 
