@@ -18,12 +18,20 @@ V1 = -1
 ϕzs = LinRange(0, π - 0.01, 3)
 periodic = true
 ndims = 3
-nbins = 41
 
 Js = collect(0:0.25:3)
-dos = zeros(length(Js), nbins)
-
 df = DataFrame(J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[])
+
+# m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=0, ϕy=0, ϕz=0, V0=V0, V1=V1, J=0, periodic=periodic, ndims=ndims)
+# H = DiagonalizedHamiltonian(m)
+# Uq = fourier_transform_eigenstates(H)
+
+# # IPR = ∑ₖ |ψ(k)|⁴ 
+# u = Uq[:, 666]
+# u2 = u .* conj.(u)
+# u4 = u2 .^ 2
+
+# @assert 1 == 0
 
 for (j, J) in enumerate(Js)
     print(j, "-")
@@ -36,16 +44,14 @@ for (j, J) in enumerate(Js)
 
                 # calculate the real IPR 
                 ipr = IPR_real(H)
-                ipr_bin = bin_results(ipr, nbins=nbins)
-                # take the middle bin 
-                ipr_real = mean(ipr)#ipr_bin[floor(Int, nbins / 2)]
+                mididx = floor(Int, length(ipr) / 2)
+                ipr_real = ipr[mididx]
+                @show ipr_real
 
                 # calculate the real IPR 
                 ipr = IPR_momentum(H)
-                ipr_bin = bin_results(ipr, nbins=nbins)
-                # take the middle bin
-                ipr_k = mean(ipr_bin)#ipr_bin[floor(Int, nbins / 2)]
-                @show mean(ipr)
+                ipr_k = ipr[mididx]
+                @show ipr_k
 
                 dfi = DataFrame(J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k])
                 append!(df, dfi)
@@ -58,7 +64,10 @@ end
 gdf = groupby(df, [:J])
 dfmean = combine(gdf, [:ipr_real => mean, :ipr_k => mean])
 
-plot(dfmean.J, dfmean.ipr_real_mean, color="red")
-scatter!(dfmean.J, dfmean.ipr_real_mean, color="red")
-plot!(dfmean.J, dfmean.ipr_k_mean, color="blue")
-scatter!(dfmean.J, dfmean.ipr_k_mean, color="blue")
+plot(dfmean.J, dfmean.ipr_real_mean, color="red", label=nothing)
+scatter!(dfmean.J, dfmean.ipr_real_mean, color="red", label="real space")
+plot!(dfmean.J, dfmean.ipr_k_mean, color="blue", label=nothing)
+scatter!(dfmean.J, dfmean.ipr_k_mean, color="blue", label="momentum space")
+title!("IPR")
+xlabel!("J")
+ylabel!("IPR")
