@@ -20,8 +20,10 @@ periodic = true
 ndims = 3
 nbins = 41
 
-Js = expspace(log10(2) - 1, log10(2) + 1, 30)
-iprs = zeros(length(Js), nbins)
+Js = collect(0:0.25:3)#expspace(log10(2) - 1, log10(2) + 1, 30)
+iprs_real = zeros(length(Js), nbins)
+iprs_k = zeros(length(Js), nbins)
+
 dos = zeros(length(Js), nbins)
 for (j, J) in enumerate(Js)
     print(j, "-")
@@ -37,7 +39,13 @@ for (j, J) in enumerate(Js)
     ipr = IPR_real(H)
     # bin the results 
     ipr_bin = bin_results(ipr, nbins=nbins)
-    iprs[j, :] = ipr_bin
+    iprs_real[j, :] = ipr_bin
+
+    # calculate the IPR 
+    ipr = IPR_momentum(H)
+    # bin the results 
+    ipr_bin = bin_results(ipr, nbins=nbins)
+    iprs_k[j, :] = ipr_bin
 end
 
 nx = length(Js)
@@ -66,4 +74,10 @@ for (x, J) in enumerate(Js) # potential strength
 end
 
 # title!("⟨r⟩ for $L×$L×$L lattice")
-title!("Real space IPR for $L×$L×$L lattice")
+plot(Js, iprs_real[:, 20], color="red", label=nothing)
+plot!(Js, iprs_k[:, 20], color="blue", label=nothing)
+scatter!(Js, iprs_real[:, 20], color="red", label="real space")
+scatter!(Js, iprs_k[:, 20], color="blue", label="momentum space")
+
+
+title!("IPR for $L×$L×$L lattice")
