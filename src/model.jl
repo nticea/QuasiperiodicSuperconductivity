@@ -629,20 +629,21 @@ function fourier_transform_eigenstates(DH; minus=false)
     return hcat(Uq...)
 end
 
-function compute_scaling_properties(m::ModelParams; loadpath::Union{String,Nothing}=nothing)
+function compute_scaling_properties(m::ModelParams; loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
     H = DiagonalizedHamiltonian(m, loadpath=loadpath)
 
     # multifractal mean
-    α₀ = multifractal_mean(H; E₀=E₀, ℓ=ℓ)
+    α₀ = multifractal_mean(H; E₀=E₀, ℓ=ℓ, num_avg=num_avg)
 
+    # IPR 
+    idxs = closest_indices(H.E, E₀, num_avg)
     # calculate the real IPR 
     ipr = IPR_real(H)
-    mididx = floor(Int, length(ipr) / 2)
-    ipr_real = ipr[mididx]
+    ipr_real = mean(ipr[idxs])
 
     # calculate the real IPR 
     ipr = IPR_momentum(H)
-    ipr_k = ipr[mididx]
+    ipr_k = mean(ipr[idxs])
 
     return α₀, ipr_real, ipr_k
 end
