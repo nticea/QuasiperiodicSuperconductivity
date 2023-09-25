@@ -66,8 +66,10 @@ for (l, L) in enumerate(Ls)
 end
 
 # use split-apply-combine
+L=10
 gdf = groupby(df, [:L, :J])
 dfmean = combine(gdf, [:ipr_real => mean, :ipr_k => mean])
+dfmean = dfmean[(dfmean.L.==L), :]
 
 plot(dfmean.J, dfmean.ipr_real_mean, color="red", label=nothing)
 scatter!(dfmean.J, dfmean.ipr_real_mean, color="red", label="real space")
