@@ -28,10 +28,7 @@ df = df[(df.Q.==Q).&(df.θ.==θ).&(df.ℓ.==ℓ).&(df.ndims.==ndims).&(df.E₀.=
 
 # for a fixed L and J, we want to average over all ϕx and ϕy 
 gs = groupby(df, [:L, :J])
-res = DataFrame(L=[], J=[], α₀=[])
-for g in gs
-    append!(res, DataFrame(L=[g.L[1]], J=[g.J[1]], α₀=[mean(g.α₀)]))
-end
+res = combine(gs, [:α₀ => mean, :ipr_real => mean, :ipr_k => mean])
 
 # plot everything 
 Ls = unique(res.L)
@@ -39,6 +36,16 @@ cmap = cgrad(:viridis, length(Ls), categorical=true)
 p = plot(xlabel="J", ylabel="α₀")
 for (Lᵢ, L) in enumerate(Ls)
     dfi = res[(res.L.==L), :]
-    p = plot!(dfi.J, dfi.α₀, label=nothing, c=cmap[Lᵢ])
-    p = scatter!(p, dfi.J, dfi.α₀, label="L=$L", c=cmap[Lᵢ])
+    p = plot!(dfi.J, dfi.α₀_mean, label=nothing, c=cmap[Lᵢ])
+    p = scatter!(p, dfi.J, dfi.α₀_mean, label="L=$L", c=cmap[Lᵢ])
+end
+
+# plot everything 
+Ls = unique(res.L)
+cmap = cgrad(:viridis, length(Ls), categorical=true)
+p2 = plot(xlabel="J", ylabel="IPR (real space)")
+for (Lᵢ, L) in enumerate(Ls)
+    dfi = res[(res.L.==L), :]
+    p2 = plot!(dfi.J, dfi.ipr_real_mean, label=nothing, c=cmap[Lᵢ])
+    p2 = scatter!(p2, dfi.J, dfi.ipr_real_mean, label="L=$L", c=cmap[Lᵢ])
 end
