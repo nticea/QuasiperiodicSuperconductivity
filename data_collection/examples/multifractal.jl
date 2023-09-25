@@ -12,26 +12,28 @@ Q = (√5 - 1) / 2
 θ = π / 7
 V0 = 1.5
 V1 = -1
-ϕxs = LinRange(0, π, 3)
-ϕys = LinRange(0, π, 3)
-ϕz = 0
+ϕxs = LinRange(0, π, 2)
+ϕys = LinRange(0, π, 2)
+ϕzs = LinRange(0, π, 2)
 periodic = false
 ndims = 3
-E₀ = 1
-ℓ = 1
+E₀ = 0
+ℓ = 5
 
-Js = LinRange(2, 4, 20)
-Ls = [5, 10, 15]
+Js = LinRange(0, 5, 20)
+Ls = [5, 10]
 αs = zeros(length(Ls), length(Js), length(ϕxs), length(ϕys))
 for (xᵢ, ϕx) in enumerate(ϕxs)
     for (yᵢ, ϕy) in enumerate(ϕys)
-        for (Lᵢ, L) in enumerate(Ls)
-            for (Jᵢ, J) in enumerate(Js)
-                print("$Jᵢ-")
-                m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims)
-                α₀ = multifractal_mean(m; E₀=E₀, ℓ=ℓ)
-                αs[Lᵢ, Jᵢ, xᵢ, yᵢ] = α₀
-                @show α₀
+        for (zᵢ, ϕz) in enumerate(ϕzs)
+            for (Lᵢ, L) in enumerate(Ls)
+                for (Jᵢ, J) in enumerate(Js)
+                    print("$Jᵢ-")
+                    m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims)
+                    α₀ = multifractal_mean(m; E₀=E₀, ℓ=ℓ)
+                    αs[Lᵢ, Jᵢ, xᵢ, yᵢ] = α₀
+                    @show α₀
+                end
             end
         end
     end
