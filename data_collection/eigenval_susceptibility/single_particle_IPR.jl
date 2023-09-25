@@ -6,7 +6,7 @@ include("../../src/model.jl")
 include("../../src/results.jl")
 
 ## PARAMETERS ## 
-L = 11
+Ls = [5, 10]
 t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -19,11 +19,11 @@ V1 = -1
 ϕBx = 1e-3
 ϕBy = 2e-3
 ϕBz = 3e-3
-periodic = true
+periodic = false
 ndims = 3
 
-Js = collect(0:0.25:3)
-df = DataFrame(J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[])
+Js = collect(0:0.25:6)
+df = DataFrame(L=[], J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[])
 
 # m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=0, ϕy=0, ϕz=0, V0=V0, V1=V1, J=0, periodic=periodic, ndims=ndims)
 # H = DiagonalizedHamiltonian(m)
@@ -36,35 +36,37 @@ df = DataFrame(J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[])
 
 # @assert 1 == 0
 
-for (j, J) in enumerate(Js)
-    print(j, "-")
-    for (ix, ϕx) in enumerate(ϕxs)
-        for (iy, ϕy) in enumerate(ϕys)
-            for (iz, ϕz) in enumerate(ϕzs)
-                # initialize model 
-                m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ϕBx=ϕBx, ϕBy=ϕBy, ϕBz=ϕBz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-                H = DiagonalizedHamiltonian(m)
+for (l, L) in enumerate(Ls)
+    for (j, J) in enumerate(Js)
+        print("J=$J,L=$L-")
+        for (ix, ϕx) in enumerate(ϕxs)
+            for (iy, ϕy) in enumerate(ϕys)
+                for (iz, ϕz) in enumerate(ϕzs)
+                    # initialize model 
+                    m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ϕBx=ϕBx, ϕBy=ϕBy, ϕBz=ϕBz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+                    H = DiagonalizedHamiltonian(m)
 
-                # calculate the real IPR 
-                ipr = IPR_real(H)
-                mididx = floor(Int, length(ipr) / 2)
-                ipr_real = ipr[mididx]
-                @show ipr_real
+                    # calculate the real IPR 
+                    ipr = IPR_real(H)
+                    mididx = floor(Int, length(ipr) / 2)
+                    ipr_real = ipr[mididx]
+                    @show ipr_real
 
-                # calculate the real IPR 
-                ipr = IPR_momentum(H)
-                ipr_k = ipr[mididx]
-                @show ipr_k
+                    # calculate the real IPR 
+                    ipr = IPR_momentum(H)
+                    ipr_k = ipr[mididx]
+                    @show ipr_k
 
-                dfi = DataFrame(J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k])
-                append!(df, dfi)
+                    dfi = DataFrame(L=[L], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k])
+                    append!(df, dfi)
+                end
             end
         end
     end
 end
 
 # use split-apply-combine
-gdf = groupby(df, [:J])
+gdf = groupby(df, [:L, :J])
 dfmean = combine(gdf, [:ipr_real => mean, :ipr_k => mean])
 
 plot(dfmean.J, dfmean.ipr_real_mean, color="red", label=nothing)

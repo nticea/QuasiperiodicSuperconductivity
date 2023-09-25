@@ -63,8 +63,8 @@ function DiagonalizedHamiltonian(m::ModelParams; E, U)
     DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, E, U)
 end
 
-function DiagonalizedHamiltonian(m::ModelParams)
-    E, U = diagonalize_hamiltonian(m)
+function DiagonalizedHamiltonian(m::ModelParams; loadpath::Union{String,Nothing}=nothing)
+    E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
     DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, E, U)
 end
 
@@ -72,7 +72,7 @@ function expspace(start, stop, length)
     exp10.(range(start, stop, length=length))
 end
 
-function numsites(m::ModelParams)
+function numsites(m::Union{ModelParams,DiagonalizedHamiltonian})
     L, ndims = m.L, m.ndims
     if ndims == 2
         return L * L
@@ -277,13 +277,23 @@ end
 function coordinate_to_site(x::Int, y::Int; m::ModelParams)
     @assert m.ndims == 2
     _, vec = coordinate_map(m)
-    return findall(r -> r == (x, y), vec)[1]
+    idxs = findall(r -> r == (x, y), vec)
+    if length(idxs) > 0
+        return idxs[1]
+    else
+        return nothing
+    end
 end
 
 function coordinate_to_site(x::Int, y::Int, z::Int; m::ModelParams)
     @assert m.ndims == 3
     _, vec = coordinate_map(m)
-    return findall(r -> r == (x, y, z), vec)[1]
+    idxs = findall(r -> r == (x, y, z), vec)
+    if length(idxs) > 0
+        return idxs[1]
+    else
+        return nothing
+    end
 end
 
 function site_to_coordinate(r; m::ModelParams)
@@ -543,7 +553,12 @@ function closest_indices(arr, value, n)
 end
 
 function multifractal_mean(m::ModelParams; E₀::Real, ℓ::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
-    E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
+    DH = DiagonalizedHamiltonian(m; loadpath=loadpath)
+    return multifractal_mean(DH, E₀=E₀, ℓ=ℓ, num_avg=num_avg)
+end
+
+function multifractal_mean(m::DiagonalizedHamiltonian; E₀::Real, ℓ::Real, num_avg::Int=10)
+    E, U = m.E, m.U
     sortidx = sortperm(E)
     E = E[sortidx]
     U = U[:, sortidx]
@@ -613,3 +628,22 @@ function fourier_transform_eigenstates(DH; minus=false)
     Uq = FT_vec.(eachcol(U))
     return hcat(Uq...)
 end
+
+function compute_scaling_properties(m::ModelParams; loadpath::Union{String,Nothing}=nothing)
+    H = DiagonalizedHamiltonian(m, loadpath=loadpath)
+
+    # multifractal mean
+    α₀ = multifractal_mean(H; E₀=E₀, ℓ=ℓ)
+
+    # calculate the real IPR 
+    ipr = IPR_real(H)
+    mididx = floor(Int, length(ipr) / 2)
+    ipr_real = ipr[mididx]
+
+    # calculate the real IPR 
+    ipr = IPR_momentum(H)
+    ipr_k = ipr[mididx]
+
+    return α₀, ipr_real, ipr_k
+end
+
