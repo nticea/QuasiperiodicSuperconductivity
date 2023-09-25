@@ -160,8 +160,8 @@ for (j, J) in enumerate(Js)
         ylabel!(pos, "χ")
     end
 end
-ylims!(px, (-1, 0))
-ylims!(pos, (-1, 0))
+ylims!(px, (-0.8, 0))
+ylims!(pos, (-0.4, 0))
 
 
 if ndims == 3

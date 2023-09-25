@@ -21,6 +21,7 @@ function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1,
     #SBATCH --output=$outpath/$(job_prefix*"_"*name)_output.txt
     #SBATCH --error=$outpath/$(job_prefix*"_"*name)_error.txt
     #SBATCH --open-mode=append
+    #SBATCH --sockets-per-node=2
 
     # load Julia module
     ml julia

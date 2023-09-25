@@ -56,3 +56,34 @@ function split_into_cubes(matrix, L)
 
     return cubes
 end
+
+function uniform_susceptibility_components(χ; ndims::Int)
+    if Base.ndims(χ) == 1
+        if ndims == 2
+            χ = reshape(χ, 3, 3)
+        elseif ndims == 3
+            χ = reshape(χ, 4, 4)
+        else
+            println("do you know who i am")
+        end
+    end
+    # on-site
+    χswave = χ[1, 1]
+
+    # make the d-wave components 
+    xx, yy = χ[2, 2], χ[3, 3]
+    xy, yx = χ[2, 3], χ[3, 2]
+    if ndims == 2
+        χdwave = xx + yy - xy - yx
+    elseif ndims == 3
+        zz = χ[4, 4]
+        xz, zx = χ[2, 4], χ[4, 2]
+        yz, zy = χ[3, 4], χ[4, 3]
+        χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
+    else
+        println("sorry")
+        χdwave = nothing
+    end
+
+    return χswave, χdwave
+end

@@ -18,7 +18,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 1e-2
+T_cutoff = 1e-1
 
 # read files 
 if savefigs
@@ -29,7 +29,9 @@ df = load_dfs()
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
+df = df[df.T.>=T_cutoff, :]
 dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
+
 Js = sort(unique(dfL.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
 
@@ -158,6 +160,15 @@ dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
 Js = sort(unique(dfL.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
 
+# normalization factor 
+ndf = dfL[(dfL.J.==0).&&(dfL.T.==minimum(dfL.T)), :]
+if size(ndf)[1] > 0
+    nfχ = ndf.dχdlogT[1]
+    nfs, nfd = uniform_susceptibility_components(nfχ, ndims=ndims)
+else
+    nfs, nfd = 1, 1
+end
+
 for (j, J) in enumerate(Js)
     dfJ = dfL[(dfL.J.==J), :]
     Ts = dfJ.T
@@ -173,23 +184,11 @@ for (j, J) in enumerate(Js)
     # Ts = Ts[Ts.>=T_cutoff]
 
     if length(Ts) > 0
-
-        # on-site
-        χswave = [χ[1, 1] for χ in χs]
-
-        # make the d-wave components 
-        xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
-        xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
-        if ndims == 2
-            χdwave = xx + yy - xy - yx
-        elseif ndims == 3
-            zz = [χ[4, 4] for χ in χs]
-            xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
-            yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
-            χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
-        else
-            println("sorry")
-            χdwave = nothing
+        χswave, χdwave = [], []
+        for χ in χs
+            χsw, χdw = uniform_susceptibility_components(χ, ndims=ndims)
+            push!(χswave, χsw / abs(nfs))
+            push!(χdwave, χdw / abs(nfd))
         end
 
         plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
@@ -206,6 +205,8 @@ for (j, J) in enumerate(Js)
         ylabel!(pos, "dχdlogT")
     end
 end
+ylims!(pos, (-1.1, 0))
+ylims!(px, (-1.1, 0))
 
 if ndims == 3
     size_str = "$L × $L × $L"
