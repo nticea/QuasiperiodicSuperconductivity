@@ -14,8 +14,8 @@ include("utilities.jl")
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
-ℓ = 3
-E₀ = 1
+ℓ = 5
+E₀ = 0
 
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
