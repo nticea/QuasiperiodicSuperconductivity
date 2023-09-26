@@ -6,8 +6,8 @@ include("../../src/submit_job.jl")
 
 ## PARAMETERS ## 
 Js = LinRange(0, 5, 30)
-λ = 5
-E₀ = 0
+λ = 1 / 5
+E₀ = 1
 t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
