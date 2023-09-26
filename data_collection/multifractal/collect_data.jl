@@ -44,7 +44,7 @@ for ϕx in ϕxs
 
             m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ϕBx=ϕBx, ϕBy=ϕBy, ϕBz=ϕBz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims)
             if !already_computed(dfs, m; E₀=E₀, λ=λ)
-                α₀, ipr_real, ipr_k = compute_scaling_properties(m; loadpath=scratchpath)
+                α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, loadpath=scratchpath)
                 @show α₀, ipr_real, ipr_k
                 # save it out 
                 save_results(m, λ=λ, E₀=E₀, α₀=α₀, ipr_real=ipr_real, ipr_k=ipr_k)
