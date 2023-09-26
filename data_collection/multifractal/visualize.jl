@@ -39,6 +39,8 @@ for (Lᵢ, L) in enumerate(Ls)
     p = plot!(dfi.J, dfi.α₀_mean, label=nothing, c=cmap[Lᵢ])
     p = scatter!(p, dfi.J, dfi.α₀_mean, label="L=$L", c=cmap[Lᵢ])
 end
+ylims!(p, (2.5, 7.5))
+xlims!(p, (1.6, 2.5))
 
 # plot everything 
 Ls = unique(res.L)
