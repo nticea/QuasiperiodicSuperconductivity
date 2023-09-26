@@ -356,7 +356,7 @@ function Bmatrix(m::ModelParams)
         Rθ = [c^2+s^3 c*s c*s^2-c*s
             c*s -s c^s
             c*s^2-c*s c^2 c^2*s+s^2]
-        println("Rotation matrix with no C₄ symmetry!")
+        #println("Rotation matrix with no C₄ symmetry!")
     else
         println("ndims=$ndims not supported (yet?)")
         return
@@ -556,12 +556,15 @@ function closest_indices(arr, value, n)
     return sorted_indices[1:n]
 end
 
-function multifractal_mean(m::ModelParams; E₀::Real, ℓ::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
+function multifractal_mean(m::ModelParams; E₀::Real, λ::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
     DH = DiagonalizedHamiltonian(m; loadpath=loadpath)
-    return multifractal_mean(DH, E₀=E₀, ℓ=ℓ, num_avg=num_avg)
+    return multifractal_mean(DH, E₀=E₀, λ=λ, num_avg=num_avg)
 end
 
-function multifractal_mean(m::DiagonalizedHamiltonian; E₀::Real, ℓ::Real, num_avg::Int=10)
+function multifractal_mean(m::DiagonalizedHamiltonian; E₀::Real, λ::Real, num_avg::Int=10)
+    ndims, L = m.ndims, m.L
+
+    ℓ = Int(λ * L)
     E, U = m.E, m.U
     sortidx = sortperm(E)
     E = E[sortidx]
@@ -571,9 +574,6 @@ function multifractal_mean(m::DiagonalizedHamiltonian; E₀::Real, ℓ::Real, nu
     us = U[:, idxs]
 
     # iterate this for each column of U 
-    ndims, L = m.ndims, m.L
-    nsites = numsites(m)
-
     function get_α̃(u)
         function cg_weight(uᵢ)
             return sum(uᵢ .* conj.(uᵢ))
@@ -590,7 +590,7 @@ function multifractal_mean(m::DiagonalizedHamiltonian; E₀::Real, ℓ::Real, nu
         # then compute the sum within each square 
         uvec = reshape(ucubes, prod(size(ucubes)))
         μk = [cg_weight(uᵢ) for uᵢ in uvec]
-        α̃ = log.(μk) ./ log(ℓ / L)
+        α̃ = log.(μk) ./ log(λ)
         return mean(α̃)
     end
 
@@ -633,11 +633,11 @@ function fourier_transform_eigenstates(DH; minus=false)
     return hcat(Uq...)
 end
 
-function compute_scaling_properties(m::ModelParams; loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
+function compute_scaling_properties(m::ModelParams; λ::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
     H = DiagonalizedHamiltonian(m, loadpath=loadpath)
 
     # multifractal mean
-    α₀ = multifractal_mean(H; E₀=E₀, ℓ=ℓ, num_avg=num_avg)
+    α₀ = multifractal_mean(H; E₀=E₀, λ=λ, num_avg=num_avg)
 
     # IPR 
     idxs = closest_indices(H.E, E₀, num_avg)

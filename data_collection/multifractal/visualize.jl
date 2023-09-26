@@ -14,8 +14,8 @@ include("utilities.jl")
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
-ℓ = 5
-E₀ = 0
+λ = 1 / 5
+E₀ = 1
 
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
@@ -24,7 +24,7 @@ if savefigs
 end
 
 df = load_dfs()
-df = df[(df.Q.==Q).&(df.θ.==θ).&(df.ℓ.==ℓ).&(df.ndims.==ndims).&(df.E₀.==E₀), :]
+df = df[(df.Q.==Q).&(df.θ.==θ).&(df.λ.==λ).&(df.ndims.==ndims).&(df.E₀.==E₀), :]
 
 # for a fixed L and J, we want to average over all ϕx and ϕy 
 gs = groupby(df, [:L, :J])
