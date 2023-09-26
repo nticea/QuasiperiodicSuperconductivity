@@ -118,7 +118,8 @@ function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
     # try to load the Hamiltonian corresponding to these parameters 
     try
         DH = load_diagonalized_H(loadpath)
-        @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.periodic == m.periodic
+        @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.ϕBx == m.ϕBx && DH.ϕBy == m.ϕBy && DH.ϕBz == m.ϕBz && DH.periodic == m.periodic && DH.ndims == m.ndims
+        println("Loading a pre-diagonalized Hamiltonian")
         return DH.E, DH.U
     catch e
         # save everything to checkpointpath 
