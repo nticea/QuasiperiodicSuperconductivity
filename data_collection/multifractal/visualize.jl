@@ -42,8 +42,8 @@ for (Lᵢ, L) in enumerate(Ls)
     p = plot!(Js, α₀s, label=nothing, c=cmap[Lᵢ])
     p = scatter!(p, Js, α₀s, label="L=$L", c=cmap[Lᵢ])
 end
-ylims!(p, (2.5, 7.5))
-xlims!(p, (1.7, 2.5))
+# ylims!(p, (2.5, 7.5))
+# xlims!(p, (1.7, 2.5))
 
 # plot everything 
 Ls = unique(res.L)
