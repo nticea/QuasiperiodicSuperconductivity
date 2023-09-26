@@ -30,8 +30,11 @@ function load_dfs()
         ndims=[], λ=[], E₀=[], α₀=[], ipr_real=[], ipr_k=[])
     for f in files
         if endswith(f, ".csv")
-            dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
-            append!(df, dfi)
+            try
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                append!(df, dfi)
+            catch
+            end
         end
     end
     dropmissing!(df)
