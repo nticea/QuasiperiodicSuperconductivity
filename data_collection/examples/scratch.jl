@@ -20,5 +20,4 @@ periodic = false
 ndims = 3
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-t1 = square_lattice_kinetic(m)
-t2 = lattice_with_flux(m, ϕ1=0, ϕ2=0, ϕ3=0)
+plot_potential(m, slice=2)

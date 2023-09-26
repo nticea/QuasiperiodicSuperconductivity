@@ -36,11 +36,14 @@ cmap = cgrad(:viridis, length(Ls), categorical=true)
 p = plot(xlabel="J", ylabel="α₀")
 for (Lᵢ, L) in enumerate(Ls)
     dfi = res[(res.L.==L), :]
-    p = plot!(dfi.J, dfi.α₀_mean, label=nothing, c=cmap[Lᵢ])
-    p = scatter!(p, dfi.J, dfi.α₀_mean, label="L=$L", c=cmap[Lᵢ])
+    Js, α₀s = dfi.J, dfi.α₀_mean
+    sortidx = sortperm(Js)
+    Js, α₀s = Js[sortidx], α₀s[sortidx]
+    p = plot!(Js, α₀s, label=nothing, c=cmap[Lᵢ])
+    p = scatter!(p, Js, α₀s, label="L=$L", c=cmap[Lᵢ])
 end
 ylims!(p, (2.5, 7.5))
-xlims!(p, (1.6, 2.5))
+xlims!(p, (1.7, 2.5))
 
 # plot everything 
 Ls = unique(res.L)
