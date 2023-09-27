@@ -20,9 +20,9 @@ periodic = Bool(periodic)
 datapath = joinpath(@__DIR__, "data")
 mkpath(datapath)
 
-ϕxs = LinRange(0, π + 0.01, 3)
-ϕys = LinRange(0, π + 0.1, 3)
-ϕzs = LinRange(0, π - 0.01, 3)
+ϕxs = LinRange(0, π + 0.1, 3)
+ϕys = LinRange(0, π + 0.01, 3)
+ϕzs = LinRange(0, π - 0.1, 3)
 
 ϕBx = 0
 ϕBy = 0
