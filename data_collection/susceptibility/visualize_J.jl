@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 27 # the full system is L × L 
+L = 15 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
