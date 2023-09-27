@@ -13,7 +13,7 @@ V1 = 0
 ϕx = 0
 ϕy = 0
 ϕz = 0
-periodic = 1
+periodic = 0 # don't do periodic 
 ndims = 3
 
 # L = 29, time = 6 hrs, mem = 350
@@ -26,24 +26,30 @@ Ts = expspace(-3, 1, 30) # temperature
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "susceptibility"
 
-# L = 23
 for J in Js
     for T in Ts
-        ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="1:30:00")
+        ps = ModelParams(L=15, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=75, kwargs="$T", time="30:00")
     end
 end
 
 for J in Js
     for T in Ts
-        ps = ModelParams(L=27, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=255, kwargs="$T", time="6:00:00")
+        ps = ModelParams(L=20, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="1:00:00")
     end
 end
 
 for J in Js
     for T in Ts
-        ps = ModelParams(L=29, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+        ps = ModelParams(L=25, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=255, kwargs="$T", time="5:00:00")
+    end
+end
+
+for J in Js
+    for T in Ts
+        ps = ModelParams(L=30, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
         submit_job(ps, filepath, @__DIR__, job_prefix, mem=350, kwargs="$T", time="12:00:00")
     end
 end
