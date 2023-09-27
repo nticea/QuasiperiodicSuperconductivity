@@ -352,11 +352,12 @@ function Bmatrix(m::ModelParams)
     if ndims == 2
         Rθ = [c -s; s c]
     elseif ndims == 3
-        Rθ = [c -s 0; s c 0; 0 0 1] # this is around y axis 
+        # Rθ = [c -s 0; s c 0; 0 0 1] # this is around y axis 
         # Rθ = [1 0 0; 0 c -s; 0 s c] this is around x axis 
-        Rθ = [c^2+s^3 c*s c*s^2-c*s
-            c*s -s c^s
-            c*s^2-c*s c^2 c^2*s+s^2]
+        # Rθ = [c^2+s^3 c*s c*s^2-c*s
+        #     c*s -s c^s
+        #     c*s^2-c*s c^2 c^2*s+s^2]
+        Rθ = [1 1 0; 0 1 1; 1 0 1]
         #println("Rotation matrix with no C₄ symmetry!")
     else
         println("ndims=$ndims not supported (yet?)")
