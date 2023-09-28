@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 15 # the full system is L × L 
+L = 20 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -29,9 +29,21 @@ df = load_dfs()
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
-df = df[df.T.>=T_cutoff, :]
+df = df[(df.T.>=T_cutoff).&(df.L.==L), :]
+# compute the eigenvector at a fixed temperature (T_cutoff) for each J 
+gdf = groupby(df, [:J])
+for g in gdf
+    lg = size(g)[1]
+    # find the temperature closest to T_cutoff 
+    idx = closest_indices(g.T, T_cutoff, 1)[1]
+    # get the eigenvector of the susceptibility
+    χ = reshape(g.χ[idx], (4, 4))
+    λs, Us = eigen(χ[2:end, 2:end], sortby=real)
+    g.χ_λ = [λs[end] for _ in 1:lg]
+    g.χ_U = [Us[:, end] for _ in 1:lg]
+end
+df = vcat(gdf...)
 dfL = df[(df.L.==L).&(df.θ.==θ).&(df.Q.==Q).&(df.ndims.==ndims), :]
-
 Js = sort(unique(dfL.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
 
@@ -39,10 +51,12 @@ for (j, J) in enumerate(Js)
     dfJ = dfL[(dfL.J.==J), :]
     Ts = dfJ.T
     χs = dfJ.χ
+    Us = dfJ.χ_U
 
     sortidx = sortperm(Ts)
     Ts = Ts[sortidx]
     χs = χs[sortidx]
+    Us = Us[sortidx]
     χs = [reshape(χ, 4, 4) for χ in χs]
 
     # consider only the linear regime 
@@ -51,22 +65,11 @@ for (j, J) in enumerate(Js)
 
     if length(Ts) > 0
 
-        # on-site
-        χswave = [χ[1, 1] for χ in χs]
-
-        # make the d-wave components 
-        xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
-        xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
-        if ndims == 2
-            χdwave = xx + yy - xy - yx
-        elseif ndims == 3
-            zz = [χ[4, 4] for χ in χs]
-            xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
-            yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
-            χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
-        else
-            println("sorry")
-            χdwave = nothing
+        χswave, χdwave = [], []
+        for (χ, U) in zip(χs, Us)
+            χsw, χdw = uniform_susceptibility_components(χ, U=U, ndims=ndims)
+            push!(χswave, χsw)
+            push!(χdwave, χdw)
         end
 
         plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
@@ -90,7 +93,8 @@ elseif ndims == 2
     size_str = "$L × $L"
 end
 p1 = plot(px, pos, layout=Plots.grid(1, 2,
-        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility for $size_str lattice with Q=$(round(Q, digits=3))
+        ")
 if savefigs
     savefig(p1, joinpath(figpath, "susceptibility_J_$(L)L.pdf"))
 end
@@ -107,28 +111,19 @@ for (i, T) in enumerate(Ts)
     dfT = dfL[(dfL.T.==T), :]
     Js = dfT.J
     χs = dfT.χ
+    Us = dfT.χ_U
 
     sortidx = sortperm(Js)
     Js = Js[sortidx]
     χs = χs[sortidx]
+    Us = Us[sortidx]
     χs = [reshape(χ, 4, 4) for χ in χs]
 
-    # on-site
-    χswave = [χ[1, 1] for χ in χs]
-
-    # make the d-wave components 
-    xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
-    xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
-    if ndims == 2
-        χdwave = xx + yy - xy - yx
-    elseif ndims == 3
-        zz = [χ[4, 4] for χ in χs]
-        xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
-        yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
-        χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
-    else
-        println("sorry")
-        χdwave = nothing
+    χswave, χdwave = [], []
+    for (χ, U) in zip(χs, Us)
+        χsw, χdw = uniform_susceptibility_components(χ, U=U, ndims=ndims)
+        push!(χswave, χsw)
+        push!(χdwave, χdw)
     end
 
     plot!(ptemp_s, Js, χswave, label=nothing, c=cmap[i])
@@ -149,7 +144,8 @@ end
 #heatmap!(ptemp_s, zeros(2, 2), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
 
 p2 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
-        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="Susceptibility for $size_str lattice with Q=$(round(Q, digits=3))
+        ")
 if savefigs
     savefig(p2, joinpath(figpath, "susceptibility_temp_$(L)L.pdf"))
 end
@@ -164,7 +160,8 @@ cmap = cgrad(:matter, length(Js), categorical=true)
 ndf = dfL[(dfL.J.==0).&&(dfL.T.==minimum(dfL.T)), :]
 if size(ndf)[1] > 0
     nfχ = ndf.dχdlogT[1]
-    nfs, nfd = uniform_susceptibility_components(nfχ, ndims=ndims)
+    U = ndf.χ_U[1]
+    nfs, nfd = uniform_susceptibility_components(nfχ, U=U, ndims=ndims)
 else
     nfs, nfd = 1, 1
 end
@@ -173,10 +170,12 @@ for (j, J) in enumerate(Js)
     dfJ = dfL[(dfL.J.==J), :]
     Ts = dfJ.T
     χs = dfJ.dχdlogT
+    Us = dfJ.χ_U
 
     sortidx = sortperm(Ts)
     Ts = Ts[sortidx]
     χs = χs[sortidx]
+    Us = Us[sortidx]
     χs = [reshape(χ, 4, 4) for χ in χs]
 
     # consider only the linear regime 
@@ -185,17 +184,17 @@ for (j, J) in enumerate(Js)
 
     if length(Ts) > 0
         χswave, χdwave = [], []
-        for χ in χs
-            χsw, χdw = uniform_susceptibility_components(χ, ndims=ndims)
+        for (χ, U) in zip(χs, Us)
+            χsw, χdw = uniform_susceptibility_components(χ, U=U, ndims=ndims)
             push!(χswave, χsw / abs(nfs))
             push!(χdwave, χdw / abs(nfd))
         end
 
         plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
+        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J", xaxis=:log10)
 
         plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J, L=$L", xaxis=:log10)
+        scatter!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
 
         title!(px, "d-wave")
         xlabel!(px, "T")
@@ -214,7 +213,8 @@ elseif ndims == 2
     size_str = "$L × $L"
 end
 p3 = plot(px, pos, layout=Plots.grid(1, 2,
-        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="dχdlogT for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="dχdlogT for $size_str lattice with Q=$(round(Q, digits=3))
+        ")
 if savefigs
     savefig(p3, joinpath(figpath, "dχdlogT_$(L)L.pdf"))
 end
@@ -231,28 +231,19 @@ for (i, T) in enumerate(Ts)
     dfT = dfL[(dfL.T.==T), :]
     Js = dfT.J
     χs = dfT.dχdlogT
+    Us = dfT.χ_U
 
     sortidx = sortperm(Js)
     Js = Js[sortidx]
     χs = χs[sortidx]
+    Us = Us[sortidx]
     χs = [reshape(χ, 4, 4) for χ in χs]
 
-    # on-site
-    χswave = [χ[1, 1] for χ in χs]
-
-    # make the d-wave components 
-    xx, yy = [χ[2, 2] for χ in χs], [χ[3, 3] for χ in χs]
-    xy, yx = [χ[2, 3] for χ in χs], [χ[3, 2] for χ in χs]
-    if ndims == 2
-        χdwave = xx + yy - xy - yx
-    elseif ndims == 3
-        zz = [χ[4, 4] for χ in χs]
-        xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
-        yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
-        χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
-    else
-        println("sorry")
-        χdwave = nothing
+    χswave, χdwave = [], []
+    for (χ, U) in zip(χs, Us)
+        χsw, χdw = uniform_susceptibility_components(χ, U=U, ndims=ndims)
+        push!(χswave, χsw / abs(nfs))
+        push!(χdwave, χdw / abs(nfd))
     end
 
     plot!(ptemp_s, Js, χswave, label=nothing, c=cmap[i])
@@ -273,7 +264,44 @@ end
 #heatmap!(ptemp_s, zeros(2, 2), clims=(minimum(Ts), maximum(Ts)), cmap=:viridis, alpha=0)
 
 p4 = plot(ptemp_d, ptemp_s, layout=Plots.grid(1, 2,
-        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="dχ/dlog₁₀T for $size_str lattice with Q=$(round(Q, digits=3)), θ=$(θ_to_π(θ))")
+        widths=[1 / 2, 1 / 2]), size=(1700, 800), plot_title="dχ/dlog₁₀T for $size_str lattice with Q=$(round(Q, digits=3))")
 if savefigs
     savefig(p4, joinpath(figpath, "susceptibility_dχdlogT_$(L)L.pdf"))
 end
+
+# plot the symmetry 
+gdf = groupby(dfL, [:J])
+Js = []
+x1, x2, x3 = [], [], []
+λs = []
+for g in gdf
+    push!(Js, g.J[1])
+    U = g.χ_U[1]
+    if real(U[1]) < 0
+        U *= -1
+    end
+    push!(x1, U[1])
+    push!(x2, U[2])
+    push!(x3, U[3])
+    push!(λs, g.χ_λ[1])
+end
+
+p5 = plot(Js, real.(x1), color="red", label=nothing)
+scatter!(p5, Js, real.(x1), color="red", label="real")
+plot!(p5, Js, real.(x2), color="blue", label=nothing)
+scatter!(p5, Js, real.(x2), color="blue", label="real")
+plot!(p5, Js, real.(x3), color="green", label=nothing)
+scatter!(p5, Js, real.(x3), color="green", label="real")
+plot!(Js, imag.(x1), color="red", label="imaginary", ls=:dashdot)
+plot!(p5, Js, imag.(x2), color="blue", label="imaginary", ls=:dashdot)
+plot!(p5, Js, imag.(x3), color="green", label="imaginary", ls=:dashdot)
+xlabel!(p5, "J")
+ylabel!(p5, "Loading onto component")
+
+p6 = plot(Js, real.(λs), color="red", label=nothing)
+scatter!(p6, Js, real.(λs), color="red", label="real part")
+plot!(p6, Js, imag.(λs), color="blue", label=nothing)
+scatter!(p6, Js, imag.(λs), color="blue", label="imaginary part")
+xlabel!(p6, "J")
+ylabel!(p6, "λ")
+title!("λ(χ)")
