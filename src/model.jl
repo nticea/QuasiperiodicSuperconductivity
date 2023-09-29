@@ -459,8 +459,50 @@ function plot_potential(m::ModelParams; slice::Int=1)
     return h
 end
 
+function plot_eigenstates(m::ModelParams; slice::Int=1)
+    E, U = diagonalize_hamiltonian(m)
+    potmat = real.(U[:, floor(Int, length(E) / 2)])
+
+    if ndims == 2
+        potmat = reshape(potmat, L, L)
+    elseif ndims == 3
+        potmat = reshape(potmat, L, L, L)
+        potmat = potmat[:, :, slice]
+    end
+
+    numpts = 10
+    cm = cgrad(:bwr, 2 * numpts + 1, categorical=true)
+
+    function colour_gradient(x1::Int, x2::Int; arr)
+        val = arr[x1, x2]
+        max = 1
+        idx = floor(Int, val / max * numpts + numpts + 1)
+        return cm[idx]
+    end
+
+    plot(xaxis=" ", yaxis=" ", legend=false)
+    heatmap([-1 1; 1 1], color=cm, visible=false)  # Dummy heatmap to generate colorbar
+
+    # Create the colorbar
+
+    h = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
+    for x in 1:L
+        for y in 1:L
+            # onsite dot 
+            scatter!(h, [x], [y], ms=10, c=colour_gradient(x, y, arr=potmat), legend=:false, aspect_ratio=:equal)
+        end
+    end
+
+    xticks!(h, collect(1:2:L))
+    yticks!(h, collect(1:2:L))
+    xlabel!(h, "Site (x)")
+    ylabel!(h, "Site (y)")
+
+    return h
+end
+
 function momentum_components(m::ModelParams; r::Int)
-    ndims = m.ndims
+    L, ndims = m.L, m.ndims
     if ndims == 2
         x, y = site_to_coordinate(r, m=m)
         return (2 * π * x / L, 2 * π * y / L)

@@ -5,11 +5,10 @@ using CSV, DataFrames, Dates, Plots
 include("../../src/BdG.jl")
 
 # Parameters 
-L = 7
-J = 100
 t = 1
+J = 0.25
 Q = (√5 - 1) / 2
-μ = 1e-8
+μ = 1
 θ = π / 7
 V0 = 0
 V1 = 0
@@ -19,51 +18,33 @@ V1 = 0
 periodic = false
 ndims = 3
 
-m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+Λ = 0.3
 
-function plot_eigenstates(m::ModelParams; slice::Int=1, E₀::Real=0)
-    E, U = diagonalize_hamiltonian(m)
-    potmat = real.(U[:, floor(Int, length(E) / 2)])
+Ts = expspace(-2, 1, 20)
+Ls = [6, 7]
+χs_swave, dχs_swave = zeros(length(Ts), length(Ls)), zeros(length(Ts), length(Ls))
+χs_dwave, dχs_dwave = zeros(length(Ts), length(Ls)), zeros(length(Ts), length(Ls))
 
-    if ndims == 2
-        potmat = reshape(potmat, L, L)
-    elseif ndims == 3
-        potmat = reshape(potmat, L, L, L)
-        potmat = potmat[:, :, slice]
+## CALCULATION ## 
+for (Lᵢ, L) in enumerate(Ls)
+    for (Tᵢ, T) in enumerate(Ts)
+        m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+        χ, dχdlogT = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true)
+        χswave, χdwave = uniform_susceptibility_components(χ, ndims=ndims)
+        dχswave, dχdwave = uniform_susceptibility_components(dχdlogT, ndims=ndims)
+        χs_swave[Tᵢ, Lᵢ] = χswave
+        χs_dwave[Tᵢ, Lᵢ] = χdwave
+        dχs_swave[Tᵢ, Lᵢ] = dχswave
+        dχs_dwave[Tᵢ, Lᵢ] = dχdwave
+        @show J, T, χ, dχdlogT
     end
-
-    numpts = 10
-    cm = cgrad(:bwr, 2 * numpts + 1, categorical=true)
-
-    function colour_gradient(x1::Int, x2::Int; arr)
-        val = arr[x1, x2]
-        max = 1
-        idx = floor(Int, val / max * numpts + numpts + 1)
-        return cm[idx]
-    end
-
-    plot(xaxis=" ", yaxis=" ", legend=false)
-    heatmap([-1 1; 1 1], color=cm, visible=false)  # Dummy heatmap to generate colorbar
-
-    # Create the colorbar
-
-    h = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false)
-    for x in 1:L
-        for y in 1:L
-            # onsite dot 
-            scatter!(h, [x], [y], ms=10, c=colour_gradient(x, y, arr=potmat), legend=:false, aspect_ratio=:equal)
-        end
-    end
-
-    xticks!(h, collect(1:2:L))
-    yticks!(h, collect(1:2:L))
-    xlabel!(h, "Site (x)")
-    ylabel!(h, "Site (y)")
-
-    return h
 end
 
-hs = []
-for s in 1:L
-    push!(hs, plot_eigenstates(m, slice=s, E₀=0))
+p = plot(xlabel="T", ylabel="dχ/dlogT")
+cmap = cgrad(:matter, length(Ls), categorical=true)
+for (Lᵢ, L) in enumerate(Ls)
+    p = plot!(p, Ts, dχs_dwave[:, Lᵢ], xaxis=:log10, label=nothing, c=cmap[Lᵢ])
+    p = scatter!(p, Ts, dχs_dwave[:, Lᵢ], xaxis=:log10, label="L=$L", c=cmap[Lᵢ])
 end
+
+

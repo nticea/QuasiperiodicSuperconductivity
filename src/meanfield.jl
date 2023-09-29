@@ -44,7 +44,7 @@ function uniform_susceptibility(m;
     T, symmetry::String="d-wave", Λ::Union{Nothing,Real}=nothing,
     checkpointpath::Union{String,Nothing}=nothing, calculate_dχdlogT=false)
 
-    ndims = m.ndims
+    L, ndims = m.L, m.ndims
     if ndims == 2
         N = L * L
         nblocks = 3

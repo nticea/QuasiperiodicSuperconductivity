@@ -12,13 +12,13 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 20 # the full system is L × L 
+L = 25 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 1e-1
+T_cutoff = 0#10^(-1.2)
 
 # read files 
 if savefigs
@@ -191,10 +191,10 @@ for (j, J) in enumerate(Js)
         end
 
         plot!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(px, Ts, χdwave, color=cmap[j], label="J=$J", xaxis=:log10)
+        scatter!(px, Ts, χdwave, color=cmap[j], label=nothing, xaxis=:log10)
 
         plot!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
-        scatter!(pos, Ts, χswave, color=cmap[j], label=nothing, xaxis=:log10)
+        scatter!(pos, Ts, χswave, color=cmap[j], label="J=$J", xaxis=:log10)
 
         title!(px, "d-wave")
         xlabel!(px, "T")

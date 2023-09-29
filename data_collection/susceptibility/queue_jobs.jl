@@ -6,7 +6,7 @@ include("../../src/submit_job.jl")
 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
-μ = 1e-8
+μ = 1
 θ = π / 7
 V0 = 0
 V1 = 0
