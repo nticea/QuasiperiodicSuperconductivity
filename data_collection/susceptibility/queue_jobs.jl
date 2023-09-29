@@ -20,7 +20,7 @@ ndims = 3
 # L = 27, time = 4 hrs, mem = 256
 # L = 23, time = 1.5 hrs, mem = 100
 
-Js = LinRange(4.2, 4.5, 30)#LinRange(0.8, 1.1, 20)#collect(0:0.25:6)
+Js = collect(0:0.05:1)
 Ts = expspace(-3, 1, 30) # temperature 
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
@@ -40,16 +40,16 @@ for J in Js
     end
 end
 
-for J in Js
-    for T in Ts
-        ps = ModelParams(L=25, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=255, kwargs="$T", time="5:00:00")
-    end
-end
+# for J in Js
+#     for T in Ts
+#         ps = ModelParams(L=25, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+#         submit_job(ps, filepath, @__DIR__, job_prefix, mem=255, kwargs="$T", time="5:00:00")
+#     end
+# end
 
-for J in Js
-    for T in Ts
-        ps = ModelParams(L=30, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=350, kwargs="$T", time="12:00:00")
-    end
-end
+# for J in Js
+#     for T in Ts
+#         ps = ModelParams(L=30, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+#         submit_job(ps, filepath, @__DIR__, job_prefix, mem=350, kwargs="$T", time="12:00:00")
+#     end
+# end
