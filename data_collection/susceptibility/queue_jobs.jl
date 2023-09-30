@@ -15,7 +15,7 @@ V1 = 0
 ϕz = 0
 periodic = 0 # don't do periodic 
 ndims = 3
-disorder = 1 # add disorder, just for this run! 
+disorder = 0 # add disorder, just for this run! 
 
 # L = 29, time = 6 hrs, mem = 350
 # L = 27, time = 4 hrs, mem = 256
