@@ -11,15 +11,15 @@ function already_computed(df; T, L, Q, θ, ϕx, ϕy, ϕz, J, ndims, Λ)
     return false
 end
 
-function load_dfs()
+function load_dfs(; dirname="data")
     # read files 
-    files = readdir(joinpath(@__DIR__, "data"))
+    files = readdir(joinpath(@__DIR__, dirname))
     df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
         T=[], Λ=[], χ=[], dχdlogT=[])
     for f in files
         if endswith(f, ".csv")
             try
-                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, dirname, f)))
                 dfi = convert_df_arrays(dfi, "χ")
                 dfi = convert_df_arrays(dfi, "dχdlogT")
                 append!(df, dfi)

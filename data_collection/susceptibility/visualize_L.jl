@@ -16,13 +16,13 @@ Q = (√5 - 1) / 2
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_cutoff = 0#1e-1
+J̃ = 0.5
 
 # read files 
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-files = readdir(joinpath(@__DIR__, "data"))
-df = load_dfs()
+df = load_dfs(dirname="data_E0")
 df = df[(df.T.>=T_cutoff), :]
 
 Js = sort(unique(df.J))
@@ -30,7 +30,7 @@ Ls = sort(unique(df.L))
 cmap = cgrad(:matter, length(Ls), categorical=true)
 mmap = [:dashdot, :dash, :solid]
 
-gdf = groupby(df[(df.J.==(Js[2])), :], [:L])
+gdf = groupby(df[(df.J.==J̃), :], [:L])
 ps, pd = plot(), plot()
 psχ, pdχ = plot(), plot()
 for g in gdf

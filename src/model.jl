@@ -28,6 +28,7 @@ struct ModelParams
     J::Real
     periodic::Real
     ndims::Int
+    disorder::Bool
 end
 
 struct DiagonalizedHamiltonian
@@ -45,27 +46,28 @@ struct DiagonalizedHamiltonian
     J::Real
     periodic::Real
     ndims::Int
+    disorder::Bool
 
     # diagonalization 
     E
     U
 end
 
-function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims, ϕBx=0, ϕBy=0, ϕBz=0)
-    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, ϕz, ϕBx, ϕBy, ϕBz, V0, V1, J, periodic, ndims)
+function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims, ϕBx=0, ϕBy=0, ϕBz=0, disorder=false)
+    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, ϕz, ϕBx, ϕBy, ϕBz, V0, V1, J, periodic, ndims, disorder)
 end
 
 function copy(m::ModelParams)
-    mnew = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.V0, m.V1, m.J, m.periodic, m.ndims)
+    mnew = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.V0, m.V1, m.J, m.periodic, m.ndims, m.disorder)
 end
 
 function DiagonalizedHamiltonian(m::ModelParams; E, U)
-    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, E, U)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
 
 function DiagonalizedHamiltonian(m::ModelParams; loadpath::Union{String,Nothing}=nothing)
     E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
-    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, E, U)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
 
 function expspace(start, stop, length)
@@ -93,7 +95,11 @@ function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shi
 
     # interaction
     _, rs = coordinate_map(m)
-    pot = aubry_andre.(rs, m=m, shift_origin=shift_origin)
+    if m.disorder
+        pot = disorder_potential.(rs, m=m, shift_origin=shift_origin)
+    else
+        pot = aubry_andre.(rs, m=m, shift_origin=shift_origin)
+    end
     pot .+= μ # add chemical potential 
     Hint = spdiagm(pot)
     H0 = Ht + Hint
@@ -118,7 +124,7 @@ function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
     # try to load the Hamiltonian corresponding to these parameters 
     try
         DH = load_diagonalized_H(loadpath)
-        @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.ϕBx == m.ϕBx && DH.ϕBy == m.ϕBy && DH.ϕBz == m.ϕBz && DH.periodic == m.periodic && DH.ndims == m.ndims
+        @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.ϕBx == m.ϕBx && DH.ϕBy == m.ϕBy && DH.ϕBz == m.ϕBz && DH.periodic == m.periodic && DH.ndims == m.ndims && DH.disorder == m.disorder
         println("Loading a pre-diagonalized Hamiltonian")
         return DH.E, DH.U
     catch e
@@ -387,6 +393,36 @@ function aubry_andre(xy; m::ModelParams, shift_origin::Bool=true, normalize_SD_t
 
     # make the rotation matrix 
     BSD = Bmatrix(m)
+
+    if ndims == 2
+        x, y = xy
+        t1 = 2 * π * (BSD[1, 1] * x + BSD[1, 2] * y) + ϕx
+        t2 = 2 * π * (BSD[2, 1] * x + BSD[2, 2] * y) + ϕy
+        return J * (cos(t1) + cos(t2))
+    elseif ndims == 3
+        x, y, z = xy
+        t1 = 2 * π * (BSD[1, 1] * x + BSD[1, 2] * y + BSD[1, 3] * z) + ϕx
+        t2 = 2 * π * (BSD[2, 1] * x + BSD[2, 2] * y + BSD[2, 3] * z) + ϕy
+        t3 = 2 * π * (BSD[3, 1] * x + BSD[3, 2] * y + BSD[3, 3] * z) + ϕz
+        return J * (cos(t1) + cos(t2) + cos(t3))
+    else
+        println("ndims=$ndims not supported (yet?)")
+        return
+    end
+end
+
+function disorder_potential(xy; m::ModelParams, shift_origin::Bool=true)
+    if shift_origin
+        xy = [a + floor(Int, L / 2) for a in xy]
+    end
+
+    # make the rotation matrix 
+    BSD = Bmatrix(m)
+
+    # random ϕx, ϕy, ϕz 
+    ϕx = rand() * 2π
+    ϕy = rand() * 2π
+    ϕz = rand() * 2π
 
     if ndims == 2
         x, y = xy
