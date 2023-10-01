@@ -29,10 +29,18 @@ job_prefix = "susceptibility"
 
 for J in Js
     for T in Ts
-        ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+        ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=0)
         submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="90:00")
     end
 end
+
+for J in Js
+    for T in Ts
+        ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=1)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="90:00")
+    end
+end
+
 
 # for J in Js
 #     for T in Ts
