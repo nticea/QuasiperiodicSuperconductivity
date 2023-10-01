@@ -6,8 +6,6 @@ function submit_job(params::ModelParams, filepath, dirpath, job_prefix; nodes=1,
     mkpath(outpath)
     mkpath(slurmpath)
 
-    @show params.periodic
-
     name = "$(params.ndims)D_$(params.L)L_$(round(params.ϕx, digits=3))ϕx_$(round(params.ϕy, digits=3))ϕy_$(round(params.ϕz, digits=3))ϕz_$(params.V0)V0_$(params.V1)V1_$(params.J)J"
 
     filestr = """#!/bin/bash

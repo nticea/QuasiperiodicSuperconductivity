@@ -415,6 +415,7 @@ function disorder_potential(xy; m::ModelParams, shift_origin::Bool=true)
     if shift_origin
         xy = [a + floor(Int, L / 2) for a in xy]
     end
+    J = m.J
 
     # make the rotation matrix 
     BSD = Bmatrix(m)
@@ -712,7 +713,7 @@ function fourier_transform_eigenstates(DH; minus=false)
     return hcat(Uq...)
 end
 
-function compute_scaling_properties(m::ModelParams; λ::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
+function compute_scaling_properties(m::ModelParams; λ::Real, E₀::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
     H = DiagonalizedHamiltonian(m, loadpath=loadpath)
 
     # multifractal mean
