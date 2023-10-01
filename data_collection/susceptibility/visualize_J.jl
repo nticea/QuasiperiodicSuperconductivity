@@ -12,19 +12,19 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 15 # the full system is L × L 
+L = 23 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 1e-1
+T_cutoff = 0#1e-1
 
 # read files 
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "data_random"
+dirname = "data_random_PBC"
 df = load_dfs(dirname=dirname)
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
