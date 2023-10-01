@@ -11,14 +11,15 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-V0 = 1.5
-V1 = -1
+V0 = 0
+V1 = 0
 ϕx = 0
 ϕy = 0
 ϕz = 0
 periodic = true
 ndims = 3
 nbins = 41
+disorder = false
 
 Js = collect(0:0.25:3)#expspace(log10(2) - 1, log10(2) + 1, 30)
 iprs_real = zeros(length(Js), nbins)
@@ -28,24 +29,14 @@ dos = zeros(length(Js), nbins)
 for (j, J) in enumerate(Js)
     print(j, "-")
     # initialize model 
-    m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+    m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
     H = DiagonalizedHamiltonian(m)
     E = H.E # energy eigenvalues 
 
     # calculate density of states 
     dos[j, :] = hist_counts(E, nbins=nbins)
 
-    # calculate the IPR 
-    ipr = IPR_real(H)
-    # bin the results 
-    ipr_bin = bin_results(ipr, nbins=nbins)
-    iprs_real[j, :] = ipr_bin
-
-    # calculate the IPR 
-    ipr = IPR_momentum(H)
-    # bin the results 
-    ipr_bin = bin_results(ipr, nbins=nbins)
-    iprs_k[j, :] = ipr_bin
+    α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, loadpath=scratchpath)
 end
 
 nx = length(Js)

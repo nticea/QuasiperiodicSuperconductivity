@@ -6,14 +6,14 @@ include("submit_job.jl")
 
 t = 1 # hopping 
 Q = (√5 - 1) / 2
-μ = 1
+μ = 0.5
 θ = π / 7
 V0 = 0
 V1 = 0
 ϕx = 0
 ϕy = 0
 ϕz = 0
-periodic = 0 # don't do periodic 
+periodic = 1 # periodic 
 ndims = 3
 disorder = 0 # add disorder, just for this run! 
 
@@ -21,7 +21,7 @@ disorder = 0 # add disorder, just for this run!
 # L = 27, time = 4 hrs, mem = 256
 # L = 23, time = 1.5 hrs, mem = 100
 
-Js = collect(0:0.05:1)
+Js = collect(0:0.1:3)
 Ts = expspace(-3, 1, 30) # temperature 
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
@@ -29,17 +29,24 @@ job_prefix = "susceptibility"
 
 for J in Js
     for T in Ts
-        ps = ModelParams(L=15, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=75, kwargs="$T", time="30:00")
+        ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="90:00")
     end
 end
 
-for J in Js
-    for T in Ts
-        ps = ModelParams(L=20, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="1:00:00")
-    end
-end
+# for J in Js
+#     for T in Ts
+#         ps = ModelParams(L=15, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+#         submit_job(ps, filepath, @__DIR__, job_prefix, mem=75, kwargs="$T", time="30:00")
+#     end
+# end
+
+# for J in Js
+#     for T in Ts
+#         ps = ModelParams(L=20, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+#         submit_job(ps, filepath, @__DIR__, job_prefix, mem=100, kwargs="$T", time="1:00:00")
+#     end
+# end
 
 # for J in Js
 #     for T in Ts

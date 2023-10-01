@@ -12,20 +12,20 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 25 # the full system is L × L 
+L = 15 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 0#10^(-1.2)
+T_cutoff = 1e-1
 
 # read files 
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-files = readdir(joinpath(@__DIR__, "data"))
-df = load_dfs()
+dirname = "data_random"
+df = load_dfs(dirname=dirname)
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
@@ -161,7 +161,7 @@ ndf = dfL[(dfL.J.==0).&&(dfL.T.==minimum(dfL.T)), :]
 if size(ndf)[1] > 0
     nfχ = ndf.dχdlogT[1]
     U = ndf.χ_U[1]
-    nfs, nfd = uniform_susceptibility_components(nfχ, U=U, ndims=ndims)
+    nfs, nfd = 1, 1#uniform_susceptibility_components(nfχ, U=U, ndims=ndims)
 else
     nfs, nfd = 1, 1
 end
@@ -204,8 +204,8 @@ for (j, J) in enumerate(Js)
         ylabel!(pos, "dχdlogT")
     end
 end
-ylims!(pos, (-1.1, 0))
-ylims!(px, (-1.1, 0))
+ylims!(pos, (-0.15, 0))
+ylims!(px, (-0.15, 0))
 
 if ndims == 3
     size_str = "$L × $L × $L"

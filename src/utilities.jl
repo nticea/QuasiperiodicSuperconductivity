@@ -96,3 +96,54 @@ function uniform_susceptibility_components(χ; U=nothing, ndims::Int)
 
     return χswave, χdwave
 end
+
+function string_to_num(s::Union{Real,AbstractString})
+    if isa(s, Number)
+        return s
+    end
+    try
+        if contains(s, "+")
+            # Split the string into real and imaginary parts based on the ' + ' delimiter
+            parts = split(s, " + ")
+
+            # Check if the string contains both real and imaginary parts
+            if length(parts) == 2
+                # Parse the real and imaginary parts as Float64 numbers
+                real_part = parse(Float64, parts[1])
+                # Remove the 'im' suffix from the imaginary part and parse it
+                imaginary_part = parse(Float64, chop(parts[2], tail=2))
+
+                # Create a complex number from the real and imaginary parts
+                return complex(real_part, imaginary_part)
+            elseif length(parts) == 1
+                # If there is no imaginary part, parse the real part as a Float64 number
+                real_part = parse(Float64, s)
+                return real_part
+            else
+                throw(ArgumentError("Invalid input string: $s"))
+            end
+        else
+            # Split the string into real and imaginary parts based on the ' + ' delimiter
+            parts = split(s, " - ")
+
+            # Check if the string contains both real and imaginary parts
+            if length(parts) == 2
+                # Parse the real and imaginary parts as Float64 numbers
+                real_part = parse(Float64, parts[1])
+                # Remove the 'im' suffix from the imaginary part and parse it
+                imaginary_part = parse(Float64, chop(parts[2], tail=2))
+
+                # Create a complex number from the real and imaginary parts
+                return complex(real_part, imaginary_part)
+            elseif length(parts) == 1
+                # If there is no imaginary part, parse the real part as a Float64 number
+                real_part = parse(Float64, s)
+                return real_part
+            else
+                throw(ArgumentError("Invalid input string: $s"))
+            end
+        end
+    catch
+        return NaN
+    end
+end

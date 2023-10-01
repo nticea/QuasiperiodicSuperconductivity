@@ -28,6 +28,11 @@ if disorder
 else
     dirname = "data"
 end
+if periodic
+    dirname = dirname * "_PBC"
+else
+    dirname = dirname * "_OBC"
+end
 
 # datapath
 datapath = joinpath(@__DIR__, dirname)
