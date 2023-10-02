@@ -18,13 +18,13 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 0#1e-1
+T_cutoff = 10^(-1.2)#1e-1
 
 # read files 
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "data_random_PBC"
+dirname = "data_PBC"
 df = load_dfs(dirname=dirname)
 
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
@@ -205,7 +205,7 @@ for (j, J) in enumerate(Js)
     end
 end
 ylims!(pos, (-0.15, 0))
-ylims!(px, (-0.15, 0))
+ylims!(px, (-0.01, 0.05))
 
 if ndims == 3
     size_str = "$L × $L × $L"

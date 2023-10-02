@@ -19,6 +19,12 @@ L = Int(L)
 ndims = Int(ndims)
 periodic = Bool(periodic)
 disorder = Bool(disorder)
+
+# MAKE RANDOM ϕx, ϕy, ϕz 
+ϕx = 2π * rand()
+ϕy = 2π * rand()
+ϕz = 2π * rand()
+
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
 
 Λ = 0.3
