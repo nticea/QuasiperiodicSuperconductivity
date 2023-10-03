@@ -69,6 +69,7 @@ function uniform_susceptibility_components(χ; U=nothing, ndims::Int)
     end
     # on-site
     χswave = χ[1, 1]
+    U = nothing
 
     if isnothing(U)
         # make the d-wave components 

@@ -12,13 +12,13 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 23 # the full system is L × L 
+L = 17 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 10^(-1.2)#1e-1
+T_cutoff = 0#1e-1
 
 # read files 
 if savefigs
@@ -27,9 +27,23 @@ end
 dirname = "data_PBC"
 df = load_dfs(dirname=dirname)
 
+function mean_χ(χs)
+    χs = hcat(χs...)
+    return mean(χs, dims=2)
+end
+
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
 df = df[(df.T.>=T_cutoff).&(df.L.==L), :]
+
+gdf = groupby(df, [:J, :T])
+for g in gdf
+    # replace χ and dχlogT with their means 
+    g.χ .= [mean_χ(g.χ) for _ in 1:length(g.χ)]
+    g.dχdlogT .= [mean_χ(g.dχdlogT) for _ in 1:length(g.dχdlogT)]
+end
+df = vcat(gdf...)
+
 # compute the eigenvector at a fixed temperature (T_cutoff) for each J 
 gdf = groupby(df, [:J])
 for g in gdf
@@ -204,8 +218,8 @@ for (j, J) in enumerate(Js)
         ylabel!(pos, "dχdlogT")
     end
 end
-ylims!(pos, (-0.15, 0))
-ylims!(px, (-0.01, 0.05))
+ylims!(pos, (-0.3, 0))
+ylims!(px, (-0.3, 0))
 
 if ndims == 3
     size_str = "$L × $L × $L"
