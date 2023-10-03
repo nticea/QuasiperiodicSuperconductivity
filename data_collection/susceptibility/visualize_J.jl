@@ -35,6 +35,8 @@ end
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
 df = df[(df.T.>=T_cutoff).&(df.L.==L), :]
+df = df[(df.ϕx.==df.ϕx[1]).&(df.ϕy.==df.ϕy[1]).&(df.ϕz.==df.ϕz[1]), :]
+
 
 gdf = groupby(df, [:J, :T])
 for g in gdf

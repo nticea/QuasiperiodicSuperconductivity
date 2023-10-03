@@ -28,27 +28,41 @@ job_prefix = "susceptibility"
 
 nrep = 10
 
-for _ in 1:nrep
-
-    # make random potential offsets 
-    ϕx = 2π * rand()
-    ϕy = 2π * rand()
-    ϕz = 2π * rand()
-
-    for J in Js
-        for T in Ts
-            ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=0)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="45:00")
-        end
-    end
-
-    for J in Js
-        for T in Ts
-            ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=1)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="45:00")
-        end
+for J in Js
+    for T in Ts
+        ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="10:00")
     end
 end
+
+for J in Js
+    for T in Ts
+        ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=0, ndims=ndims, disorder=0)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="10:00")
+    end
+end
+
+# for _ in 1:nrep
+
+#     # make random potential offsets 
+#     ϕx = 2π * rand()
+#     ϕy = 2π * rand()
+#     ϕz = 2π * rand()
+
+#     for J in Js
+#         for T in Ts
+#             ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=0)
+#             submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="45:00")
+#         end
+#     end
+
+#     for J in Js
+#         for T in Ts
+#             ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=1)
+#             submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="45:00")
+#         end
+#     end
+# end
 
 
 # for J in Js
