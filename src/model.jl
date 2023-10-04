@@ -540,14 +540,16 @@ function momentum_components(m::ModelParams; r::Int)
     L, ndims = m.L, m.ndims
     if m.periodic
         ϕx, ϕy, ϕz = copy(m.ϕx), copy(m.ϕy), copy(m.ϕz)
-        ϕx = floor(Int, ϕx * L / 2π) * 2π / L
+        ϕx = round(Int, ϕx * L / (2π)) * 2π / L
+        ϕy = round(Int, ϕy * L / (2π)) * 2π / L
+        ϕz = round(Int, ϕz * L / (2π)) * 2π / L
         # implement a shift by ϕ if we are working with PBC  
         if ndims == 2
             x, y = site_to_coordinate(r, m=m)
-            return (2 * π * x / L + m.ϕx, 2 * π * y / L + m.ϕy)
+            return (2 * π * x / L + ϕx, 2 * π * y / L + ϕy)
         elseif ndims == 3
             x, y, z = site_to_coordinate(r, m=m)
-            return (2 * π * x / L + m.ϕx, 2 * π * y / L + m.ϕy, 2 * π * z / L + m.ϕz)
+            return (2 * π * x / L + ϕx, 2 * π * y / L + ϕy, 2 * π * z / L + ϕz)
         else
             println("$dims dimensions not implemented")
         end
