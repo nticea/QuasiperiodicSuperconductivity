@@ -540,7 +540,7 @@ function momentum_components(m::ModelParams; r::Int)
     L, ndims = m.L, m.ndims
     if m.periodic
         ϕx, ϕy, ϕz = copy(m.ϕx), copy(m.ϕy), copy(m.ϕz)
-        ϕx = floor(Int, ϕx * L / 2π) / L
+        ϕx = floor(Int, ϕx * L / 2π) * 2π / L
         # implement a shift by ϕ if we are working with PBC  
         if ndims == 2
             x, y = site_to_coordinate(r, m=m)
