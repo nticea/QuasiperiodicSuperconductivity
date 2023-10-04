@@ -20,9 +20,6 @@ struct ModelParams
     ϕx::Real
     ϕy::Real
     ϕz::Real
-    ϕBx::Real
-    ϕBy::Real
-    ϕBz::Real
     V0::Real
     V1::Real
     J::Real
@@ -40,9 +37,6 @@ struct DiagonalizedHamiltonian
     ϕx::Real
     ϕy::Real
     ϕz::Real
-    ϕBx::Real
-    ϕBy::Real
-    ϕBz::Real
     J::Real
     periodic::Real
     ndims::Int
@@ -53,21 +47,21 @@ struct DiagonalizedHamiltonian
     U
 end
 
-function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims, ϕBx=0, ϕBy=0, ϕBz=0, disorder=false)
-    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, ϕz, ϕBx, ϕBy, ϕBz, V0, V1, J, periodic, ndims, disorder)
+function ModelParams(; L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims, disorder=false)
+    ModelParams(L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims, disorder)
 end
 
 function copy(m::ModelParams)
-    mnew = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.V0, m.V1, m.J, m.periodic, m.ndims, m.disorder)
+    mnew = ModelParams(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.J, m.periodic, m.ndims, m.disorder)
 end
 
 function DiagonalizedHamiltonian(m::ModelParams; E, U)
-    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, m.disorder, E, U)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
 
 function DiagonalizedHamiltonian(m::ModelParams; loadpath::Union{String,Nothing}=nothing)
     E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
-    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ϕBx, m.ϕBy, m.ϕBz, m.J, m.periodic, m.ndims, m.disorder, E, U)
+    DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
 
 function expspace(start, stop, length)
@@ -87,10 +81,10 @@ function numsites(m::Union{ModelParams,DiagonalizedHamiltonian})
 end
 
 function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin=true)
-    if m.ϕBx == 0 && m.ϕBy == 0 && m.ϕBz == 0
+    if (m.ϕx == 0 && m.ϕy == 0 && m.ϕz == 0) || !m.periodic
         Ht = square_lattice_kinetic(m)
     else
-        Ht = lattice_with_flux(m, ϕ1=m.ϕBx, ϕ2=m.ϕBy, ϕ3=m.ϕBz)
+        Ht = lattice_with_flux(m, ϕ1=m.ϕx, ϕ2=m.ϕy, ϕ3=m.ϕz)
     end
 
     # interaction
@@ -124,7 +118,7 @@ function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
     # try to load the Hamiltonian corresponding to these parameters 
     try
         DH = load_diagonalized_H(loadpath)
-        @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.ϕBx == m.ϕBx && DH.ϕBy == m.ϕBy && DH.ϕBz == m.ϕBz && DH.periodic == m.periodic && DH.ndims == m.ndims && DH.disorder == m.disorder
+        @assert DH.L == m.L && DH.t == m.t && DH.J == m.J && DH.Q == m.Q && DH.μ == m.μ && DH.θ == m.θ && DH.ϕx == m.ϕx && DH.ϕy == m.ϕy && DH.ϕz == m.ϕz && DH.periodic == m.periodic && DH.ndims == m.ndims && DH.disorder == m.disorder
         println("Loading a pre-diagonalized Hamiltonian")
         return DH.E, DH.U
     catch e

@@ -564,16 +564,10 @@ function load_diagonalized_H(loadpath::String)
     f = h5open(loadpath, "r")
     d = read(f)
     close(f)
-    try
-        return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
-            d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["ϕz"], d["J"],
-            d["periodic"], d["ndims"], d["E"], d["U"])
-    catch
-        return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
-            d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["ϕz"],
-            d["ϕBx"], d["ϕBy"], d["ϕBz"], d["J"],
-            d["periodic"], d["ndims"], d["E"], d["U"])
-    end
+    return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
+        d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["ϕz"], d["J"],
+        d["periodic"], d["ndims"], d["E"], d["U"])
+
 end
 
 function bin_results(arr; nbins)

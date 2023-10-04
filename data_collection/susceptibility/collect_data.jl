@@ -20,10 +20,7 @@ ndims = Int(ndims)
 periodic = Bool(periodic)
 disorder = Bool(disorder)
 
-ϕBx = 1e-2
-ϕBy = 2e-2
-ϕBz = 3e-2
-m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ϕBx=ϕBx, ϕBy=ϕBy, ϕBz=ϕBz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
 
 Λ = 0.3
 if disorder

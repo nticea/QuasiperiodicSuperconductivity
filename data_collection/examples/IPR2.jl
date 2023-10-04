@@ -15,9 +15,6 @@ Q = (√5 - 1) / 2
 θ = π / 7
 V0 = 0
 V1 = 0
-ϕBx = 1e-2
-ϕBy = 2e-2
-ϕBz = 3e-2
 periodic = false
 disorder = false
 ndims = 3
@@ -45,7 +42,7 @@ for n in 1:nrep
     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
     for J in Js
         print("n=$n,J=$J-")
-        m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ϕBx=ϕBx, ϕBy=ϕBy, ϕBz=ϕBz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+        m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
         α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀)
 
         dfi = DataFrame(L=[L], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k], α₀=[real(α₀)], BC=[BC], pot=[pot])

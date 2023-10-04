@@ -24,10 +24,6 @@ mkpath(datapath)
 ϕys = LinRange(0, π + 0.01, 3)
 ϕzs = LinRange(0, π - 0.1, 3)
 
-ϕBx = 0
-ϕBy = 0
-ϕBz = 0
-
 dfs = load_dfs()
 
 for ϕx in ϕxs
@@ -42,7 +38,7 @@ for ϕx in ϕxs
             mkpath(scratchbase)
             scratchpath = joinpath(scratchbase, stamp)
 
-            m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ϕBx=ϕBx, ϕBy=ϕBy, ϕBz=ϕBz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims)
+            m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims)
             if !already_computed(dfs, m; E₀=E₀, λ=λ)
                 α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀, loadpath=scratchpath)
                 @show α₀, ipr_real, ipr_k
