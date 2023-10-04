@@ -81,7 +81,7 @@ function numsites(m::Union{ModelParams,DiagonalizedHamiltonian})
 end
 
 function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin=true)
-    if (m.ϕx == 0 && m.ϕy == 0 && m.ϕz == 0) || !m.periodic
+    if !m.periodic
         Ht = square_lattice_kinetic(m)
     else
         Ht = lattice_with_flux(m, ϕ1=m.ϕx, ϕ2=m.ϕy, ϕ3=m.ϕz)
@@ -534,14 +534,27 @@ end
 
 function momentum_components(m::ModelParams; r::Int)
     L, ndims = m.L, m.ndims
-    if ndims == 2
-        x, y = site_to_coordinate(r, m=m)
-        return (2 * π * x / L, 2 * π * y / L)
-    elseif ndims == 3
-        x, y, z = site_to_coordinate(r, m=m)
-        return (2 * π * x / L, 2 * π * y / L, 2 * π * z / L)
+    if m.periodic
+        # implement a shift by ϕ if we are working with PBC  
+        if ndims == 2
+            x, y = site_to_coordinate(r, m=m)
+            return (2 * π * x / L + m.ϕx, 2 * π * y / L + m.ϕy)
+        elseif ndims == 3
+            x, y, z = site_to_coordinate(r, m=m)
+            return (2 * π * x / L + m.ϕx, 2 * π * y / L + m.ϕy, 2 * π * z / L + m.ϕz)
+        else
+            println("$dims dimensions not implemented")
+        end
     else
-        println("$dims dimensions not implemented")
+        if ndims == 2
+            x, y = site_to_coordinate(r, m=m)
+            return (2 * π * x / L, 2 * π * y / L)
+        elseif ndims == 3
+            x, y, z = site_to_coordinate(r, m=m)
+            return (2 * π * x / L, 2 * π * y / L, 2 * π * z / L)
+        else
+            println("$dims dimensions not implemented")
+        end
     end
 end
 
