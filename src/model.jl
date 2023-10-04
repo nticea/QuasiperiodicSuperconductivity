@@ -124,7 +124,11 @@ function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
     catch e
         # save everything to checkpointpath 
         DH = DiagonalizedHamiltonian(m)
-        save_structs(DH, loadpath)
+        try
+            save_structs(DH, loadpath)
+        catch e
+            @show e
+        end
         return DH.E, DH.U
     end
 end
