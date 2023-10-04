@@ -24,7 +24,7 @@ T_cutoff = 1e-1
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "data_OBC"
+dirname = "data_PBC"
 df = load_dfs(dirname=dirname)
 
 function mean_χ(χs)
@@ -35,7 +35,7 @@ end
 px, pos = plot(margin=10Plots.mm), plot(margin=10Plots.mm)
 # extract only the parameters we are interested in 
 df = df[(df.T.>=T_cutoff).&(df.L.==L), :]
-df = df[(df.ϕx.==df.ϕx[1]).&(df.ϕy.==df.ϕy[1]).&(df.ϕz.==df.ϕz[1]), :]
+# df = df[(df.ϕx.==df.ϕx[1]).&(df.ϕy.==df.ϕy[1]).&(df.ϕz.==df.ϕz[1]), :]
 
 
 gdf = groupby(df, [:J, :T])
