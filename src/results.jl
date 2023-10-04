@@ -566,8 +566,7 @@ function load_diagonalized_H(loadpath::String)
     close(f)
     return DiagonalizedHamiltonian(d["L"], d["t"], d["Q"],
         d["μ"], d["θ"], d["ϕx"], d["ϕy"], d["ϕz"], d["J"],
-        d["periodic"], d["ndims"], d["E"], d["U"])
-
+        d["periodic"], d["ndims"], d["disorder"], d["E"], d["U"])
 end
 
 function bin_results(arr; nbins)
