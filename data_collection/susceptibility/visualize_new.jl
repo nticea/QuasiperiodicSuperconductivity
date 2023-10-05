@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 17 # the full system is L × L 
+L = 7 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -24,7 +24,7 @@ T_cutoff = 0#1e-1
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "data_PBC"
+dirname = "data_OBC"
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 

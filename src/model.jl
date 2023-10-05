@@ -162,12 +162,18 @@ function lattice_with_flux(m::ModelParams; ϕ1::Real=0, ϕ2::Real=0, ϕ3::Real=0
         for i in 1:nsites
             rL, rU, rR, rD, rzU, rzD = nni[i]
             for j in 1:nsites
-                if j == rL || j == rR
+                if j == rR
                     H[i, j] = -t * exp(1im * ϕ1)
-                elseif j == rU || j == rD
+                elseif j == rL
+                    H[i, j] = -t * exp(-1im * ϕ1)
+                elseif j == rU
                     H[i, j] = -t * exp(1im * ϕ2)
-                elseif j == rzU || j == rzD
+                elseif j == rD
+                    H[i, j] = -t * exp(-1im * ϕ2)
+                elseif j == rzU
                     H[i, j] = -t * exp(1im * ϕ3)
+                elseif j == rzD
+                    H[i, j] = -t * exp(-1im * ϕ3)
                 end
             end
         end
@@ -176,10 +182,14 @@ function lattice_with_flux(m::ModelParams; ϕ1::Real=0, ϕ2::Real=0, ϕ3::Real=0
             rL, rU, rR, rD = nni[i]
             for j in 1:nsites
                 rL, rU, rR, rD, = nearest_neighbours(i, m=m)
-                if j == rL || j == rR
+                if j == rR
                     H[i, j] = -t * exp(1im * ϕ1)
-                elseif j == rU || j == rD
+                elseif j == rL
+                    H[i, j] = -t * exp(-1im * ϕ1)
+                elseif j == rU
                     H[i, j] = -t * exp(1im * ϕ2)
+                elseif j == rD
+                    H[i, j] = -t * exp(-1im * ϕ2)
                 end
             end
         end
