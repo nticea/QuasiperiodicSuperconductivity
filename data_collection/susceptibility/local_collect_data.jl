@@ -14,16 +14,16 @@ include("utilities.jl")
 L = 7
 t = 1 # hopping 
 Q = (√5 - 1) / 2
-μ = 0.5
+μ = 1e-8
 θ = π / 7
-periodic = false # periodic 
+periodic = true # periodic 
 disorder = false
 ndims = 3
 nrep = 10
-Js = [0, 0.2]
+Js = [0, 0.2, 4]
 Ts = expspace(-3, 1, 30) # temperature 
 
-Λ = 0.3
+Λ = 0.5
 if disorder
     dirname = "data_random"
 else

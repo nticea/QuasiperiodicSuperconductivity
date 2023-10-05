@@ -548,6 +548,9 @@ end
 
 function momentum_components(m::ModelParams; r::Int)
     L, ndims = m.L, m.ndims
+
+    # I've noticed that adding the ϕ shift does nothing for J=0
+    # but it does affect J ≂̸ 0
     if m.periodic
         ϕx, ϕy, ϕz = copy(m.ϕx), copy(m.ϕy), copy(m.ϕz)
         ϕx = round(Int, ϕx * L / (2π)) * 2π / L

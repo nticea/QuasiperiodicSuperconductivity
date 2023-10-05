@@ -70,6 +70,38 @@ function uniform_susceptibility(m;
     E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
     rvec = collect(1:N)
 
+    # x̂_shift = zeros(length(rvec)) * 1im
+    # ŷ_shift = zeros(length(rvec)) * 1im
+    # ẑ_shift = zeros(length(rvec)) * 1im
+    # if m.ndims == 2
+    #     ϕ̃x = round(Int, m.ϕx * L / (2π)) * 2π / L
+    #     ϕ̃y = round(Int, m.ϕy * L / (2π)) * 2π / L
+    # elseif m.ndims == 3
+    #     ϕ̃x = round(Int, m.ϕx * L / (2π)) * 2π / L
+    #     ϕ̃y = round(Int, m.ϕy * L / (2π)) * 2π / L
+    #     ϕ̃z = round(Int, m.ϕz * L / (2π)) * 2π / L
+    # end
+    # for (rᵢ, r) in enumerate(rvec)
+    #     if m.ndims == 2
+    #         x, y = site_to_coordinate(r, m=m)
+    #         x̂_shift[rᵢ] = exp(1im * 2π / L * (2 * x * ϕ̃x))
+    #         ŷ_shift[rᵢ] = exp(1im * 2π / L * (2 * y * ϕ̃y))
+    #     elseif m.ndims == 3
+    #         x, y, z = site_to_coordinate(r, m=m)
+    #         x̂_shift[rᵢ] = exp(1im * 2π / L * (2 * x * ϕ̃x))
+    #         ŷ_shift[rᵢ] = exp(1im * 2π / L * (2 * y * ϕ̃y))
+    #         ẑ_shift[rᵢ] = exp(1im * 2π / L * (2 * z * ϕ̃z))
+    #     end
+    # end
+    # if m.ndims == 2
+    #     x̂_shift = reshape(x̂_shift, L, L)
+    #     ŷ_shift = reshape(ŷ_shift, L, L)
+    # elseif m.ndims == 3
+    #     x̂_shift = reshape(x̂_shift, L, L, L)
+    #     ŷ_shift = reshape(ŷ_shift, L, L, L)
+    #     ẑ_shift = reshape(ẑ_shift, L, L, L)
+    # end
+
     # We need to transform each of the eigenvectors into 2D space! 
     function fourier_transform_U(u; minus=false)
         # first, map back to 2D space 
@@ -86,6 +118,15 @@ function uniform_susceptibility(m;
         if !minus # this is the expression for U_{q}
             uq = fft(u)
         else # this is the expression for U_{-q}
+            # uconj = conj.(u)
+            # # FFT in x̂ direction with shift 
+            # ux = fft(uconj .* x̂_shift, 1)
+            # # now in ŷ direction 
+            # uy = fft(ux .* ŷ_shift, 2)
+            # # now in ẑ direction 
+            # uz = fft(uy .* ẑ_shift, 3)
+            # uq = conj.(uz)
+
             uq = conj.(fft(conj.(u)))
         end
 
@@ -98,8 +139,36 @@ function uniform_susceptibility(m;
     # perform a Fourier transform along the real space dim
     Uq = fourier_transform_U.(eachcol(U))
     Uq = hcat(Uq...)
+
+    # println("Doing something crazy!!")
+    # Uminusq = fourier_transform_U.(eachcol(U) .* shifts, minus=true)
+    # Uminusq = hcat(Uminusq...)
+
     Uminusq = fourier_transform_U.(eachcol(U), minus=true)
     Uminusq = hcat(Uminusq...)
+
+    println("doing something cray!")
+    # permute Uminusq by the right amount along every dimension
+    if m.ndims == 2
+        x_shift = round(Int, -2 * m.ϕx * L / (2π))
+        y_shift = round(Int, -2 * m.ϕy * L / (2π))
+    elseif m.ndims == 3
+        x_shift = round(Int, -2 * m.ϕx * L / (2π))
+        y_shift = round(Int, -2 * m.ϕy * L / (2π))
+        z_shift = round(Int, -2 * m.ϕz * L / (2π))
+    end
+    Uminusq_shifted = zeros(size(U)) * 1im
+    for (k, umq) in enumerate(eachcol(Uminusq))
+        umq = reshape(umq, L, L, L)
+        umq = circshift(umq, (x_shift, y_shift, z_shift))
+        umq = reshape(umq, L * L * L)
+        Uminusq_shifted[:, k] = umq
+    end
+
+    Uminusq = Uminusq_shifted
+
+    # Uminusq = hcat(Uminusq...)
+
 
     if !isnothing(Λ)
         @warn "Keeping only states close to εf"
@@ -170,6 +239,20 @@ function uniform_susceptibility(m;
 
     @show χ0
     return χ0
+
+    # multiply with the prefactor 
+    # δ = 1
+    # δp = 1
+    # Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
+    # Uminusq_δ = Uminusq .* pfsneg[δp, :]
+    # # create the terms 
+    # Tq = transpose(Uminusq_conj_δ) * Uq_conj
+    # Tl1 = transpose(Uminusq_δ) * Uq
+    # Tl2 = transpose(Uq) * Uminusq_δ
+    # # sum them together 
+    # Tl = Tl1 + Tl2
+    # @einsimd χ[n, m] := Tq[n, m] * Tl[n, m]
+    # return χ
 end
 
 function susceptibility_dwave_prefactors(r::Int; m::ModelParams)

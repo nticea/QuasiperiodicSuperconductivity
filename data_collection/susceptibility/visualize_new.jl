@@ -24,7 +24,7 @@ T_cutoff = 0#1e-1
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "data_OBC"
+dirname = "data_PBC"
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
@@ -49,7 +49,7 @@ dfmean = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :d
 
 Js = sort(unique(dfmean.J))
 # cmap = cgrad(:matter, length(Js), categorical=true)
-cmap = ["red", "blue"]
+cmap = ["red", "blue", "green"]
 pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave"), plot(title="χ dwave"), plot(title="dχdlogT swave"), plot(title="dχdlogT dwave")
 for (Jᵢ, J) in enumerate(Js)
     dfJ = dfmean[(dfmean.J.==J), :]

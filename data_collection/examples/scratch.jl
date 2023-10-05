@@ -8,21 +8,21 @@ include("../../src/BdG.jl")
 t = 1
 L = 7
 Q = (√5 - 1) / 2
-μ = 1
+μ = 1e-8
 θ = π / 7
 V0 = 0
 V1 = 0
-ϕx = 0#rand() * 2π
-ϕy = 0#rand() * 2π
-ϕz = 0#rand() * 2π
-periodic = false
+ϕx = 0.123#rand() * 2π
+ϕy = 0.456#rand() * 2π
+ϕz = 0.789#rand() * 2π
+periodic = true
 disorder = false
 ndims = 3
 
 Λ = nothing
 
-Ts = expspace(-3, 1, 20)
-Js = [0, 0.2, 4]
+Ts = expspace(-2, 1, 30)
+Js = [0]
 χs_swave, dχs_swave = zeros(length(Ts), length(Js)), zeros(length(Ts), length(Js))
 χs_dwave, dχs_dwave = zeros(length(Ts), length(Js)), zeros(length(Ts), length(Js))
 
@@ -40,11 +40,21 @@ for (Jᵢ, J) in enumerate(Js)
     end
 end
 
-p = plot(xlabel="T", ylabel="dχ/dlogT")
-cmap = cgrad(:matter, length(Js), categorical=true)
+ps = plot(xlabel="T", ylabel="dχ/dlogT")
+#cmap = cgrad(:matter, length(Js), categorical=true)
+cmap = ["red", "blue"]
 for (Jᵢ, J) in enumerate(Js)
-    plot!(p, Ts, dχs_dwave[:, Jᵢ], xaxis=:log10, label=nothing, c=cmap[Jᵢ])
-    scatter!(p, Ts, dχs_dwave[:, Jᵢ], xaxis=:log10, label="J=$J", c=cmap[Jᵢ])
+    plot!(ps, Ts, dχs_swave[:, Jᵢ], xaxis=:log10, label=nothing, c=cmap[Jᵢ])
+    scatter!(ps, Ts, dχs_swave[:, Jᵢ], xaxis=:log10, label="J=$J", c=cmap[Jᵢ])
+end
+
+
+pd = plot(xlabel="T", ylabel="dχ/dlogT")
+#cmap = cgrad(:matter, length(Js), categorical=true)
+cmap = ["red", "blue"]
+for (Jᵢ, J) in enumerate(Js)
+    plot!(pd, Ts, dχs_dwave[:, Jᵢ], xaxis=:log10, label=nothing, c=cmap[Jᵢ])
+    scatter!(pd, Ts, dχs_dwave[:, Jᵢ], xaxis=:log10, label="J=$J", c=cmap[Jᵢ])
 end
 
 
