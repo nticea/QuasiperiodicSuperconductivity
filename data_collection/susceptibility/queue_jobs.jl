@@ -26,22 +26,22 @@ Ts = expspace(-3, 1, 30) # temperature
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "susceptibility"
 
-nrep = 1
+nrep = 10
 
 for _ in 1:nrep
     # make random potential offsets 
-    # ϕx = 2π * rand()
-    # ϕy = 2π * rand()
-    # ϕz = 2π * rand()
+    ϕx = 2π * rand()
+    ϕy = 2π * rand()
+    ϕz = 2π * rand()
 
     for T in Ts
-        ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=0, periodic=1, ndims=ndims, disorder=0)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="10:00")
+        ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=0, periodic=1, ndims=ndims, disorder=0)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="60:00")
     end
 
     for T in Ts
-        ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=0.2, periodic=1, ndims=ndims, disorder=0)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=80, kwargs="$T", time="10:00")
+        ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=0.2, periodic=1, ndims=ndims, disorder=0)
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="60:00")
     end
 end
 
