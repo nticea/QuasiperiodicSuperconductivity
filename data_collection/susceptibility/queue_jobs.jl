@@ -26,13 +26,13 @@ Ts = expspace(-3, 1, 30) # temperature
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "susceptibility"
 
-nrep = 10
+nrep = 1
 
 for _ in 1:nrep
     # make random potential offsets 
-    ϕx = 2π * rand()
-    ϕy = 2π * rand()
-    ϕz = 2π * rand()
+    # ϕx = 2π * rand()
+    # ϕy = 2π * rand()
+    # ϕz = 2π * rand()
 
     for T in Ts
         ps = ModelParams(L=17, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=0, periodic=1, ndims=ndims, disorder=0)

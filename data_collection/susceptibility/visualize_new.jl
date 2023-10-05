@@ -31,10 +31,6 @@ df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.=
 # make a new dataframe to hold the averaged quantities 
 gdf = groupby(df, [:J, :T])
 dfsummary = DataFrame(J=[], T=[], χswave=[], χdwave=[], dχswave=[], dχdwave=[])
-function mean_χ(χs)
-    χs = hcat(χs...)
-    return mean(χs, dims=2)
-end
 for g in gdf
     J, T = g.J[1], g.T[1]
     χs, dχs = g.χ, g.dχdlogT
@@ -52,11 +48,31 @@ dfmean = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :d
 
 
 Js = sort(unique(dfmean.J))
-cmap = cgrad(:matter, length(Js), categorical=true)
+# cmap = cgrad(:matter, length(Js), categorical=true)
+cmap = ["red", "blue"]
 pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave"), plot(title="χ dwave"), plot(title="dχdlogT swave"), plot(title="dχdlogT dwave")
-for J in Js
+for (Jᵢ, J) in enumerate(Js)
     dfJ = dfmean[(dfmean.J.==J), :]
-    Ts, χswave, χdwave, dχswave, dχdwave = dfmean.T, dfmean.χswave_mean, dfmean.χdwave_mean, dfmean.dχswave_mean, dfmean.dχdwave_mean
+    Ts, χswave, χdwave, dχswave, dχdwave = dfJ.T, dfJ.χswave_mean, dfJ.χdwave_mean, dfJ.dχswave_mean, dfJ.dχdwave_mean
+    sortidx = sortperm(Ts)
+    Ts = Ts[sortidx]
+    χswave = χswave[sortidx]
+    χdwave = χdwave[sortidx]
+    dχswave = dχswave[sortidx]
+    dχdwave = dχdwave[sortidx]
+
+    plot!(pχswave, Ts, χswave, xaxis=:log10, xlabel="T", ylabel="χ", label=nothing, c=cmap[Jᵢ])
+    scatter!(pχswave, Ts, χswave, xaxis=:log10, xlabel="T", ylabel="χ", label="J=$J", c=cmap[Jᵢ])
+
+    plot!(pχdwave, Ts, χdwave, xaxis=:log10, xlabel="T", ylabel="χ", label=nothing, c=cmap[Jᵢ])
+    scatter!(pχdwave, Ts, χdwave, xaxis=:log10, xlabel="T", ylabel="χ", label="J=$J", c=cmap[Jᵢ])
+
+    plot!(pdχswave, Ts, dχswave, xaxis=:log10, xlabel="T", ylabel="dχ", label=nothing, c=cmap[Jᵢ])
+    scatter!(pdχswave, Ts, dχswave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
+
+    plot!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label=nothing, c=cmap[Jᵢ])
+    scatter!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
+
 end
 
 
