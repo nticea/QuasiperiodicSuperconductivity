@@ -13,18 +13,24 @@ Q = (√5 - 1) / 2
 θ = π / 7
 V0 = 0
 V1 = 0
-ϕy = 0.123
-ϕz = 0.456
-ϕx = 0.789
+ϕy = 2π * rand()
+ϕz = 2π * rand()
+ϕx = 2π * rand()
 periodic = true
 disorder = false
 ndims = 3
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-χ = @time uniform_susceptibility(m, T=0, calculate_dχdlogT=true, Λ=Λ)
-
-# m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
 E, U = diagonalize_hamiltonian(m)
+
+m̃ = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=-ϕx, ϕy=-ϕy, ϕz=-ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+Ẽ, Ũ = diagonalize_hamiltonian(m̃)
+
+@assert Ẽ == E
+@assert conj.(Ũ) == U
+
+println("tests passed!")
+
 # N = numsites(m)
 
 # # We need to transform each of the eigenvectors into 2D space! 

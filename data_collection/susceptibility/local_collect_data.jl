@@ -20,10 +20,10 @@ periodic = true # periodic
 disorder = false
 ndims = 3
 nrep = 10
-Js = [0, 0.2, 4]
-Ts = expspace(-3, 1, 30) # temperature 
+Js = [0]
+Ts = expspace(-2, 1, 20) # temperature 
 
-Λ = 0.5
+Λ = nothing
 if disorder
     dirname = "data_random"
 else
@@ -56,7 +56,7 @@ for _ in 1:nrep
             savepath = joinpath(datapath, "$(L)L_$(J)J" * timestamp * ".csv")
             df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
                 ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims],
-                T=[T], χ=[χ], dχdlogT=[dχdlogT], Λ=[Λ])
+                T=[T], χ=[χ], dχdlogT=[dχdlogT], Λ=[6])
             CSV.write(savepath, df)
         end
     end

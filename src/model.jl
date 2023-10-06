@@ -92,6 +92,7 @@ function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shi
     if m.disorder
         pot = disorder_potential.(rs, m=m, shift_origin=shift_origin)
     else
+        println("No more potential offsets! Twisted BCs only")
         pot = aubry_andre.(rs, m=m, shift_origin=shift_origin)
     end
     pot .+= μ # add chemical potential 
@@ -395,6 +396,10 @@ end
 function aubry_andre(xy; m::ModelParams, shift_origin::Bool=true, normalize_SD_to_1::Bool=true)
     J, Q, L, θ, ϕx, ϕy, ϕz, ndims = m.J, m.Q, m.L, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ndims
 
+    ϕx = 0
+    ϕy = 0
+    ϕz = 0
+
     if shift_origin
         xy = [a + floor(Int, L / 2) for a in xy]
     end
@@ -547,16 +552,9 @@ function plot_eigenstates(m::ModelParams; slice::Int=1)
 end
 
 function momentum_components(m::ModelParams; r::Int)
+    ϕx, ϕy, ϕz = m.ϕx, m.ϕy, m.ϕz
     L, ndims = m.L, m.ndims
-
-    # I've noticed that adding the ϕ shift does nothing for J=0
-    # but it does affect J ≂̸ 0
     if m.periodic
-        ϕx, ϕy, ϕz = copy(m.ϕx), copy(m.ϕy), copy(m.ϕz)
-        ϕx = round(Int, ϕx * L / (2π)) * 2π / L
-        ϕy = round(Int, ϕy * L / (2π)) * 2π / L
-        ϕz = round(Int, ϕz * L / (2π)) * 2π / L
-        # implement a shift by ϕ if we are working with PBC  
         if ndims == 2
             x, y = site_to_coordinate(r, m=m)
             return (2 * π * x / L + ϕx, 2 * π * y / L + ϕy)

@@ -135,9 +135,6 @@ function density(; T::Real, Bmax::Real, num_LL::Int, numpts::Int, dos_fcn, Δμ_
     n = res.mean
     n = reshape(res.mean, length(Bs), length(μs))
     return n
-    #n_fcn = make_interpolated_function(Bs, μs, n)
-
-    #return n_fcn
 end
 
 function dos_nB(kind::String; T::Real, Bmax::Real, num_LL::Int, numpts::Int, Δμ_offset::Real=0)
