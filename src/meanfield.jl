@@ -168,22 +168,13 @@ function uniform_susceptibility(m;
     normf = numsites(m)
     for (δ, δp) in δδp
         # multiply with the prefactor 
-        # Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
-        # Uminusq_δ = Uminusq .* pfsneg[δp, :]
         Un_minus_q_conj_δ = Un_minus_conj .* pfs[δ, :]
         Un_minus_l_δ = Un_minus .* pfsneg[δp, :]
         Un_l_δ = Un .* pfsneg[δp, :]
         # multiply things by ϕ prefactors 
-        # Un_minus_q_conj_δ = Un_minus_q_conj_δ .* ϕpfs[δ]
-        # Un_minus_l_δ = Un_minus_l_δ .* ϕpfs[δp]
-        # Un_l_δ = Un_l_δ .* ϕpfsneg[δp]
-        # create the terms 
         Tq = transpose(Un_minus_q_conj_δ) * Um_conj .* ϕpfs[δ]
-        Tl1 = transpose(Un_minus_l_δ) * Um .* ϕpfs[δp]
-        Tl2 = transpose(Un_l_δ) * Um_minus .* ϕpfsneg[δp]
-        # Tq = transpose(Uminusq_conj_δ) * Uq_conj
-        # Tl1 = transpose(Uminusq_δ) * Uq
-        # Tl2 = transpose(Uq) * Uminusq_δ
+        Tl1 = transpose(Un_minus_l_δ) * Um .* ϕpfsneg[δp]
+        Tl2 = transpose(Un_l_δ) * Um_minus .* ϕpfs[δp]
         # sum them together 
         Tl = Tl1 + Tl2
         @einsimd χ := 1 / (2 * normf) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
