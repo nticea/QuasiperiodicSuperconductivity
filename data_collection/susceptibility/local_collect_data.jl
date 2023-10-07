@@ -19,7 +19,7 @@ Q = (√5 - 1) / 2
 periodic = true # periodic 
 disorder = false
 ndims = 3
-nrep = 10
+nrep = 40
 Js = [0]
 Ts = expspace(-2, 1, 20) # temperature 
 

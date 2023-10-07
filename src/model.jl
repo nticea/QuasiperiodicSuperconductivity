@@ -554,26 +554,14 @@ end
 function momentum_components(m::ModelParams; r::Int)
     ϕx, ϕy, ϕz = m.ϕx, m.ϕy, m.ϕz
     L, ndims = m.L, m.ndims
-    if m.periodic
-        if ndims == 2
-            x, y = site_to_coordinate(r, m=m)
-            return (2 * π * x / L + ϕx, 2 * π * y / L + ϕy)
-        elseif ndims == 3
-            x, y, z = site_to_coordinate(r, m=m)
-            return (2 * π * x / L + ϕx, 2 * π * y / L + ϕy, 2 * π * z / L + ϕz)
-        else
-            println("$dims dimensions not implemented")
-        end
+    if ndims == 2
+        x, y = site_to_coordinate(r, m=m)
+        return (2 * π * x / L, 2 * π * y / L)
+    elseif ndims == 3
+        x, y, z = site_to_coordinate(r, m=m)
+        return (2 * π * x / L, 2 * π * y / L, 2 * π * z / L)
     else
-        if ndims == 2
-            x, y = site_to_coordinate(r, m=m)
-            return (2 * π * x / L, 2 * π * y / L)
-        elseif ndims == 3
-            x, y, z = site_to_coordinate(r, m=m)
-            return (2 * π * x / L, 2 * π * y / L, 2 * π * z / L)
-        else
-            println("$dims dimensions not implemented")
-        end
+        println("$dims dimensions not implemented")
     end
 end
 

@@ -160,6 +160,8 @@ function uniform_susceptibility(m;
     pfs = susceptibility_dwave_prefactors.(rvec, m=m)
     pfs = hcat(pfs...) # dimensions [δ] x [q]
     pfsneg = conj.(pfs)
+    ϕpfs = twisted_BC_prefactors(m)
+    ϕpfsneg = conj.(ϕpfs)
 
     χ0 = zeros(nblocks, nblocks)
     dχdlogT = zeros(nblocks, nblocks)
@@ -171,10 +173,14 @@ function uniform_susceptibility(m;
         Un_minus_q_conj_δ = Un_minus_conj .* pfs[δ, :]
         Un_minus_l_δ = Un_minus .* pfsneg[δp, :]
         Un_l_δ = Un .* pfsneg[δp, :]
+        # multiply things by ϕ prefactors 
+        # Un_minus_q_conj_δ = Un_minus_q_conj_δ .* ϕpfs[δ]
+        # Un_minus_l_δ = Un_minus_l_δ .* ϕpfs[δp]
+        # Un_l_δ = Un_l_δ .* ϕpfsneg[δp]
         # create the terms 
-        Tq = transpose(Un_minus_q_conj_δ) * Um_conj
-        Tl1 = transpose(Un_minus_l_δ) * Um
-        Tl2 = transpose(Un_l_δ) * Um_minus
+        Tq = transpose(Un_minus_q_conj_δ) * Um_conj .* ϕpfs[δ]
+        Tl1 = transpose(Un_minus_l_δ) * Um .* ϕpfs[δp]
+        Tl2 = transpose(Un_l_δ) * Um_minus .* ϕpfsneg[δp]
         # Tq = transpose(Uminusq_conj_δ) * Uq_conj
         # Tl1 = transpose(Uminusq_δ) * Uq
         # Tl2 = transpose(Uq) * Uminusq_δ
@@ -195,21 +201,23 @@ function uniform_susceptibility(m;
     end
 
     # multiply with the prefactor 
-    δ = 1
-    δp = 1
-    Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
-    Uminusq_δ = Uminusq .* pfsneg[δp, :]
-    # create the terms 
-    Tq = transpose(Uminusq_conj_δ) * Uq_conj
-    Tl1 = transpose(Uminusq_δ) * Uq
-    Tl2 = transpose(Uq) * Uminusq_δ
-    # sum them together 
-    Tl = Tl1 + Tl2
-    @einsimd χ[n, m] := Tq[n, m] * Tl[n, m]
-    return χ
+    # δ = 1
+    # δp = 1
+    # Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
+    # Uminusq_δp_minusϕ = Uminusq .* pfsneg[δp, :]
+    # Uminusq_δp_plusϕ = Uminusq .* pfs[δp, :]
 
-    # @show χ0
-    # return χ0
+    # # create the terms 
+    # Tq = transpose(Uminusq_conj_δ) * Uq_conj
+    # Tl1 = transpose(Uminusq_δp_plusϕ) * Uq
+    # Tl2 = transpose(Uq) * Uminusq_δp_minusϕ
+    # # sum them together 
+    # Tl = Tl1 + Tl2
+    # @einsimd χ[n, m] := Tq[n, m] * Tl[n, m]
+    # return χ
+
+    @show χ0
+    return χ0
 end
 
 function susceptibility_dwave_prefactors(r::Int; m::ModelParams)
@@ -217,6 +225,11 @@ function susceptibility_dwave_prefactors(r::Int; m::ModelParams)
     pfs = [exp(1im * q) for q in qs]
     pushfirst!(pfs, 1)
     return pfs
+end
+
+function twisted_BC_prefactors(m::ModelParams)
+    # there are 3+1 components to this vector 
+    return exp.([0, 1im * m.ϕx, 1im * m.ϕy, 1im * m.ϕz])
 end
 
 function decomposition_M(M)
