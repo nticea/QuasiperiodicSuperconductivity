@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 7 # the full system is L × L 
+L = 17 # the full system is L × L 
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -45,7 +45,6 @@ for g in gdf
 end
 gdf = groupby(dfsummary, [:J, :T])
 dfmean = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :dχdwave => mean])
-
 
 Js = sort(unique(dfmean.J))
 # cmap = cgrad(:matter, length(Js), categorical=true)
