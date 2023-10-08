@@ -20,8 +20,8 @@ periodic = true # periodic
 disorder = false
 ndims = 3
 nrep = 40
-Js = [0]
-Ts = expspace(-2, 1, 20) # temperature 
+Js = [1, 4]
+Ts = expspace(-3, 1, 30) # temperature 
 
 Λ = nothing
 if disorder

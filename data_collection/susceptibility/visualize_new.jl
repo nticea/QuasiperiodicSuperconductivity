@@ -49,7 +49,7 @@ dfmean = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :d
 
 Js = sort(unique(dfmean.J))
 # cmap = cgrad(:matter, length(Js), categorical=true)
-cmap = ["red", "blue", "green"]
+cmap = ["red", "blue", "green", "orange"]
 pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave"), plot(title="χ dwave"), plot(title="dχdlogT swave"), plot(title="dχdlogT dwave")
 for (Jᵢ, J) in enumerate(Js)
     dfJ = dfmean[(dfmean.J.==J), :]
@@ -74,7 +74,3 @@ for (Jᵢ, J) in enumerate(Js)
     scatter!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
 
 end
-
-
-
-
