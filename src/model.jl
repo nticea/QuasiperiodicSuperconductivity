@@ -92,7 +92,7 @@ function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shi
     if m.disorder
         pot = disorder_potential.(rs, m=m, shift_origin=shift_origin)
     else
-        println("No more potential offsets! Twisted BCs only")
+        # println("No more potential offsets! Twisted BCs only")
         pot = aubry_andre.(rs, m=m, shift_origin=shift_origin)
     end
     pot .+= μ # add chemical potential 
@@ -396,9 +396,9 @@ end
 function aubry_andre(xy; m::ModelParams, shift_origin::Bool=true, normalize_SD_to_1::Bool=true)
     J, Q, L, θ, ϕx, ϕy, ϕz, ndims = m.J, m.Q, m.L, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ndims
 
-    ϕx = 0
-    ϕy = 0
-    ϕz = 0
+    # ϕx = 0
+    # ϕy = 0
+    # ϕz = 0
 
     if shift_origin
         xy = [a + floor(Int, L / 2) for a in xy]
