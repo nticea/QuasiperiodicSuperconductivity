@@ -12,8 +12,8 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 17 # the full system is L × L 
-ndims = 3
+L = 35 # the full system is L × L 
+ndims = 2
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
@@ -24,7 +24,7 @@ T_cutoff = 0#1e-1
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "data_PBC"
+dirname = "2D_data_random_PBC"
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
@@ -35,8 +35,15 @@ for g in gdf
     J, T = g.J[1], g.T[1]
     χs, dχs = g.χ, g.dχdlogT
     for (χ, dχ) in zip(χs, dχs)
-        χ = reshape(χ, (4, 4))
-        dχ = reshape(dχ, (4, 4))
+        if ndims == 2
+            χ = reshape(χ, (3, 3))
+            dχ = reshape(dχ, (3, 3))
+        elseif ndims == 3
+            χ = reshape(χ, (4, 4))
+            dχ = reshape(dχ, (4, 4))
+        else
+            println("sucks to suck")
+        end
         χsw, χdw = uniform_susceptibility_components(χ, ndims=ndims)
         dχsw, dχdw = uniform_susceptibility_components(dχ, ndims=ndims)
         dfi = DataFrame(J=[J], T=[T], χswave=[χsw], χdwave=[χdw], dχswave=[dχsw], dχdwave=[dχdw])
