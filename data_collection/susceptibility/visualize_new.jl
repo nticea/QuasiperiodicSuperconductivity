@@ -24,7 +24,7 @@ T_cutoff = 0#1e-1
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "data_random_PBC"
+dirname = "data_PBC"
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 

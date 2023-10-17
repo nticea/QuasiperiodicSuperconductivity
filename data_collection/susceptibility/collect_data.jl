@@ -24,10 +24,10 @@ m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V
 
 Λ = 0.3
 if disorder
-    dirname = "data_random"
+    dirname = "$(ndims)D_data_random"
     println("We are adding disorder!")
 else
-    dirname = "data"
+    dirname = "$(ndims)D_data"
 end
 if periodic
     dirname = dirname * "_PBC"
