@@ -37,7 +37,7 @@ for _ in 1:nrep
     # QUASIPERIOIDIC!
     for J in Js
         for T in Ts
-            ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
+            ps = ModelParams(L=35, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
             submit_job(ps, filepath, @__DIR__, job_prefix, mem=64, kwargs="$T", time="15:00")
         end
     end
@@ -45,7 +45,7 @@ for _ in 1:nrep
     # DISORDER! 
     for J in Js
         for T in Ts
-            ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
+            ps = ModelParams(L=35, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
             submit_job(ps, filepath, @__DIR__, job_prefix, mem=64, kwargs="$T", time="15:00")
         end
     end
