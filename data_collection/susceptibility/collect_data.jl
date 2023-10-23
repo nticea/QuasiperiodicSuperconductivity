@@ -53,7 +53,7 @@ if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims
 
     ## CALCULATION ## 
     println("Finding χ")
-    χ, dχdlogT = @time uniform_susceptibility(m, T=T, checkpointpath=scratchpath, calculate_dχdlogT=true)
+    χ, dχdlogT = @time uniform_susceptibility(m, T=T, checkpointpath=scratchpath, calculate_dχdlogT=true, Λ=Λ)
 
     ## SAVING ##  
     timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
