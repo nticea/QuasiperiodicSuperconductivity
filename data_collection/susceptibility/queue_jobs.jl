@@ -21,7 +21,7 @@ ndims = 2
 # L = 23, time = 1.5 hrs, mem = 100
 
 Js = [0, 0.2, 0.7, 1, 2, 4]#collect(0:0.1:3)
-Ts = expspace(-3, 1, 30) # temperature 
+Ts = expspace(-5, 1, 30) # temperature 
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "susceptibility"
@@ -38,7 +38,7 @@ for _ in 1:nrep
     for J in Js
         for T in Ts
             ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=256, kwargs="$T", time="4:00:00")
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, kwargs="$T", time="35:00")
         end
     end
 
@@ -46,7 +46,7 @@ for _ in 1:nrep
     for J in Js
         for T in Ts
             ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=256, kwargs="$T", time="4:00:00")
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, kwargs="$T", time="35:00")
         end
     end
 end
