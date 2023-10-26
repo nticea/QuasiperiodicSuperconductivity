@@ -21,7 +21,7 @@ ndims = 2
 # L = 23, time = 1.5 hrs, mem = 100
 
 Js = [0, 0.2, 0.7, 1, 2, 4]#collect(0:0.1:3)
-Ts = expspace(-5, 1, 30) # temperature 
+Ts = expspace(-3, 1, 30) # temperature 
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "susceptibility"
