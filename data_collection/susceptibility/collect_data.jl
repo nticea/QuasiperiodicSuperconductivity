@@ -20,6 +20,8 @@ ndims = Int(ndims)
 periodic = Bool(periodic)
 disorder = Bool(disorder)
 
+println("Rescaling μ by J")
+μ = μ / (1 + J)
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
 
 Λ = 0.3
