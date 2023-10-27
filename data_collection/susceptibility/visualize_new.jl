@@ -13,6 +13,7 @@ include("utilities.jl")
 ## PARAMETERS ## 
 
 L = 71 # the full system is L × L 
+μ = 0.75
 ndims = 2
 Q = (√5 - 1) / 2
 θ = π / 7
@@ -33,7 +34,7 @@ else
     title = "quasiperiodic potential"
 end
 df = load_dfs(dirname=dirname)
-df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
+df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.μ.==μ).&&(df.ndims.==ndims), :]
 
 # make a new dataframe to hold the averaged quantities 
 gdf = groupby(df, [:J, :T])

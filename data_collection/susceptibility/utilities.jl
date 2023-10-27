@@ -1,9 +1,9 @@
 using DataFrames, CSV
 include("../../src/results.jl")
 
-function already_computed(df; T, L, Q, θ, ϕx, ϕy, ϕz, J, ndims, Λ)
+function already_computed(df; T, L, Q, θ, μ, ϕx, ϕy, ϕz, J, ndims, Λ)
     # extract only the parameters we are interested in 
-    df = df[(df.L.==L).&(df.T.==T).&(df.θ.==θ).&(df.Q.==Q).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.ϕz.==ϕz).&(df.ndims.==ndims).&(df.J.==J).&(df.Λ.==Λ), :]
+    df = df[(df.L.==L).&(df.T.==T).&(df.θ.==θ).&(df.μ.==μ).&(df.Q.==Q).&(df.ϕx.==ϕx).&(df.ϕy.==ϕy).&(df.ϕz.==ϕz).&(df.ndims.==ndims).&(df.J.==J).&(df.Λ.==Λ), :]
     if size(df)[1] > 0
         println("Already computed!")
         return true
@@ -14,7 +14,7 @@ end
 function load_dfs(; dirname="data")
     # read files 
     files = readdir(joinpath(@__DIR__, dirname))
-    df = DataFrame(L=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
+    df = DataFrame(L=[], J=[], Q=[], θ=[], μ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
         T=[], Λ=[], χ=[], dχdlogT=[])
     for f in files
         if endswith(f, ".csv")

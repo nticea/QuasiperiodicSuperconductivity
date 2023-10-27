@@ -50,7 +50,7 @@ scratchpath = joinpath(scratchbase, stamp)
 # all the other things we have computed 
 dfs = load_dfs(dirname=dirname)
 
-if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims=ndims, J=J, Λ=Λ)
+if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims=ndims, J=J, Λ=Λ, μ=μ)
     @show L, J, T, ndims
 
     ## CALCULATION ## 
@@ -60,7 +60,7 @@ if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims
     ## SAVING ##  
     timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
     savepath = joinpath(datapath, "$(L)L_$(J)J" * timestamp * ".csv")
-    df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
+    df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ], μ=[μ],
         ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims],
         T=[T], χ=[χ], dχdlogT=[dχdlogT], Λ=[Λ])
     CSV.write(savepath, df)
