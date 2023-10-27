@@ -19,12 +19,19 @@ Q = (√5 - 1) / 2
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_cutoff = 0#1e-1
+disorder = false
 
 # read files 
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-dirname = "2D_data_PBC"
+if disorder
+    dirname = "2D_data_random_PBC"
+    title = "disordered potential"
+else
+    dirname = "2D_data_PBC"
+    title = "quasiperiodic potential"
+end
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
@@ -57,7 +64,7 @@ dfmean = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :d
 Js = sort(unique(dfmean.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
 #cmap = ["red", "blue", "green", "orange"]
-pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave", grid=false), plot(title="χ dwave", grid=false), plot(title="dχdlogT swave", grid=false), plot(title="dχdlogT dwave", grid=false)
+pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave for $title", grid=false), plot(title="χ dwave for $title", grid=false), plot(title="dχdlogT swave for $title", grid=false), plot(title="dχdlogT dwave for $title", grid=false)
 for (Jᵢ, J) in enumerate(Js)
     dfJ = dfmean[(dfmean.J.==J), :]
     Ts, χswave, χdwave, dχswave, dχdwave = dfJ.T, dfJ.χswave_mean, dfJ.χdwave_mean, dfJ.dχswave_mean, dfJ.dχdwave_mean
