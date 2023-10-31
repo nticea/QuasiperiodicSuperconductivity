@@ -83,7 +83,9 @@ end
 function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin::Bool=true, scale_μ::Bool=true)
     if scale_μ
         println("Rescaling μ by J")
-        μ = μ / (1 + J)
+        μ = m.μ / (1 + m.J)
+    else
+        μ = m.μ
     end
 
     if !m.periodic

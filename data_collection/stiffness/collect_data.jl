@@ -30,11 +30,18 @@ BdG_tol = 1e-15
 LGE_tol = 1e-2
 
 ## SAVING ## 
-mkpath(joinpath(@__DIR__, "data"))
-dfs = load_dfs()
+if disorder
+    dirname = "data_$(ndims)D_disorder"
+else
+    dirname = "data_$(ndims)D_QP"
+end
+
+datapath = joinpath(@__DIR__, dirname)
+mkpath(datapath)
+dfs = load_dfs(dirname)
 timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
-savepath_BdG = joinpath(@__DIR__, "data", "$(L)L_ΦQ_BdG_" * timestamp * ".csv")
-savepath_LGE = joinpath(@__DIR__, "data", "$(L)L_ΦQ_LGE_" * timestamp * ".csv")
+savepath_BdG = joinpath(datapath, "$(L)L_ΦQ_BdG_" * timestamp * ".csv")
+savepath_LGE = joinpath(datapath, "$(L)L_ΦQ_LGE_" * timestamp * ".csv")
 df_BdG = DataFrame(L=[], t=[], μ=[], J=[], Q=[], θ=[],
     ϕx=[], ϕy=[], ϕz=[], V0=[], V1=[], ndims=[], periodic=[],
     T=[], λ=[], Δ=[], K=[], Π=[])

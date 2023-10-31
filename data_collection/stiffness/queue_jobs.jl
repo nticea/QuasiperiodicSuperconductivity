@@ -15,7 +15,7 @@ V0 = 2#-1.2
 V1 = -1.5#0
 periodic = 1
 ndims = 3
-disorder = 0
+disorder = false
 
 Js = collect(0:0.25:3)
 filepath = joinpath(@__DIR__, "collect_data.jl")
