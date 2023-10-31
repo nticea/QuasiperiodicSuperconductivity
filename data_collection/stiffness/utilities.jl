@@ -15,16 +15,16 @@ function already_computed(m::ModelParams, df::DataFrame; T)
     return false
 end
 
-function load_dfs()
+function load_dfs(dirname)
     # read files 
-    files = readdir(joinpath(@__DIR__, "data"))
+    files = readdir(joinpath(@__DIR__, dirname))
     df = DataFrame(L=[], λ=[], Δ=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
         ϕz=[], ndims=[], V0=[], V1=[], t=[], μ=[], periodic=[], T=[],
         K=[], Π=[])
     for f in files
         if endswith(f, ".csv")
             try
-                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, dirname, f)))
                 dfi = convert_df_arrays(dfi, "K")
                 dfi = convert_df_arrays(dfi, "Π")
                 dfi = convert_df_arrays(dfi, "Δ")
@@ -38,16 +38,16 @@ function load_dfs()
     return df
 end
 
-function load_LGE()
+function load_LGE(dirname)
     # read files 
-    files = readdir(joinpath(@__DIR__, "data"))
+    files = readdir(joinpath(@__DIR__, dirname))
     df = DataFrame(L=[], λ=[], Δ=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
         ϕz=[], ndims=[], V0=[], V1=[], t=[], μ=[], periodic=[], T=[],
         K=[], Π=[])
     for f in files
         if endswith(f, ".csv") && contains(f, "LGE")
             try
-                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, dirname, f)))
                 dfi = convert_df_arrays(dfi, "K")
                 dfi = convert_df_arrays(dfi, "Π")
                 dfi = convert_df_arrays(dfi, "Δ")
@@ -62,16 +62,16 @@ function load_LGE()
     return df
 end
 
-function load_BdG()
+function load_BdG(dirname)
     # read files 
-    files = readdir(joinpath(@__DIR__, "data"))
+    files = readdir(joinpath(@__DIR__, dirname))
     df = DataFrame(L=[], λ=[], Δ=[], J=[], Q=[], θ=[], ϕx=[], ϕy=[],
         ϕz=[], ndims=[], V0=[], V1=[], t=[], μ=[], periodic=[], T=[],
         K=[], Π=[])
     for f in files
         if endswith(f, ".csv") && contains(f, "BdG")
             try
-                dfi = DataFrame(CSV.File(joinpath(@__DIR__, "data", f)))
+                dfi = DataFrame(CSV.File(joinpath(@__DIR__, dirname, f)))
                 dfi = convert_df_arrays(dfi, "K")
                 dfi = convert_df_arrays(dfi, "Π")
                 dfi = convert_df_arrays(dfi, "Δ")
