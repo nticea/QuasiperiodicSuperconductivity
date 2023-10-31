@@ -14,7 +14,7 @@ V1 = 0
 ϕy = 0
 ϕz = 0
 periodic = 1 # periodic 
-ndims = 2
+ndims = 3
 
 # L = 29, time = 6 hrs, mem = 350
 # L = 27, time = 4 hrs, mem = 256
@@ -34,19 +34,37 @@ for _ in 1:nrep
     ϕy = 2π * rand()
     ϕz = 2π * rand()
 
-    # QUASIPERIOIDIC!
+    ## 2D 
+    # # QUASIPERIOIDIC!
+    # for J in Js
+    #     for T in Ts
+    #         ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
+    #         submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, kwargs="$T", time="1:35:00")
+    #     end
+    # end
+
+    # # DISORDER! 
+    # for J in Js
+    #     for T in Ts
+    #         ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
+    #         submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, kwargs="$T", time="1:35:00")
+    #     end
+    # end
+
+    # 2D 
+    # Quasiperiodic 
     for J in Js
         for T in Ts
-            ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, kwargs="$T", time="1:35:00")
+            ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="1:35:00")
         end
     end
 
     # DISORDER! 
     for J in Js
         for T in Ts
-            ps = ModelParams(L=71, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, kwargs="$T", time="1:35:00")
+            ps = ModelParams(L=23, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="1:35:00")
         end
     end
 end
