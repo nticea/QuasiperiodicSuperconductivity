@@ -14,12 +14,13 @@ include("utilities.jl")
 
 ## MODEL PARAMETERS ##
 args = parse.(Float64, ARGS)
-@assert length(args) == 13
-L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims = [args[n] for n in 1:length(args)]
+@assert length(args) == 14
+L, t, Q, μ, θ, ϕx, ϕy, ϕz, V0, V1, J, periodic, ndims, disorder = [args[n] for n in 1:length(args)]
 L = Int(L)
 ndims = Int(ndims)
 periodic = Bool(periodic)
-m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
+disorder = Bool(disorder)
+m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
 
 @show V0, V1, J
 

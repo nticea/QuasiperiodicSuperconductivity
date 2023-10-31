@@ -80,7 +80,12 @@ function numsites(m::Union{ModelParams,DiagonalizedHamiltonian})
     end
 end
 
-function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin=true)
+function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin::Bool=true, scale_μ::Bool=true)
+    if scale_μ
+        println("Rescaling μ by J")
+        μ = μ / (1 + J)
+    end
+
     if !m.periodic
         Ht = square_lattice_kinetic(m)
     else
