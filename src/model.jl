@@ -467,8 +467,13 @@ function fermi(ε::Real, T::Real)
     1 / (exp(ε / T) + 1)
 end
 
-function plot_potential(m::ModelParams; slice::Int=1)
+function plot_potential(m::ModelParams; slice::Int=1, scale_μ=true)
     L, J, θ, ϕx, ϕy, μ = m.L, m.J, m.θ, m.ϕx, m.ϕy, m.μ
+
+    if scale_μ
+        println("Rescaling μ by J")
+        μ = m / (1 + J)
+    end
 
     _, rs = coordinate_map(m)
     potmat = aubry_andre.(rs, m=m)
