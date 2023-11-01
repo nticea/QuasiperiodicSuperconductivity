@@ -27,6 +27,8 @@ function pairfield_correlation(m::ModelParams; T::Real,
 
     M = dwave(m, T, E=E, U=U)
     λ, Δ = calculate_λ_Δ(M)
+    @assert abs(imag(λ)) < 1e-6
+    λ = real(λ)
 
     # We've only explicitly calculated half the bonds  
     if ndims == 2
@@ -298,11 +300,11 @@ function dwave(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
 
     # Initialize the M matrix 
     if ndims == 2
-        M = Matrix{Matrix{Float64}}(undef, 3, 3)
-        dM = Matrix{Matrix{Float64}}(undef, 3, 3)
+        M = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+        dM = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
     elseif ndims == 3
-        M = Matrix{Matrix{Float64}}(undef, 4, 4)
-        dM = Matrix{Matrix{Float64}}(undef, 4, 4)
+        M = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
+        dM = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
     else
         println("$ndims dimensions not supported")
     end
@@ -398,7 +400,7 @@ end
 function mortar(M::Matrix)
     (n, _) = size(M)
     (N, _) = size(M[1, 1])
-    new_M = zeros(n * N, n * N)
+    new_M = zeros(n * N, n * N) .* 1im
     for b in 1:n
         for d in 1:n
             b_idx_start = (b - 1) * N + 1
@@ -591,11 +593,11 @@ function dwave_χ(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
 
     # Initialize the M matrix 
     if ndims == 2
-        M = Matrix{Matrix{Float64}}(undef, 2, 2)
-        dM = Matrix{Matrix{Float64}}(undef, 2, 2)
+        M = Matrix{Matrix{ComplexF64}}(undef, 2, 2)
+        dM = Matrix{Matrix{ComplexF64}}(undef, 2, 2)
     elseif ndims == 3
-        M = Matrix{Matrix{Float64}}(undef, 3, 3)
-        dM = Matrix{Matrix{Float64}}(undef, 3, 3)
+        M = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+        dM = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
     else
         println("$ndims dimensions not supported")
     end
