@@ -424,7 +424,7 @@ end
 function to_7N_LGE_Δ(maxev; L)
     N = L * L * L
     @assert length(maxev) == 4 * N
-    evs = zeros(4, L, L, L)
+    evs = zeros(4, L, L, L) .* 1im
     for (n, i) in enumerate(1:N:4*N)
         evi = maxev[i:(i+N-1)]
         evs[n, :, :, :] = reshape(evi, L, L, L)
@@ -438,7 +438,7 @@ function to_7N_LGE_Δ(maxev; L)
     Δyminus = circshift(Δy, (0, 1, 0)) # mapping between +ŷ and -ŷ
     Δzminus = circshift(Δz, (0, 0, 1)) # mapping between +ẑ and -ẑ
 
-    new_evs = zeros(7, L, L, L)
+    new_evs = zeros(7, L, L, L) .* 1im
     new_evs[1, :, :, :] = evs[1, :, :, :] # on-site term 
     new_evs[2, :, :, :] = Δx
     new_evs[3, :, :, :] = Δy
@@ -447,7 +447,7 @@ function to_7N_LGE_Δ(maxev; L)
     new_evs[6, :, :, :] = Δz
     new_evs[7, :, :, :] = Δzminus
 
-    evs_flat = zeros(7 * N)
+    evs_flat = zeros(7 * N) .* 1im
     for (n, i) in enumerate(1:N:7N)
         evi = new_evs[n, :, :, :]
         evs_flat[i:(i+N-1)] = reshape(evi, N)
