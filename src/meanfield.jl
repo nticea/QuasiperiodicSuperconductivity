@@ -424,7 +424,7 @@ function calculate_λ_Δ(M)
         λ = decomp.R[1]
 
         @show λ
-        return λ, maxev
+        return real(λ), maxev
     catch e
         @show e
         println("Trying a different decomposition")
@@ -437,7 +437,7 @@ function calculate_λ_Δ(M)
         maxev = V[:, end]
 
         @show λ
-        return λ, maxev
+        return real(λ), maxev
     end
 end
 
@@ -484,7 +484,7 @@ function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10)
             # if not, keep iterating 
             push!(λs, λ)
 
-            if λ < 1
+            if real(λ) < 1
                 break
             end
         end

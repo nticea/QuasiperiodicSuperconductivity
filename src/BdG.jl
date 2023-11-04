@@ -12,7 +12,7 @@ include("../src/meanfield.jl")
 include("../src/model.jl")
 include("../src/results.jl")
 
-function BdG_iteration_swave(M::Matrix{Float64}, Δi; V0::Real, T::Real)
+function BdG_iteration_swave(M::Matrix{ComplexF64}, Δi; V0::Real, T::Real)
     M = copy(M)
     N = size(Δi)[1]
     # Fill in the off-diagonal blocks 
@@ -50,7 +50,7 @@ function converge_BdG_swave(m::ModelParams; T::Real, Δ_init=nothing, niter::Int
     N = numsites(m)
 
     # make the BdG equation matrix (fill in just block diagonals)
-    M = zeros(2 * N, 2 * N)
+    M = zeros(2 * N, 2 * N) .* 1im
     hij = noninteracting_hamiltonian(m)
     M[1:N, 1:N] .= hij
     M[(N+1):end, (N+1):end] .= -conj.(hij)
@@ -80,7 +80,7 @@ function converge_BdG_swave(m::ModelParams; T::Real, Δ_init=nothing, niter::Int
         end
 
         # track convergence history  
-        push!(max_Δ, maximum(Δi))
+        push!(max_Δ, maximum(abs.(Δi)))
 
         Δi_prev = Δi
     end
@@ -95,7 +95,7 @@ function converge_BdG_dwave(m::ModelParams; T::Real, Δ_init=nothing, niter::Int
     N = numsites(m)
 
     # make the BdG matrix (fill in just the diagonals with H0 for now)
-    M = zeros(2 * N, 2 * N)
+    M = zeros(2 * N, 2 * N) .* 1im
     hij = noninteracting_hamiltonian(m)
     M[1:N, 1:N] .= hij
     M[(N+1):end, (N+1):end] .= -conj.(hij)
@@ -141,7 +141,7 @@ function converge_BdG_dwave(m::ModelParams; T::Real, Δ_init=nothing, niter::Int
     return Δij, U, V, E, hist
 end
 
-function BdG_iteration_dwave(M::Matrix{Float64}, Δij; Vij, T::Real)
+function BdG_iteration_dwave(M::Matrix{ComplexF64}, Δij; Vij, T::Real)
     M = copy(M)
     N = size(Δij)[1]
 

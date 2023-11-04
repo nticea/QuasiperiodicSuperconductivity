@@ -123,11 +123,11 @@ function _spatial_profile(Δ, L, ndims)
     if ndims == 2
         N = L * L
         if length(Δ) == N # swave 
-            evs = zeros(5, L, L)
+            evs = zeros(5, L, L) .* 1im
             evs[1, :, :] = reshape(Δ, L, L)
             return evs
         else # dwave 
-            evs = zeros(5, L, L)
+            evs = zeros(5, L, L) .* 1im
             for (n, i) in enumerate(1:N:5N)
                 evi = Δ[i:(i+N-1)]
                 evs[n, :, :] = reshape(evi, L, L)
@@ -136,7 +136,7 @@ function _spatial_profile(Δ, L, ndims)
         end
 
     elseif ndims == 3
-        evs = zeros(7, L, L, L)
+        evs = zeros(7, L, L, L) .* 1im
         N = L * L * L
         if length(Δ) == N # s wave case 
             evs[1, :, :, :] = reshape(Δ, L, L, L)
@@ -274,7 +274,7 @@ function ΔLGE_to_ΔBdG(m::ModelParams; Δ)
     # get the spatial profile out of the flat thing 
     evs = spatial_profile(m, Δ=Δ)
 
-    Δ_BdG = zeros(N, N)
+    Δ_BdG = zeros(N, N) .* 1im
     for r in 1:N
         coords = site_to_coordinate(r, m=m)
 
@@ -318,9 +318,9 @@ function ΔBdG_to_ΔLGE(m::ModelParams; Δ)
     ndims, L = m.ndims, m.L
     # and now, go backwards 
     if m.ndims == 2
-        evs_rec = zeros(5, L, L)
+        evs_rec = zeros(5, L, L) .* 1im
     elseif m.ndims == 3
-        evs_rec = zeros(7, L, L, L)
+        evs_rec = zeros(7, L, L, L) .* 1im
     else
         println("Sorry, $ndims dims not available")
     end
@@ -372,13 +372,13 @@ function ΔBdG_to_ΔLGE_flat(m::ModelParams; Δ)
     N = numsites(m)
 
     if ndims == 2
-        evs_flat = zeros(5 * N)
+        evs_flat = zeros(5 * N) .* 1im
         for (n, i) in enumerate(1:N:(5N))
             evi = evs_rec[n, :, :]
             evs_flat[i:(i+N-1)] = reshape(evi, N)
         end
     elseif ndims == 3
-        evs_flat = zeros(7 * N)
+        evs_flat = zeros(7 * N) .* 1im
         for (n, i) in enumerate(1:N:(7N))
             evi = evs_rec[n, :, :, :]
             evs_flat[i:(i+N-1)] = reshape(evi, N)

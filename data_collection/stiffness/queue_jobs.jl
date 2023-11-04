@@ -38,7 +38,7 @@ for _ in 1:nrep
         submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="1:00:00")
 
         # s-wave 
-        V0 = -1.2
+        V0 = -3
         V1 = 0
         ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
         submit_job(ps, filepath, @__DIR__, job_prefix, mem=256, time="6:00:00")
