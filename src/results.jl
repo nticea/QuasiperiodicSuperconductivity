@@ -37,11 +37,15 @@ end
 function convert_df_arrays(df::DataFrame, col_name::String, delims=r"[,; ]")
     all_arrs = []
     for (i, arr) in enumerate(df[!, Symbol(col_name)])
-        cleaned_string = replace(arr, r"Any|\[|\]" => "")
-        # Split the string by multiple delimiters
-        result = split(cleaned_string, delims)
-        new_array = result[result.!=""]
-        arrs_new = parse.(Float64, new_array)
+        # cleaned_string = replace(arr, r"Any|\[|\]" => "")
+        # # Split the string by multiple delimiters
+        # result = split(cleaned_string, delims)
+        # new_array = result[result.!=""]
+        # arrs_new = parse.(Float64, new_array)
+
+        # trying something new 
+        arrs_new = eval(Meta.parse(arr))
+
         push!(all_arrs, arrs_new)
     end
     dfcut = copy(df)#df[:, collect(1:size(df)[2]-1)]

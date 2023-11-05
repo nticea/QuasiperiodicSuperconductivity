@@ -16,17 +16,26 @@ include("utilities.jl")
 L = 7 # the full system is L × L 
 t = 1
 Q = (√5 - 1) / 2
-μ = 1e-8
-ϕx, ϕy, ϕz = 0, 0, 0
+μ = 0.75
 θ = π / 7
-V0 = -1.2#2
-V1 = 0#-1.5
-ndims = 2
+V0 = 2#-3
+V1 = -1.5#0
+ndims = 3
 periodic = true
-
+disorder = false
 savefigs = false
 slice = 1
-dirname = "data_2D"
+
+if disorder
+    dirname = "data_$(ndims)D_disorder"
+else
+    dirname = "data_$(ndims)D_QP"
+end
+if ndims == 3
+    size_str = "$L × $L × $L"
+elseif ndims == 2
+    size_str = "$L × $L"
+end
 
 # read files 
 if savefigs
@@ -36,15 +45,18 @@ df_LGE = load_LGE(dirname)
 df_BdG = load_BdG(dirname)
 
 # extract only the parameters we are interested in 
-df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.ndims.==ndims).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.V0.==V0).&(df_LGE.V1.==V1), :]
-df_BdG = df_BdG[(df_BdG.L.==L).&(df_BdG.ndims.==ndims).&(df_BdG.θ.==θ).&(df_BdG.Q.==Q).&(df_BdG.V0.==V0).&(df_BdG.V1.==V1), :]
+df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.ndims.==ndims).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.V0.==V0).&(df_LGE.V1.==V1).&(df_LGE.μ.==μ), :]
+df_BdG = df_BdG[(df_BdG.L.==L).&(df_BdG.ndims.==ndims).&(df_BdG.θ.==θ).&(df_BdG.Q.==Q).&(df_BdG.V0.==V0).&(df_BdG.V1.==V1).&(df_BdG.μ.==μ), :]
 
-## FIGURES ##
-if ndims == 3
-    size_str = "$L × $L × $L"
-elseif ndims == 2
-    size_str = "$L × $L"
-end
+# perform averaging 
+gdf_LGE = groupby(df_LGE, [:J])
+gdf_BdG = groupby(df_BdG, [:J])
+LGE_mean = combine(gdf_LGE, [:λ => mean, :T => mean,
+    :λ => sem, :T => sem])
+BdG_mean = combine(gdf_BdG, [:T => mean, :K => mean, :Π => mean,
+    :T => sem, :K => sem, :Π => sem])
+
+@assert 1 == 0
 
 # Comparing Tc from LGE and from BdG 
 df_LGE_Tc = df_LGE[df_LGE.T.>0, :]
