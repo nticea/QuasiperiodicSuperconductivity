@@ -18,8 +18,8 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = -3#2#-3
-V1 = 0#-1.5#0
+V0 = 2#-3
+V1 = -1.5#0
 ndims = 3
 periodic = true
 disorder = false
@@ -41,12 +41,12 @@ end
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-df_LGE = load_LGE(dirname)
-df_BdG = load_BdG(dirname)
+# df_LGE_full = load_LGE(dirname)
+# df_BdG_full = load_BdG(dirname)
 
 # extract only the parameters we are interested in 
-df_LGE = df_LGE[(df_LGE.L.==L).&(df_LGE.ndims.==ndims).&(df_LGE.θ.==θ).&(df_LGE.Q.==Q).&(df_LGE.V0.==V0).&(df_LGE.V1.==V1).&(df_LGE.μ.==μ), :]
-df_BdG = df_BdG[(df_BdG.L.==L).&(df_BdG.ndims.==ndims).&(df_BdG.θ.==θ).&(df_BdG.Q.==Q).&(df_BdG.V0.==V0).&(df_BdG.V1.==V1).&(df_BdG.μ.==μ), :]
+df_LGE = df_LGE_full[(df_LGE_full.L.==L).&(df_LGE_full.ndims.==ndims).&(df_LGE_full.θ.==θ).&(df_LGE_full.Q.==Q).&(df_LGE_full.V0.==V0).&(df_LGE_full.V1.==V1).&(df_LGE_full.μ.==μ), :]
+df_BdG = df_BdG_full[(df_BdG_full.L.==L).&(df_BdG_full.ndims.==ndims).&(df_BdG_full.θ.==θ).&(df_BdG_full.Q.==Q).&(df_BdG_full.V0.==V0).&(df_BdG_full.V1.==V1).&(df_BdG_full.μ.==μ), :]
 
 # Averaging
 df_LGE = df_LGE[df_LGE.T.>0, :] # nonzero T
