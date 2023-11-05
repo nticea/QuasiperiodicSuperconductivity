@@ -18,8 +18,8 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 2#-3
-V1 = -1.5#0
+V0 = -3#2#-3
+V1 = 0#-1.5#0
 ndims = 3
 periodic = true
 disorder = false
@@ -60,7 +60,7 @@ sortidx = sortperm(Js)
 Js = Js[sortidx]
 Tcs = Tcs[sortidx]
 Tcs_err = Tcs_err[sortidx]
-p1 = plot(ylims=(-0.1, 0.1))
+p1 = plot(ylims=(-0.1, 1))
 plot!(p1, Js, Tcs, color="red", label=nothing, ribbon=Tcs_err)
 scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
 xlabel!(p1, "J")
