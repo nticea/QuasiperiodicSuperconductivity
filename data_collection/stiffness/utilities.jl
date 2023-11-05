@@ -53,7 +53,8 @@ function load_LGE(dirname)
                 dfi = convert_df_arrays(dfi, "Δ")
                 append!(df, dfi)
             catch e
-                println("file $f not valid...?")
+                @show e
+                #println("file $f not valid...?")
             end
         end
     end

@@ -8,10 +8,10 @@ include("../../src/utilities.jl")
 # Parameters 
 L = 13
 λ = 1 / 13
-E₀ = 1
+E₀ = 0.75
 t = 1
 Q = (√5 - 1) / 2
-μ = 0.75
+μ = 1e-8
 θ = π / 7
 V0 = 0
 V1 = 0
