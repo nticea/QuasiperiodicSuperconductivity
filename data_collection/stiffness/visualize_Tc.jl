@@ -4,7 +4,7 @@ Pkg.activate(joinpath(@__DIR__, "../.."))
 using Plots
 using CSV
 using DataFrames
-using StatsPlots
+using StatsPlots, Statistics
 
 include("../../src/BdG.jl")
 include("../../src/meanfield.jl")
@@ -18,8 +18,8 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 2#-3
-V1 = -1.5#0
+V0 = -3#2#-3
+V1 = 0#-1.5#0
 ndims = 3
 periodic = true
 disorder = false
@@ -60,40 +60,60 @@ sortidx = sortperm(Js)
 Js = Js[sortidx]
 Tcs = Tcs[sortidx]
 Tcs_err = Tcs_err[sortidx]
-p1 = plot(ylims=(-0.1, 1))
+p1 = plot()
 plot!(p1, Js, Tcs, color="red", label=nothing, ribbon=Tcs_err)
 scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
 xlabel!(p1, "J")
 title!(p1, "Tc for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $size_str lattice")
 
-@assert 1 == 0
-
 # Superfluid stiffness 
 df_BdG = df_BdG[df_BdG.T.==0, :] # stiffness at 0T only
 gdf_BdG = groupby(df_BdG, [:J])
-BdG_mean = DataFrame(["J", "K_mean", "Π_mean", "K_sem", "Π_sem"])
+BdG_mean = DataFrame(J=[], K_mean=[], Π_mean=[], D_mean=[], K_sem=[], Π_sem=[], D_sem=[])
 # combine(gdf_BdG, [:K => mean, :Π => mean,
 #     :K => sem, :Π => sem])
-for 
 
-Js = sort(unique(BdG_mean.J))
-Ds_avg = zeros(length(Js), ndims)
-Ks_avg = zeros(length(Js), ndims)
-Πs_avg = zeros(length(Js), ndims)
-for (j, J) in enumerate(Js)
-    dfsub = BdG_mean[(df_BdG_0.J.==J), :]
-    Ks, Πs = hcat(dfsub.K...), hcat(dfsub.Π...)
-    Ks, Πs = mean(Ks, dims=2), mean(Πs, dims=2)
-    Ds_avg[j, :] = -Ks + Πs
-    Ks_avg[j, :] = Ks
-    Πs_avg[j, :] = Πs
+function sem_dims(arr; dims)
+    @assert Base.ndims(arr) == 2
+    res = []
+    if dims == 1
+        for a in eachcol(arr)
+            push!(res, sem(a))
+        end
+    elseif dims == 2
+        for a in eachrow(arr)
+            push!(res, sem(a))
+        end
+    else
+        println("idk man :(")
+        return
+    end
+    return res
+end
+
+for g in gdf_BdG
+    J = g.J[1]
+    Ks, Πs = hcat(g.K...), hcat(g.Π...)
+    Ks_avg, Πs_avg = mean(Ks, dims=2), mean(Πs, dims=2)
+    Ds_avg = -Ks_avg + Πs_avg
+    Ks_sem, Πs_sem = sem_dims(Ks, dims=2), sem_dims(Πs, dims=2)
+    Ds_sem = -Ks_sem + Πs_sem
+    dfi = DataFrame(J=[J], K_mean=[Ks_avg], Π_mean=[Πs_avg], D_mean=[Ds_avg], K_sem=[Ks_sem], Π_sem=[Πs_sem], D_sem=[Ds_sem])
+    append!(BdG_mean, dfi)
 end
 
 dirs = ["Dₛ/π (x̂)", "Dₛ/π (ŷ)", "Dₛ/π (ẑ)"]
 cmap = ["green", "orange", "blue"]
+Js, Ds_avg, Ds_sem = BdG_mean.J, BdG_mean.D_mean, BdG_mean.D_sem
+sortidx = sortperm(Js)
+Js = Js[sortidx]
+Ds_avg = Ds_avg[sortidx]
+Ds_sem = Ds_sem[sortidx]
 for i in 1:ndims
-    plot!(p1, Js, Ds_avg[:, i], label=nothing, c=cmap[i], secondary=true)
-    scatter!(p1, Js, Ds_avg[:, i], label=dirs[i], c=cmap[i], secondary=true)
+    toplot = [D[i] for D in Ds_avg]
+    toplot_ribbon = [D[i] for D in Ds_sem]
+    plot!(p1, Js, toplot, label=nothing, c=cmap[i], secondary=true, ribbon=toplot_ribbon)
+    scatter!(p1, Js, toplot, label=dirs[i], c=cmap[i], secondary=true)
 end
 plot!(p1, legend=:right)
 

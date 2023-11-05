@@ -32,3 +32,5 @@ Manifest.toml
 *.slurm
 *.sh
 *.txt
+*IPR_data_PBC_disorder.csv
+*IPR_data_PBC_QP.csv
