@@ -27,7 +27,7 @@ for J in Js
     V0 = 3
     V1 = -2
     ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="12:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="12:00:00")
     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
     submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="8:00:00")
     # ps = ModelParams(L=7, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
@@ -37,7 +37,7 @@ for J in Js
     V0 = -3
     V1 = 0
     ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="12:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="12:00:00")
     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
     submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="8:00:00")
     # ps = ModelParams(L=7, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
