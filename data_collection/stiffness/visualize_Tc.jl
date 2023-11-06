@@ -60,7 +60,7 @@ sortidx = sortperm(Js)
 Js = Js[sortidx]
 Tcs = Tcs[sortidx]
 Tcs_err = Tcs_err[sortidx]
-p1 = plot()
+p1 = plot(grid=false)
 plot!(p1, Js, Tcs, color="red", label=nothing, ribbon=Tcs_err)
 scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
 xlabel!(p1, "J")
