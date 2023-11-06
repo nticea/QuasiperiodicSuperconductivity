@@ -3,46 +3,56 @@ using Pkg
 Pkg.activate(joinpath(@__DIR__, "../.."))
 using CSV, DataFrames, Dates, Plots
 include("../../src/BdG.jl")
+include("../../src/stiffness.jl")
 
 # Parameters 
 t = 1
 L = 3
 Q = (√5 - 1) / 2
-μ = 1e-8
+μ = 0.75
 θ = π / 7
-V0 = -3
-V1 = 0
+V0 = 2
+V1 = -3
 ϕx = 0
 ϕy = 0
 ϕz = 0
 periodic = true
 disorder = false
 ndims = 3
-T = 0.25
-J = 1
+T = 0
+J = 0
 slice = 1
 
+# simulation parameters 
+niter = 500
+BdG_tol = 1e-15
+LGE_tol = 1e-2
+
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-H0 = noninteracting_hamiltonian(m)
-λ, Δ_LGE = @time pairfield_correlation(m, T=T)
+# λ, Δ_LGE = pairfield_correlation(m, T=T)
+Tc, λ, Δ_LGE = LGE_find_Tc(m, npts=5, tol=LGE_tol)
+K, Π, Δ_BdG = superfluid_stiffness_finiteT(m, T=0, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE)
 
-@assert 1 == 0
+# λ, Δ_LGE = @time pairfield_correlation(m, T=T)
 
-E, U = diagonalize_hamiltonian(m)
+# @assert 1 == 0
 
-# s-wave case is faster 
-if V1 == 0
-    M = swave(m, T, E=E, U=U)
-    λ, Δ = calculate_λ_Δ(M)
-else
-    M = dwave(m, T, E=E, U=U)
-    λ, Δ = calculate_λ_Δ(M)
-end
-@assert abs(imag(λ)) < 1e-6
-λ = real(λ)
+# E, U = diagonalize_hamiltonian(m)
 
-@assert 1 == 0
+# # s-wave case is faster 
+# if V1 == 0
+#     M = swave(m, T, E=E, U=U)
+#     λ, Δ = calculate_λ_Δ(M)
+# else
+#     M = dwave(m, T, E=E, U=U)
+#     λ, Δ = calculate_λ_Δ(M)
+# end
+# @assert abs(imag(λ)) < 1e-6
+# λ = real(λ)
 
+# @assert 1 == 0
+
+Δ = Δ_BdG
 Δ = spatial_profile(m, Δ=real.(Δ))
 evs = real.(Δ)[:, :, :, slice]
 

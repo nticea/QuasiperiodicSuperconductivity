@@ -107,7 +107,7 @@ function kinetic_term(sites; U, V, E, f, m)
 
         Kx = -2 * t / N * (t1 + t2 + t3 + t4) # factor of 2 from spin 
 
-        K[j-1] = Kx
+        K[j-1] = real(Kx)
     end
 
     return K
@@ -218,7 +218,7 @@ function Πq(sites, coords; U, V, pf, q, m::ModelParams)
             println("boop")
             return
         end
-        
+
         Aconj = conj.(A)
         AplusD = Aconj + D
         @einsimd Πxx := 2 * t^2 / N * A[n1, n2] * AplusD[n1, n2] * pf[n1, n2]
