@@ -20,6 +20,7 @@ function pairfield_correlation(m::ModelParams; T::Real,
     E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
 
     # s-wave case is faster 
+    # println("UNCOMMENT THIS !!!!")
     if V1 == 0
         M = swave(m, T, E=E, U=U)
         return calculate_λ_Δ(M)
@@ -300,11 +301,21 @@ function dwave(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
 
     # Initialize the M matrix 
     if ndims == 2
-        M = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
-        dM = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+        if m.ϕx != 0 || m.ϕy != 0 || m.ϕz != 0
+            M = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+            dM = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+        else
+            M = Matrix{Matrix{Float64}}(undef, 3, 3)
+            dM = Matrix{Matrix{Float64}}(undef, 3, 3)
+        end
     elseif ndims == 3
-        M = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
-        dM = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
+        if m.ϕx != 0 || m.ϕy != 0 || m.ϕz != 0
+            M = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
+            dM = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
+        else
+            M = Matrix{Matrix{Float64}}(undef, 4, 4)
+            dM = Matrix{Matrix{Float64}}(undef, 4, 4)
+        end
     else
         println("$ndims dimensions not supported")
     end
@@ -400,7 +411,7 @@ end
 function mortar(M::Matrix)
     (n, _) = size(M)
     (N, _) = size(M[1, 1])
-    new_M = zeros(n * N, n * N) .* 1im
+    new_M = zeros(n * N, n * N) #.* 1im
     for b in 1:n
         for d in 1:n
             b_idx_start = (b - 1) * N + 1
