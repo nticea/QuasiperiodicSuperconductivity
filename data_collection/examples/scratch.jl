@@ -6,55 +6,61 @@ include("../../src/BdG.jl")
 
 # Parameters 
 t = 1
-L = 7
+L = 3
 Q = (√5 - 1) / 2
 μ = 1e-8
 θ = π / 7
-V0 = 0
+V0 = -3
 V1 = 0
-ϕx = 4.053017248851461#rand() * 2π
-ϕy = 4.264087078239874#rand() * 2π
-ϕz = 4.252252190103651#rand() * 2π
+ϕx = 0
+ϕy = 0
+ϕz = 0
 periodic = true
 disorder = false
 ndims = 3
+T = 0.25
+J = 1
+slice = 1
 
-Λ = nothing
+m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+H0 = noninteracting_hamiltonian(m)
+λ, Δ_LGE = @time pairfield_correlation(m, T=T)
 
-Ts = expspace(-2, 1, 30)
-Js = [0]
-χs_swave, dχs_swave = zeros(length(Ts), length(Js)), zeros(length(Ts), length(Js))
-χs_dwave, dχs_dwave = zeros(length(Ts), length(Js)), zeros(length(Ts), length(Js))
+@assert 1 == 0
 
-## CALCULATION ## 
-for (Jᵢ, J) in enumerate(Js)
-    for (Tᵢ, T) in enumerate(Ts)
-        m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-        χ, dχdlogT = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
-        χswave, χdwave = uniform_susceptibility_components(χ, ndims=ndims)
-        dχswave, dχdwave = uniform_susceptibility_components(dχdlogT, ndims=ndims)
-        χs_swave[Tᵢ, Jᵢ] = χswave
-        χs_dwave[Tᵢ, Jᵢ] = χdwave
-        dχs_swave[Tᵢ, Jᵢ] = dχswave
-        dχs_dwave[Tᵢ, Jᵢ] = dχdwave
+E, U = diagonalize_hamiltonian(m)
+
+# s-wave case is faster 
+if V1 == 0
+    M = swave(m, T, E=E, U=U)
+    λ, Δ = calculate_λ_Δ(M)
+else
+    M = dwave(m, T, E=E, U=U)
+    λ, Δ = calculate_λ_Δ(M)
+end
+@assert abs(imag(λ)) < 1e-6
+λ = real(λ)
+
+@assert 1 == 0
+
+Δ = spatial_profile(m, Δ=real.(Δ))
+evs = real.(Δ)[:, :, :, slice]
+
+p = plot(xlims=(0, L + 1), ylims=(0, L + 1), grid=false, aspect_ratio=true)
+for x in 1:L
+    for y in 1:L
+
+        # bonds 
+        plot!(p, [x, x - 1], [y, y], lw=10 * abs(evs[2, x, y]), alpha=10 * abs(evs[2, x, y]), c=colour_phase(2, x, y, all_evs=evs), legend=:false)
+        plot!(p, [x, x], [y, y + 1], lw=10 * abs(evs[3, x, y]), alpha=10 * abs(evs[3, x, y]), c=colour_phase(3, x, y, all_evs=evs), legend=:false)
+        plot!(p, [x, x + 1], [y, y], lw=10 * abs(evs[4, x, y]), alpha=10 * abs(evs[4, x, y]), c=colour_phase(4, x, y, all_evs=evs), legend=:false)
+        plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[5, x, y]), alpha=10 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
+
+        # onsite dot 
+        scatter!(p, [x], [y], ms=100 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
     end
 end
 
-ps = plot(xlabel="T", ylabel="dχ/dlogT")
-#cmap = cgrad(:matter, length(Js), categorical=true)
-cmap = ["red", "blue"]
-for (Jᵢ, J) in enumerate(Js)
-    plot!(ps, Ts, dχs_swave[:, Jᵢ], xaxis=:log10, label=nothing, c=cmap[Jᵢ])
-    scatter!(ps, Ts, dχs_swave[:, Jᵢ], xaxis=:log10, label="J=$J", c=cmap[Jᵢ])
-end
-
-
-pd = plot(xlabel="T", ylabel="dχ/dlogT")
-#cmap = cgrad(:matter, length(Js), categorical=true)
-cmap = ["red", "blue"]
-for (Jᵢ, J) in enumerate(Js)
-    plot!(pd, Ts, dχs_dwave[:, Jᵢ], xaxis=:log10, label=nothing, c=cmap[Jᵢ])
-    scatter!(pd, Ts, dχs_dwave[:, Jᵢ], xaxis=:log10, label="J=$J", c=cmap[Jᵢ])
-end
-
-
+xlabel!(p, "Site (x)")
+ylabel!(p, "Site, (y)")
+title!(p, "J=$(m.J), V0=$(m.V0), V1=$(m.V1), θ=$(θ_to_π(m.θ)) on $(m.L)×$(m.L)×$(m.L) lattice at z=$slice")

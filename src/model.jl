@@ -88,7 +88,7 @@ function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shi
         μ = m.μ
     end
 
-    if !m.periodic
+    if !m.periodic || (m.ϕx == 0 && m.ϕy == 0 && m.ϕz == 0)
         Ht = square_lattice_kinetic(m)
     else
         Ht = lattice_with_flux(m, ϕ1=m.ϕx, ϕ2=m.ϕy, ϕ3=m.ϕz)
@@ -99,7 +99,6 @@ function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shi
     if m.disorder
         pot = disorder_potential.(rs, m=m, shift_origin=shift_origin)
     else
-        # println("No more potential offsets! Twisted BCs only")
         pot = aubry_andre.(rs, m=m, shift_origin=shift_origin)
     end
     pot .+= μ # add chemical potential 
@@ -378,7 +377,6 @@ function Bmatrix(m::ModelParams)
         Rθ = [c^2+s^3 c*s c*s^2-c*s
             c*s -s c^s
             c*s^2-c*s c^2 c^2*s+s^2]
-        # Rθ = [1 1 0; 0 1 1; 1 0 1]
         #println("Rotation matrix with no C₄ symmetry!")
     else
         println("ndims=$ndims not supported (yet?)")
@@ -401,11 +399,7 @@ function Bmatrix(m::ModelParams)
 end
 
 function aubry_andre(xy; m::ModelParams, shift_origin::Bool=true, normalize_SD_to_1::Bool=true)
-    J, Q, L, θ, ϕx, ϕy, ϕz, ndims = m.J, m.Q, m.L, m.θ, m.ϕx, m.ϕy, m.ϕz, m.ndims
-
-    # ϕx = 0
-    # ϕy = 0
-    # ϕz = 0
+    J, L, ϕx, ϕy, ϕz, ndims = m.J, m.L, m.ϕx, m.ϕy, m.ϕz, m.ndims
 
     if shift_origin
         xy = [a + floor(Int, L / 2) for a in xy]
