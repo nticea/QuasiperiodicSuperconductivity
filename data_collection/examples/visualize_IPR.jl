@@ -30,51 +30,50 @@ else
     pot = "QP"
 end
 
-savepath = "IPR_data_$(BC)_$(pot).csv"
+fname = "IPR_data_$(BC)_$(pot).csv"
+dirpath = "/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity"
+savepath = joinpath(dirpath, fname)
+df = DataFrame(CSV.File(savepath))
 
-df = DataFrame(L=[], J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[], α₀=[], BC=[], pot=[])
-# fname = "/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/IPR_data.csv"
-# df = DataFrame(CSV.File(fname))
+# Js = collect(0:0.25:10)
+# nrep = 20
+# for n in 1:nrep
+#     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
+#     for J in Js
+#         print("n=$n,J=$J-")
+#         m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+#         α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀)
 
-Js = collect(0:0.25:10)
-nrep = 20
-for n in 1:nrep
-    ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
-    for J in Js
-        print("n=$n,J=$J-")
-        m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-        α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀)
+#         dfi = DataFrame(L=[L], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k], α₀=[real(α₀)], BC=[BC], pot=[pot])
+#         append!(df, dfi)
 
-        dfi = DataFrame(L=[L], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k], α₀=[real(α₀)], BC=[BC], pot=[pot])
-        append!(df, dfi)
+#         if isfile(savepath)
+#             CSV.write(savepath, df, append=true)
+#         else
+#             CSV.write(savepath, df, append=false)
+#         end
+#     end
+# end
 
-        if isfile(savepath)
-            CSV.write(savepath, df, append=true)
-        else
-            CSV.write(savepath, df, append=false)
-        end
-    end
-end
+# Js = collect(0:0.25:6)
+# nrep = 20
+# for n in 1:nrep
+#     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
+#     for J in Js
+#         print("n=$n,J=$J-")
+#         m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+#         α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀)
 
-Js = collect(0:0.25:6)
-nrep = 20
-for n in 1:nrep
-    ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
-    for J in Js
-        print("n=$n,J=$J-")
-        m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-        α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀)
+#         dfi = DataFrame(L=[L], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k], α₀=[real(α₀)], BC=[BC], pot=[pot])
+#         append!(df, dfi)
 
-        dfi = DataFrame(L=[L], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k], α₀=[real(α₀)], BC=[BC], pot=[pot])
-        append!(df, dfi)
-
-        if isfile(savepath)
-            CSV.write(savepath, df, append=true)
-        else
-            CSV.write(savepath, df, append=false)
-        end
-    end
-end
+#         if isfile(savepath)
+#             CSV.write(savepath, df, append=true)
+#         else
+#             CSV.write(savepath, df, append=false)
+#         end
+#     end
+# end
 
 # use split-apply-combine
 df_plot = df[(df.BC.==BC).&(df.pot.==pot), :]

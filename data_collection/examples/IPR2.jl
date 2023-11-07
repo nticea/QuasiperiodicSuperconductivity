@@ -56,7 +56,7 @@ for n in 1:nrep
     end
 end
 
-Js = collect(0:0.25:6)
+Js = collect(0:0.25:10)
 nrep = 20
 for n in 1:nrep
     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
