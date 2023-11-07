@@ -1,7 +1,7 @@
 ## IMPORTS ##
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "../.."))
-using CSV, DataFrames, Dates, Plots
+using CSV, DataFrames, Dates, Plots, StatsBase
 include("../../src/model.jl")
 include("../../src/utilities.jl")
 
@@ -15,12 +15,13 @@ V0 = 0
 V1 = 0
 periodic = true
 ndims = 3
+nbins = L * L
 
-savepath = joinpath(@__DIR__, "data", "IPR_data_$(L)L.csv")
-df = DataFrame(CSV.File(savepath))
-df = convert_df_arrays(df, "ipr_real")
-df = convert_df_arrays(df, "ipr_k")
-df = convert_df_arrays(df, "E")
+# savepath = joinpath(@__DIR__, "data", "IPR_data_$(L)L.csv")
+# df = DataFrame(CSV.File(savepath))
+# df = convert_df_arrays(df, "ipr_real")
+# df = convert_df_arrays(df, "ipr_k")
+# df = convert_df_arrays(df, "E")
 
 function sem_dims(arr; dims)
     @assert Base.ndims(arr) == 2
@@ -40,13 +41,69 @@ function sem_dims(arr; dims)
     return res
 end
 
+minE, maxE = -2 * ndims, 2 * ndims
+binsize_E = 2 * maxE / nbins
+binsize_ipr = 1 / nbins
 gdf = groupby(df, [:J, :pot])
-df_mean = DataFrame(J=[], pot=[], ipr_real_mean=[], ipr_k_mean=[], ipr_real_sem=[], ipr_k_sem=[])
+df_mean = DataFrame(J=[], pot=[], E=[], ipr_real_mean=[], ipr_k_mean=[], ipr_real_sem=[], ipr_k_sem=[])
 for g in gdf
-    iprs_r, iprs_k = hcat(g.ipr_real...), hcat(g.ipr_k...)
-    iprs_r_avg, iprs_k_avg = mean(iprs_r, dims=2), mean(iprs_k, dims=2)
-    iprs_r_sem, iprs_k_sem = sem_dims(iprs_r, dims=2), sem_dims(iprs_k, dims=2)
-    dfi = DataFrame(J=[g.J[1]], pot=[g.pot[1]], ipr_real_mean=[iprs_r_avg], ipr_k_mean=[iprs_k_avg], ipr_real_sem=[iprs_r_sem], ipr_k_sem=[iprs_k_sem])
+    iprs_r, iprs_k, Es = hcat(g.ipr_real...), hcat(g.ipr_k...), hcat(g.E...)
+    iprs_r_avg, iprs_k_avg, E_avg = mean(iprs_r, dims=2), mean(iprs_k, dims=2), mean(Es, dims=2)
+    iprs_r_sem, iprs_k_sem, E_sem = sem_dims(iprs_r, dims=2), sem_dims(iprs_k, dims=2), sem_dims(Es, dims=2)
+
+    Es = StatsBase.fit(Histogram, E_avg[:, 1], minE:binsize_E:maxE).weights ./ binsize_E
+    iprs_k_avg = bin_array_evenly(iprs_k_avg, nbins)
+    iprs_r_avg = bin_array_evenly(iprs_r_avg, nbins)
+    # Es = hist_counts(Es, nbins=nbins)
+    # iprs_k_avg = hist_counts(iprs_k_avg, nbins=nbins)
+    # iprs_r_avg = hist_counts(iprs_r_avg, nbins=nbins)
+
+    dfi = DataFrame(J=[g.J[1]], pot=[g.pot[1]], E=[Es], ipr_real_mean=[iprs_r_avg], ipr_k_mean=[iprs_k_avg], ipr_real_sem=[iprs_r_sem], ipr_k_sem=[iprs_k_sem])
     append!(df_mean, dfi)
 end
 
+subdf = df_mean[(df_mean.pot.=="QP"), :]
+dos, iprs_real, iprs_k, Js = hcat(subdf.E...), hcat(subdf.ipr_real_mean...), hcat(subdf.ipr_k_mean...), subdf.J
+
+iprs = iprs_real
+nx = length(Js)
+ny = nbins
+hval = copy(iprs)'
+dos = dos'
+E_edges = collect(minE:binsize_E:maxE)[1:end-1]
+
+function get_colour(val; max_val)
+    c = floor(Int, val / max_val * 100)
+    if c == 0
+        c = 1
+    end
+    cmap = cgrad(:magma, 100, categorical=true)
+    return cmap[c]
+end
+
+p = plot(xlims=(minimum(Js), maximum(Js)), ylims=(minE, maxE), grid=false, xlabel="J", ylabel="E/(1+J)", xticks=sort(Js)[1:3:end])
+for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength  
+    for (y, E) in Iterators.reverse(enumerate(E_edges)) # eigenstates 
+        dos_xy = dos[x, y]
+        val_xy = hval[x, y]
+        # phase 
+        c = get_colour(val_xy, max_val=maximum(hval))
+        # onsite term  
+        scatter!(p, [J], [E], ms=abs(dos_xy) * 0.05, c=c, legend=:false)
+    end
+end
+
+
+
+# if ndims == 2
+#     N = L * L
+# elseif ndims == 3
+#     N = L * L * L
+# end
+# E_binned = zeros(nbins, N)
+# r_binned = zeros(nbins, N)
+# k_binned = zeros(nbins, N)
+
+# for n in 1:N
+#     hist_counts(E, nbins=nbins)
+# end

@@ -600,3 +600,28 @@ function hist_counts(arr; nbins::Int, normalize::Bool=false)
     end
     return counts
 end
+
+function bin_array_evenly(original_array, n)
+    N = length(original_array)
+    
+    if N < n
+        throw(ArgumentError("The original array is smaller than the desired length n."))
+    end
+
+    step = N / n
+    new_array = similar(original_array, n)
+    
+    for i in 1:n
+        # Calculate the starting and ending indices for averaging
+        start_idx = Int(((i - 1) * step) + 1)
+        end_idx = Int(i * step)
+        
+        # Average the elements in the original array for this section
+        avg = mean(original_array[start_idx:end_idx])
+        
+        # Store the average in the new array
+        new_array[i] = avg
+    end
+    
+    return new_array
+end
