@@ -7,12 +7,12 @@ include("../../src/stiffness.jl")
 
 # Parameters 
 t = 1
-L = 3
+L = 7
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 2
-V1 = -3
+V0 = 3
+V1 = -2
 ϕx = 0
 ϕy = 0
 ϕz = 0
@@ -20,7 +20,7 @@ periodic = true
 disorder = false
 ndims = 3
 T = 0
-J = 0
+J = 2
 slice = 1
 
 # simulation parameters 
@@ -52,7 +52,7 @@ K, Π, Δ_BdG = superfluid_stiffness_finiteT(m, T=0, tol=BdG_tol, niter=niter, �
 
 # @assert 1 == 0
 
-Δ = Δ_BdG
+Δ = Δ_LGE
 Δ = spatial_profile(m, Δ=real.(Δ))
 evs = real.(Δ)[:, :, :, slice]
 
