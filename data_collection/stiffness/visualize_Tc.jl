@@ -13,7 +13,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 3 # the full system is L × L 
+L = 7 # the full system is L × L 
 t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
@@ -23,7 +23,7 @@ V1 = -3#0
 ndims = 3
 periodic = true
 disorder = false
-savefigs = false
+savefigs = true
 slice = 1
 
 if disorder
@@ -41,8 +41,8 @@ end
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-df_LGE_full = load_LGE(dirname)
-df_BdG_full = load_BdG(dirname)
+# df_LGE_full = load_LGE(dirname)
+# df_BdG_full = load_BdG(dirname)
 
 # extract only the parameters we are interested in 
 df_LGE = df_LGE_full[(df_LGE_full.L.==L).&(df_LGE_full.ndims.==ndims).&(df_LGE_full.θ.==θ).&(df_LGE_full.Q.==Q).&(df_LGE_full.V0.==V0).&(df_LGE_full.V1.==V1).&(df_LGE_full.μ.==μ), :]
@@ -60,7 +60,7 @@ sortidx = sortperm(Js)
 Js = Js[sortidx]
 Tcs = Tcs[sortidx]
 Tcs_err = Tcs_err[sortidx]
-p1 = plot(grid=false)
+p1 = plot(grid=false, ylims=(0, 0.65))
 plot!(p1, Js, Tcs, color="red", label=nothing, ribbon=Tcs_err)
 scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
 xlabel!(p1, "J")
@@ -116,6 +116,7 @@ for i in 1:ndims
     scatter!(p1, Js, toplot, label=dirs[i], c=cmap[i], secondary=true)
 end
 plot!(p1, legend=:right)
+plot!(p1, legend=false)
 
 if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_stiffness_averaged.pdf"))

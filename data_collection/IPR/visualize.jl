@@ -2,8 +2,11 @@
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "../.."))
 using CSV, DataFrames, Dates, Plots, StatsBase
+using Plots.PlotMeasures
 include("../../src/model.jl")
 include("../../src/utilities.jl")
+include("../../src/results.jl")
+
 
 # Parameters 
 L = 11
@@ -14,14 +17,24 @@ Q = (√5 - 1) / 2
 V0 = 0
 V1 = 0
 periodic = true
+disorder = false
+savefigs = true
 ndims = 3
-nbins = L * L
+nbins = 30
+
+mkpath(joinpath(@__DIR__, "figures"))
 
 # savepath = joinpath(@__DIR__, "data", "IPR_data_$(L)L.csv")
 # df = DataFrame(CSV.File(savepath))
 # df = convert_df_arrays(df, "ipr_real")
 # df = convert_df_arrays(df, "ipr_k")
 # df = convert_df_arrays(df, "E")
+
+if disorder
+    pot = "disorder"
+else
+    pot = "QP"
+end
 
 function sem_dims(arr; dims)
     @assert Base.ndims(arr) == 2
@@ -44,7 +57,7 @@ end
 minE, maxE = -2 * ndims, 2 * ndims
 binsize_E = 2 * maxE / nbins
 binsize_ipr = 1 / nbins
-gdf = groupby(df, [:J, :pot])
+gdf = groupby(df, [:J])
 df_mean = DataFrame(J=[], pot=[], E=[], ipr_real_mean=[], ipr_k_mean=[], ipr_real_sem=[], ipr_k_sem=[])
 for g in gdf
     iprs_r, iprs_k, Es = hcat(g.ipr_real...), hcat(g.ipr_k...), hcat(g.E...)
@@ -62,7 +75,7 @@ for g in gdf
     append!(df_mean, dfi)
 end
 
-subdf = df_mean[(df_mean.pot.=="QP"), :]
+# subdf = df_mean[(df_mean.pot.=="QP"), :]
 dos, iprs_real, iprs_k, Js = hcat(subdf.E...), hcat(subdf.ipr_real_mean...), hcat(subdf.ipr_k_mean...), subdf.J
 
 iprs = iprs_real
@@ -77,11 +90,12 @@ function get_colour(val; max_val)
     if c == 0
         c = 1
     end
-    cmap = cgrad(:magma, 100, categorical=true)
+    # palett = palette([:purple, :red], 100)
+    cmap = reverse(cgrad(:seismic, 200, categorical=true)[1:100])
     return cmap[c]
 end
 
-p = plot(xlims=(minimum(Js), maximum(Js)), ylims=(minE, maxE), grid=false, xlabel="J", ylabel="E/(1+J)", xticks=sort(Js)[1:3:end])
+p = plot(grid=false, xlabel="J", ylabel="E/(1+J)", xticks=sort(Js)[1:3:end], margin=5mm)
 for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength  
     for (y, E) in Iterators.reverse(enumerate(E_edges)) # eigenstates 
         dos_xy = dos[x, y]
@@ -89,21 +103,41 @@ for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength
         # phase 
         c = get_colour(val_xy, max_val=maximum(hval))
         # onsite term  
-        scatter!(p, [J], [E], ms=abs(dos_xy) * 0.05, c=c, legend=:false)
+        scatter!(p, [J], [E], ms=abs(dos_xy) * 0.075, c=c, legend=:false)
     end
 end
 
+iprs = iprs_k
+hval = copy(iprs)'
 
+function get_colour(val; max_val)
+    c = floor(Int, val / max_val * 100)
+    if c == 0
+        c = 1
+    end
+    # palett = palette([:purple, :blue], 100)
+    cmap = cgrad(:seismic, 200, categorical=true)[100:end]
+    return cmap[c]
+end
 
-# if ndims == 2
-#     N = L * L
-# elseif ndims == 3
-#     N = L * L * L
-# end
-# E_binned = zeros(nbins, N)
-# r_binned = zeros(nbins, N)
-# k_binned = zeros(nbins, N)
+for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength  
+    for (y, E) in Iterators.reverse(enumerate(E_edges)) # eigenstates 
+        if J < 2.5
+            dos_xy = dos[x, y]
+            val_xy = hval[x, y]
+            # phase 
+            c = get_colour(val_xy, max_val=maximum(hval))
+            # onsite term  
+            scatter!(p, [J], [E], ms=abs(dos_xy) * 0.075, c=c, legend=:false)
+        end
+    end
+end
 
-# for n in 1:N
-#     hist_counts(E, nbins=nbins)
-# end
+arr = zeros(4, 4)
+arr[1, 1] = -1
+arr[2, 2] = 1
+heatmap!(p, arr, alpha=0, c=:seismic)
+
+if savefigs
+    savefig(p, joinpath(@__DIR__, "figures", "$(L)L_$(ndims)D_IPR.pdf"))
+end

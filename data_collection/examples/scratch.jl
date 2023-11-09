@@ -11,8 +11,8 @@ L = 7
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 3
-V1 = -2
+V0 = 2
+V1 = -1.5
 ϕx = 0
 ϕy = 0
 ϕz = 0
@@ -20,7 +20,7 @@ periodic = true
 disorder = false
 ndims = 3
 T = 0
-J = 2
+J = 0.8
 slice = 1
 
 # simulation parameters 

@@ -603,25 +603,28 @@ end
 
 function bin_array_evenly(original_array, n)
     N = length(original_array)
-    
+
     if N < n
         throw(ArgumentError("The original array is smaller than the desired length n."))
     end
 
-    step = N / n
+    step = floor(Int, N / n)
     new_array = similar(original_array, n)
-    
-    for i in 1:n
+    init_idx = floor(Int, (N - step * n) / 2)
+
+    for (j, i) in enumerate(init_idx:step:(N-step))
         # Calculate the starting and ending indices for averaging
-        start_idx = Int(((i - 1) * step) + 1)
-        end_idx = Int(i * step)
-        
+        # start_idx = Int(((i - 1) * step) + 1)
+        # end_idx = Int(i * step)
+        start_idx = i
+        end_idx = i + step
+
         # Average the elements in the original array for this section
         avg = mean(original_array[start_idx:end_idx])
-        
+
         # Store the average in the new array
-        new_array[i] = avg
+        new_array[j] = avg
     end
-    
+
     return new_array
 end
