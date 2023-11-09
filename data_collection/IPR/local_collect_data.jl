@@ -22,7 +22,7 @@ savepath = joinpath(dirpath, "IPR_data_$(L)L.csv")
 df = DataFrame(L=[], μ=[], J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[], E=[], pot=[])
 
 Js = collect(0:0.25:10)
-nrep = 1
+nrep = 20
 
 # QUASIPERIODIC
 for n in 1:nrep

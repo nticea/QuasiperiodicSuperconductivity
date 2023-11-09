@@ -12,9 +12,9 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 71 # the full system is L × L 
+L = 23 # the full system is L × L 
 μ = 0.75
-ndims = 2
+ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
@@ -27,10 +27,10 @@ if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
 if disorder
-    dirname = "2D_data_random_PBC"
+    dirname = "3D_data_random_PBC"
     title = "disordered potential"
 else
-    dirname = "2D_data_PBC"
+    dirname = "3D_data_PBC"
     title = "quasiperiodic potential"
 end
 df = load_dfs(dirname=dirname)
