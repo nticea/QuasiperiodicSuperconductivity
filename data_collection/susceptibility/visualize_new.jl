@@ -19,7 +19,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 1e-2
+T_cutoff = 0#1e-2
 disorder = false
 
 # read files 
