@@ -22,8 +22,8 @@ V0 = 1#-3
 V1 = -3#0
 ndims = 3
 periodic = true
-disorder = false
-savefigs = true
+disorder = true
+savefigs = false
 slice = 1
 
 if disorder
