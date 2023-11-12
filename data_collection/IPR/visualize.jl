@@ -9,7 +9,7 @@ include("../../src/results.jl")
 
 
 # Parameters 
-L = 11
+L = 13
 t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -24,11 +24,11 @@ nbins = 30
 
 mkpath(joinpath(@__DIR__, "figures"))
 
-# savepath = joinpath(@__DIR__, "data", "IPR_data_$(L)L.csv")
-# df = DataFrame(CSV.File(savepath))
-# df = convert_df_arrays(df, "ipr_real")
-# df = convert_df_arrays(df, "ipr_k")
-# df = convert_df_arrays(df, "E")
+savepath = "/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/IPR/3D_data_disorder/13L_0.1J2023-11-10_08:59:25.csv"#joinpath(@__DIR__, "data", "IPR_data_$(L)L.csv")
+df = DataFrame(CSV.File(savepath))
+df = convert_df_arrays(df, "ipr_real")
+df = convert_df_arrays(df, "ipr_k")
+df = convert_df_arrays(df, "E")
 
 if disorder
     pot = "disorder"
