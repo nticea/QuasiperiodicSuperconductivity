@@ -4,9 +4,7 @@ Pkg.activate(joinpath(@__DIR__, "../.."))
 using CSV, DataFrames, Dates, Plots, StatsBase
 using Plots.PlotMeasures
 include("../../src/model.jl")
-include("../../src/utilities.jl")
-include("../../src/results.jl")
-
+include("utilities.jl")
 
 # Parameters 
 L = 13
@@ -18,23 +16,20 @@ V0 = 0
 V1 = 0
 periodic = true
 disorder = false
-savefigs = true
+savefigs = false
 ndims = 3
 nbins = 30
 
 mkpath(joinpath(@__DIR__, "figures"))
-
-savepath = "/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/IPR/3D_data_disorder/13L_0.1J2023-11-10_08:59:25.csv"#joinpath(@__DIR__, "data", "IPR_data_$(L)L.csv")
-df = DataFrame(CSV.File(savepath))
-df = convert_df_arrays(df, "ipr_real")
-df = convert_df_arrays(df, "ipr_k")
-df = convert_df_arrays(df, "E")
 
 if disorder
     pot = "disorder"
 else
     pot = "QP"
 end
+
+dirname = "$(ndims)D_data_$pot"
+df = load_dfs(dirname=dirname)
 
 function sem_dims(arr; dims)
     @assert Base.ndims(arr) == 2
@@ -75,7 +70,7 @@ for g in gdf
     append!(df_mean, dfi)
 end
 
-# subdf = df_mean[(df_mean.pot.=="QP"), :]
+subdf = df_mean[(df_mean.pot.==pot), :]
 dos, iprs_real, iprs_k, Js = hcat(subdf.E...), hcat(subdf.ipr_real_mean...), hcat(subdf.ipr_k_mean...), subdf.J
 
 iprs = iprs_real
@@ -95,7 +90,8 @@ function get_colour(val; max_val)
     return cmap[c]
 end
 
-p = plot(grid=false, xlabel="J", ylabel="E/(1+J)", xticks=sort(Js)[1:3:end], margin=5mm)
+p = heatmap(arr, alpha=0, c=:seismic)
+plot!(p, grid=false, xlabel="J", ylabel="E/(1+J)", xticks=sort(Js)[1:3:end], margin=5mm, xaxis=:log10)
 for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength  
     for (y, E) in Iterators.reverse(enumerate(E_edges)) # eigenstates 
         dos_xy = dos[x, y]
@@ -106,6 +102,7 @@ for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength
         scatter!(p, [J], [E], ms=abs(dos_xy) * 0.075, c=c, legend=:false)
     end
 end
+# xticklabels!(log10.(Js))
 
 iprs = iprs_k
 hval = copy(iprs)'
@@ -136,7 +133,6 @@ end
 arr = zeros(4, 4)
 arr[1, 1] = -1
 arr[2, 2] = 1
-heatmap!(p, arr, alpha=0, c=:seismic)
 
 if savefigs
     savefig(p, joinpath(@__DIR__, "figures", "$(L)L_$(ndims)D_IPR.pdf"))

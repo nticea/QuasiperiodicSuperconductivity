@@ -92,5 +92,4 @@ for (Jᵢ, J) in enumerate(Js)
 
     plot!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label=nothing, c=cmap[Jᵢ], ribbon=σ_dχdwave)
     scatter!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
-
 end
