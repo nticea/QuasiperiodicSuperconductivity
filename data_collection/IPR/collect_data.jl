@@ -29,7 +29,7 @@ mkpath(datapath)
 df = DataFrame(L=[], μ=[], J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[], E=[], pot=[])
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-H = DiagonalizedHamiltonian(m)
+H = DiagonalizedHamiltonian(m, scale_μ=false)
 E = H.E
 # calculate the real IPR 
 ipr_real = IPR_real(H)

@@ -23,17 +23,17 @@ mkpath(datapath)
 
 df = DataFrame(L=[], μ=[], J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[], E=[], pot=[])
 
-Js = expspace(log10(1) - 1, log10(1) + 1, 20)
+Js = expspace(log10(2) - 1, log10(2) + 1, 21)
 nrep = 5
 
 # QUASIPERIODIC
-savepath = joinpath(datapath, "quasiperiodic.csv")
+savepath = joinpath(datapath, "IPR_data_$(L)L.csv")
 for n in 1:nrep
     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
     for J in Js
         print("n=$n,J=$J-")
         m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-        H = DiagonalizedHamiltonian(m)
+        H = DiagonalizedHamiltonian(m, scale_μ=false)
         E = H.E
         # calculate the real IPR 
         ipr_real = IPR_real(H)
@@ -42,23 +42,16 @@ for n in 1:nrep
 
         dfi = DataFrame(L=[L], μ=[μ], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k], E=[E], pot=["QP"])
         append!(df, dfi)
-
-        if isfile(savepath)
-            CSV.write(savepath, df, append=true)
-        else
-            CSV.write(savepath, df, append=false)
-        end
     end
 end
 
 # DISORDER 
-savepath = joinpath(datapath, "disorder.csv")
 for n in 1:nrep
     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
     for J in Js
         print("n=$n,J=$J-")
         m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-        H = DiagonalizedHamiltonian(m)
+        H = DiagonalizedHamiltonian(m, scale_μ=false)
         E = H.E
         # calculate the real IPR 
         ipr_real = IPR_real(H)
@@ -67,11 +60,11 @@ for n in 1:nrep
 
         dfi = DataFrame(L=[L], μ=[μ], J=[J], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ipr_real=[ipr_real], ipr_k=[ipr_k], E=[E], pot=["disorder"])
         append!(df, dfi)
-
-        if isfile(savepath)
-            CSV.write(savepath, df, append=true)
-        else
-            CSV.write(savepath, df, append=false)
-        end
     end
+end
+
+if isfile(savepath)
+    CSV.write(savepath, df, append=true)
+else
+    CSV.write(savepath, df, append=false)
 end

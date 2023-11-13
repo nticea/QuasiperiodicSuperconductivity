@@ -34,6 +34,5 @@ Manifest.toml
 *.txt
 
 # specific files
-*IPR_data_PBC_disorder.csv
-*IPR_data_PBC_QP.csv
-*IPR_data_11L.csv
+disorder.csv
+quasiperiodic.csv

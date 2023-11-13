@@ -30,14 +30,10 @@ BdG_tol = 1e-15
 LGE_tol = 1e-2
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-H = DiagonalizedHamiltonian(m)
-@show minimum(H.E), maximum(H.E)
-
-@assert 1 == 0
-
 # λ, Δ_LGE = pairfield_correlation(m, T=T)
 Tc, λ, Δ_LGE = LGE_find_Tc(m, npts=5, tol=LGE_tol)
 K, Π, Δ_BdG = superfluid_stiffness_finiteT(m, T=0, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE)
+@show -K .+ Π
 
 # λ, Δ_LGE = @time pairfield_correlation(m, T=T)
 

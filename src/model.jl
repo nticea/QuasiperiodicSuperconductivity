@@ -59,8 +59,8 @@ function DiagonalizedHamiltonian(m::ModelParams; E, U)
     DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
 
-function DiagonalizedHamiltonian(m::ModelParams; loadpath::Union{String,Nothing}=nothing)
-    E, U = diagonalize_hamiltonian(m, loadpath=loadpath)
+function DiagonalizedHamiltonian(m::ModelParams; loadpath::Union{String,Nothing}=nothing, scale_μ=false)
+    E, U = diagonalize_hamiltonian(m, loadpath=loadpath, scale_μ=scale_μ)
     DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
 
@@ -81,12 +81,12 @@ function numsites(m::Union{ModelParams,DiagonalizedHamiltonian})
 end
 
 function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin::Bool=true, scale_μ::Bool=true)
-    # if scale_μ
-    #     println("Rescaling μ by J")
-    #     μ = m.μ / (1 + m.J)
-    # else
-    #     μ = m.μ
-    # end
+    if scale_μ
+        println("Rescaling μ by J")
+        μ = m.μ / (1 + m.J)
+    else
+        μ = m.μ
+    end
 
     if !m.periodic || (m.ϕx == 0 && m.ϕy == 0 && m.ϕz == 0)
         Ht = square_lattice_kinetic(m)
@@ -116,10 +116,10 @@ function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shi
     return H0
 end
 
-function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing)
+function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing, scale_μ=false)
     # we must compute all eigenvalues
     if isnothing(loadpath)
-        H = noninteracting_hamiltonian(m)
+        H = noninteracting_hamiltonian(m, scale_μ=scale_μ)
         E, U = eigen(Hermitian(Matrix(H)))
         return E, U
     end
