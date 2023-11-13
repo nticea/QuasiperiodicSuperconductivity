@@ -16,15 +16,18 @@ V1 = 0
 periodic = true
 ndims = 3
 
-dirpath = joinpath(@__DIR__, "data")
-mkpath(dirpath)
-savepath = joinpath(dirpath, "IPR_data_$(L)L.csv")
+# datapath
+dirname = "$(ndims)D_$(L)L_data"
+datapath = joinpath(@__DIR__, dirname)
+mkpath(datapath)
+
 df = DataFrame(L=[], μ=[], J=[], ϕx=[], ϕy=[], ϕz=[], ipr_real=[], ipr_k=[], E=[], pot=[])
 
-Js = collect(0:0.25:10)
-nrep = 20
+Js = expspace(log10(1) - 1, log10(1) + 1, 20)
+nrep = 5
 
 # QUASIPERIODIC
+savepath = joinpath(datapath, "quasiperiodic.csv")
 for n in 1:nrep
     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
     for J in Js
@@ -49,6 +52,7 @@ for n in 1:nrep
 end
 
 # DISORDER 
+savepath = joinpath(datapath, "disorder.csv")
 for n in 1:nrep
     ϕx, ϕy, ϕz = 2π * rand(), 2π * rand(), 2π * rand()
     for J in Js

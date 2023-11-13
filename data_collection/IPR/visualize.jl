@@ -19,6 +19,7 @@ disorder = false
 savefigs = false
 ndims = 3
 nbins = 30
+Jmin = 10^(log10(2) - (1 - log10(2)))
 
 mkpath(joinpath(@__DIR__, "figures"))
 
@@ -29,7 +30,9 @@ else
 end
 
 dirname = "$(ndims)D_data_$pot"
-df = load_dfs(dirname=dirname)
+# all_dfs = load_dfs(dirname=dirname)
+all_dfs = DataFrame(CSV.File("/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/IPR/3D_11L_data/disorder.csv"))
+df = all_dfs[(all_dfs.L.==L).&&(all_dfs.J.>=Jmin), :]
 
 function sem_dims(arr; dims)
     @assert Base.ndims(arr) == 2
@@ -49,24 +52,32 @@ function sem_dims(arr; dims)
     return res
 end
 
-minE, maxE = -2 * ndims, 2 * ndims
+minE, maxE = -25, 25#-2 * ndims, 2 * ndims
 binsize_E = 2 * maxE / nbins
 binsize_ipr = 1 / nbins
 gdf = groupby(df, [:J])
 df_mean = DataFrame(J=[], pot=[], E=[], ipr_real_mean=[], ipr_k_mean=[], ipr_real_sem=[], ipr_k_sem=[])
 for g in gdf
     iprs_r, iprs_k, Es = hcat(g.ipr_real...), hcat(g.ipr_k...), hcat(g.E...)
-    iprs_r_avg, iprs_k_avg, E_avg = mean(iprs_r, dims=2), mean(iprs_k, dims=2), mean(Es, dims=2)
-    iprs_r_sem, iprs_k_sem, E_sem = sem_dims(iprs_r, dims=2), sem_dims(iprs_k, dims=2), sem_dims(Es, dims=2)
+    iprs_r_avg, iprs_k_avg = mean(iprs_r, dims=2), mean(iprs_k, dims=2)
+    iprs_r_sem, iprs_k_sem = sem_dims(iprs_r, dims=2), sem_dims(iprs_k, dims=2)
 
-    Es = StatsBase.fit(Histogram, E_avg[:, 1], minE:binsize_E:maxE).weights ./ binsize_E
+    Es_binned = zeros(size(Es)[2], nbins)
+    for (Eᵢ, E) in enumerate(eachcol(Es))
+        h = StatsBase.fit(Histogram, E, minE:binsize_E:maxE)
+        Es_binned[Eᵢ, :] = h.weights #./ binsize_E
+    end
+    Es_binned_avg = mean(Es_binned, dims=1)
+    Es_binned_avg = Es_binned_avg[1, :] # mean returns 2 dims still 
+
+    #Es = StatsBase.fit(Histogram, E_avg[:, 1], minE:binsize_E:maxE).weights #./ binsize_E
     iprs_k_avg = bin_array_evenly(iprs_k_avg, nbins)
     iprs_r_avg = bin_array_evenly(iprs_r_avg, nbins)
     # Es = hist_counts(Es, nbins=nbins)
     # iprs_k_avg = hist_counts(iprs_k_avg, nbins=nbins)
     # iprs_r_avg = hist_counts(iprs_r_avg, nbins=nbins)
 
-    dfi = DataFrame(J=[g.J[1]], pot=[g.pot[1]], E=[Es], ipr_real_mean=[iprs_r_avg], ipr_k_mean=[iprs_k_avg], ipr_real_sem=[iprs_r_sem], ipr_k_sem=[iprs_k_sem])
+    dfi = DataFrame(J=[g.J[1]], pot=[g.pot[1]], E=[Es_binned_avg], ipr_real_mean=[iprs_r_avg], ipr_k_mean=[iprs_k_avg], ipr_real_sem=[iprs_r_sem], ipr_k_sem=[iprs_k_sem])
     append!(df_mean, dfi)
 end
 
@@ -90,7 +101,11 @@ function get_colour(val; max_val)
     return cmap[c]
 end
 
+arr = zeros(4, 4)
+arr[1, 1] = -1
+arr[2, 2] = 1
 p = heatmap(arr, alpha=0, c=:seismic)
+
 plot!(p, grid=false, xlabel="J", ylabel="E/(1+J)", xticks=sort(Js)[1:3:end], margin=5mm, xaxis=:log10)
 for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength  
     for (y, E) in Iterators.reverse(enumerate(E_edges)) # eigenstates 
@@ -129,10 +144,6 @@ for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength
         end
     end
 end
-
-arr = zeros(4, 4)
-arr[1, 1] = -1
-arr[2, 2] = 1
 
 if savefigs
     savefig(p, joinpath(@__DIR__, "figures", "$(L)L_$(ndims)D_IPR.pdf"))

@@ -7,9 +7,9 @@ include("../../src/stiffness.jl")
 
 # Parameters 
 t = 1
-L = 7
+L = 11
 Q = (√5 - 1) / 2
-μ = 0.75
+μ = 1e-8
 θ = π / 7
 V0 = 2
 V1 = -1.5
@@ -20,8 +20,9 @@ periodic = true
 disorder = false
 ndims = 3
 T = 0
-J = 0.8
+J = 10
 slice = 1
+ndims = 3
 
 # simulation parameters 
 niter = 500
@@ -29,6 +30,11 @@ BdG_tol = 1e-15
 LGE_tol = 1e-2
 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+H = DiagonalizedHamiltonian(m)
+@show minimum(H.E), maximum(H.E)
+
+@assert 1 == 0
+
 # λ, Δ_LGE = pairfield_correlation(m, T=T)
 Tc, λ, Δ_LGE = LGE_find_Tc(m, npts=5, tol=LGE_tol)
 K, Π, Δ_BdG = superfluid_stiffness_finiteT(m, T=0, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE)
