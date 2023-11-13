@@ -16,7 +16,7 @@ Js = collect(0:0.25:6)
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "stiffness"
 
-# make random potential offsets 
+# make random potential offsets hi
 ϕx = 0
 ϕy = 0
 ϕz = 0
