@@ -24,7 +24,16 @@ function load_dfs(; dirname="data")
                 dfi = convert_df_arrays(dfi, "dχdlogT")
                 append!(df, dfi)
             catch e
-                @show e
+                #println("file $f not valid...?")
+                try
+                    dfi = DataFrame(CSV.File(joinpath(@__DIR__, dirname, f)))
+                    dfi = convert_df_arrays(dfi, "χ")
+                    dfi = convert_df_arrays(dfi, "dχdlogT")
+                    dfi.μ = [0.75 for _ in 1:size(dfi)[1]]
+                    append!(df, dfi)
+                catch e
+                    @show e
+                end
             end
         end
     end

@@ -59,7 +59,7 @@ function DiagonalizedHamiltonian(m::ModelParams; E, U)
     DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
 
-function DiagonalizedHamiltonian(m::ModelParams; loadpath::Union{String,Nothing}=nothing, scale_μ=false)
+function DiagonalizedHamiltonian(m::ModelParams; loadpath::Union{String,Nothing}=nothing, scale_μ=true)
     E, U = diagonalize_hamiltonian(m, loadpath=loadpath, scale_μ=scale_μ)
     DiagonalizedHamiltonian(m.L, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.J, m.periodic, m.ndims, m.disorder, E, U)
 end
@@ -116,7 +116,7 @@ function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shi
     return H0
 end
 
-function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing, scale_μ=false)
+function diagonalize_hamiltonian(m; loadpath::Union{String,Nothing}=nothing, scale_μ=true)
     # we must compute all eigenvalues
     if isnothing(loadpath)
         H = noninteracting_hamiltonian(m, scale_μ=scale_μ)

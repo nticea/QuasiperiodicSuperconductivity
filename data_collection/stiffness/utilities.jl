@@ -54,7 +54,6 @@ function load_LGE(dirname)
                 append!(df, dfi)
             catch e
                 @show e
-                #println("file $f not valid...?")
             end
         end
     end

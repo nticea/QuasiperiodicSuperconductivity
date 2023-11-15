@@ -7,9 +7,9 @@ include("../../src/stiffness.jl")
 
 # Parameters 
 t = 1
-L = 11
+L = 7
 Q = (√5 - 1) / 2
-μ = 1e-8
+μ = 0.75
 θ = π / 7
 V0 = 2
 V1 = -1.5
