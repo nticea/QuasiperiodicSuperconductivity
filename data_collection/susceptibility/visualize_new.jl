@@ -26,11 +26,18 @@ disorder = false
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
+# if disorder
+#     dirname = "3D_data_random_PBC"
+#     title = "disordered potential"
+# else
+#     dirname = "3D_data_PBC"
+#     title = "quasiperiodic potential"
+# end
 if disorder
-    dirname = "3D_data_random_PBC"
+    dirname = "data_random_3D"
     title = "disordered potential"
 else
-    dirname = "3D_data_PBC"
+    dirname = "data_QP_3D"
     title = "quasiperiodic potential"
 end
 df = load_dfs(dirname=dirname)

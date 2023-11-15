@@ -24,6 +24,7 @@ function load_dfs(; dirname="data")
                 dfi = convert_df_arrays(dfi, "dχdlogT")
                 append!(df, dfi)
             catch e
+                @show e
             end
         end
     end
