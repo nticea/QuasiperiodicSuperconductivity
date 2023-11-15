@@ -19,7 +19,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 1e-2
+T_cutoff = 0#1e-2
 disorder = false
 
 # read files 
@@ -34,10 +34,10 @@ end
 #     title = "quasiperiodic potential"
 # end
 if disorder
-    dirname = "data_random_3D"
+    dirname = "3D_data_random_PBC"
     title = "disordered potential"
 else
-    dirname = "data_QP_3D"
+    dirname = "3D_data_PBC"
     title = "quasiperiodic potential"
 end
 df = load_dfs(dirname=dirname)

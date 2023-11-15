@@ -10,7 +10,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 periodic = 1
 ndims = 3
-disorder = false
+disorder = true
 
 Js = collect(0:0.25:6)
 filepath = joinpath(@__DIR__, "collect_data.jl")
