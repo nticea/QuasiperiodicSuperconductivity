@@ -7,12 +7,12 @@ include("../../src/stiffness.jl")
 
 # Parameters 
 t = 1
-L = 7
+L = 3
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 2
-V1 = -1.5
+V0 = 1
+V1 = -3
 ϕx = 0
 ϕy = 0
 ϕz = 0
@@ -20,20 +20,26 @@ periodic = true
 disorder = false
 ndims = 3
 T = 0
-J = 10
+J = 0
 slice = 1
 ndims = 3
 
-# simulation parameters 
-niter = 500
-BdG_tol = 1e-15
-LGE_tol = 1e-2
-
+# calculate the fermi velocity 
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-# λ, Δ_LGE = pairfield_correlation(m, T=T)
-Tc, λ, Δ_LGE = LGE_find_Tc(m, npts=5, tol=LGE_tol)
-K, Π, Δ_BdG = superfluid_stiffness_finiteT(m, T=0, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE)
-@show -K .+ Π
+
+
+@assert 1 == 0
+
+# simulation parameters 
+# niter = 500
+# BdG_tol = 1e-15
+# LGE_tol = 1e-2
+
+# m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+# # λ, Δ_LGE = pairfield_correlation(m, T=T)
+# Tc, λ, Δ_LGE = LGE_find_Tc(m, npts=5, tol=LGE_tol)
+# K, Π, Δ_BdG = superfluid_stiffness_finiteT(m, T=0, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE)
+# @show -K .+ Π
 
 # λ, Δ_LGE = @time pairfield_correlation(m, T=T)
 

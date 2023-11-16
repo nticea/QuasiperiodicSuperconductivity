@@ -582,8 +582,16 @@ end
 
 function density_of_states(H::DiagonalizedHamiltonian; nbins::Int)
     return hist_counts(H.E, nbins=nbins, normalize=true)
-    # h = fit(Histogram, E, nbins=nbins)
-    # return h.weights
+end
+
+function fermi_velocity(m::ModelParams; ky::Real=0)
+    kx = acos(m.μ / (2 * m.t) - cos(ky)) # along x axis, ky=0
+    return 2 * m.t * (sin(kx) + sin(ky))
+end
+
+function effective_mass(m::ModelParams; ky::Real=0)
+    vF = fermi_velocity(m, ky=ky)
+    return 2 * m.μ / (vF^2)
 end
 
 function IPR_momentum(H::DiagonalizedHamiltonian)

@@ -13,7 +13,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 11 # the full system is L × L 
+L = 7 # the full system is L × L 
 t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
@@ -22,7 +22,7 @@ V0 = -3
 V1 = 0
 ndims = 3
 periodic = true
-disorder = false
+disorder = true
 savefigs = false
 slice = 1
 
@@ -41,8 +41,8 @@ end
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-# df_LGE_full = load_LGE(dirname)
-# df_BdG_full = load_BdG(dirname)
+df_LGE_full = load_LGE(dirname)
+df_BdG_full = load_BdG(dirname)
 
 # extract only the parameters we are interested in 
 df_LGE = df_LGE_full[(df_LGE_full.L.==L).&(df_LGE_full.ndims.==ndims).&(df_LGE_full.θ.==θ).&(df_LGE_full.Q.==Q).&(df_LGE_full.V0.==V0).&(df_LGE_full.V1.==V1).&(df_LGE_full.μ.==μ), :]

@@ -13,13 +13,13 @@ include("../../src/meanfield.jl")
 include("utilities.jl")
 
 ## MODEL PARAMETERS ##
-L = 3
+L = 7
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 2
-V1 = -1.5
+V0 = -3
+V1 = 0
 ϕx = 0
 ϕy = 0
 ϕz = 0

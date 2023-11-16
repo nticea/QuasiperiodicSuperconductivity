@@ -4,7 +4,7 @@ Pkg.activate(joinpath(@__DIR__, "../.."))
 include("../../src/model.jl")
 include("submit_job.jl")
 
-L = 13
+L = 23
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -34,12 +34,12 @@ for _ in 1:nrep
     # QUASIPERIOIDIC!
     for J in Js
         ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, time="10:00")
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="30:00")
     end
 
     # DISORDER! 
     for J in Js
         ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
-        submit_job(ps, filepath, @__DIR__, job_prefix, mem=50, time="10:00")
+        submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="30:00")
     end
 end

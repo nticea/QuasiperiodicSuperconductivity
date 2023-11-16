@@ -118,6 +118,22 @@ function spatial_profile(m::ModelParams; Δ)
     return _spatial_profile(Δ, L, ndims)
 end
 
+function coherence_length(m::ModelParams; Δ, ky::Real=0)
+    vF = fermi_velocity(m, ky=ky)
+    Δ̄ = maximum(abs.(Δ))
+    return vF / (π * Δ̄)
+end
+
+function phase_fluctuation_Tc(m::ModelParams; Δ, K, Π, ky::Real=0, A::Real=2.2)
+    ξ = coherence_length(m, Δ=Δ, ky=ky)
+    if ξ < 1
+        ξ = 1 # ξ cannot be smaller than lattice constant 
+    end
+    @show ξ
+    Ds = -K .+ Π
+    return π^(3 / 2) * ξ * A .* Ds ./ (4)
+end
+
 function _spatial_profile(Δ, L, ndims)
     # check to see if we are already in spatial profile form 
     if Base.ndims(Δ) == 3 || Base.ndims(Δ) == 4
