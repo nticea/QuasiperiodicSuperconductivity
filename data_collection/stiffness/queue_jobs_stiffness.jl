@@ -12,8 +12,8 @@ periodic = 1
 ndims = 3
 
 Js = collect(0:0.25:6)
-filepath = joinpath(@__DIR__, "collect_data.jl")
-job_prefix = "stiffness"
+filepath = joinpath(@__DIR__, "collect_data_stiffness.jl")
+job_prefix = "stiffness_only"
 
 # make random potential offsets hi
 ϕx = 0
@@ -26,41 +26,41 @@ for J in Js
     V0 = 1
     V1 = -3
     ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="12:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="6:00:00")
     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="8:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="4:00:00")
     # ps = ModelParams(L=7, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="1:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="10:00")
 
     # s-wave 
     V0 = -3
     V1 = 0
     ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="12:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="6:00:00")
     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="8:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="4:00:00")
     # ps = ModelParams(L=7, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="1:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="10:00")
 
-    # # DISORDER 
-    # # d-wave 
+    # DISORDER 
+    # d-wave 
     # V0 = 1
     # V1 = -3
     # ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="12:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="6:00:00")
     # ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="8:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="4:00:00")
     # ps = ModelParams(L=7, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="1:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="10:00")
 
     # # s-wave 
     # V0 = -3
     # V1 = 0
     # ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="12:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="6:00:00")
     # ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="8:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="4:00:00")
     # ps = ModelParams(L=7, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="1:00:00")
+    # submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, time="10")
 end
 

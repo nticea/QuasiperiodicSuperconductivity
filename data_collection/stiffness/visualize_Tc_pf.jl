@@ -13,7 +13,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 7 # the full system is L × L 
+L = 11 # the full system is L × L 
 t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
