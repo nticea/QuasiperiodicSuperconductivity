@@ -5,9 +5,9 @@ include("../../src/model.jl")
 include("../../src/submit_job.jl")
 
 ## PARAMETERS ## 
-Js = LinRange(0, 5, 30)
+J = 0
 λ = 1 / 5
-E₀ = 0
+E₀ = 0.75
 t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -20,10 +20,17 @@ V1 = -1
 periodic = 0
 ndims = 3
 
+nrep = 30
+
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "multifractal_scaling"
 
-for J in Js
+for _ in 1:nrep
+    # make random potential offsets 
+    ϕx = 2π * rand()
+    ϕy = 2π * rand()
+    ϕz = 2π * rand()
+
     # L = 10
     ps = ModelParams(L=10, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
     submit_job(ps, filepath, @__DIR__, job_prefix, mem=32, kwargs="$λ $E₀", time="5:00")
