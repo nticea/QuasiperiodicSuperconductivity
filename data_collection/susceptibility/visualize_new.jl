@@ -19,7 +19,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 0#1e-2
+T_cutoff = 1e-2
 disorder = false
 
 # read files 
@@ -68,6 +68,14 @@ end
 gdf = groupby(dfsummary, [:J, :T])
 dfmean = combine(gdf, [:χswave => mean, :χdwave => mean, :dχswave => mean, :dχdwave => mean,
     :χswave => sem, :χdwave => sem, :dχswave => sem, :dχdwave => sem])
+
+sems = dfmean.dχdwave_sem
+sems[isnan.(sems)] .= 0
+dfmean.dχdwave_sem = sems
+
+sems = dfmean.dχswave_sem
+sems[isnan.(sems)] .= 0
+dfmean.dχswave_sem = sems
 
 Js = sort(unique(dfmean.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
