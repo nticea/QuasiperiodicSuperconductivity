@@ -23,7 +23,7 @@ V1 = 0
 ndims = 3
 periodic = true
 disorder = false
-savefigs = false
+savefigs = true
 slice = 1
 
 if disorder
@@ -66,37 +66,60 @@ Js = Js[sortidx]
 Tcs = Tcs[sortidx]
 Tcs_err = Tcs_err[sortidx]
 p1 = plot(grid=false)
-plot!(p1, Js, Tcs, color="red", label=nothing, ribbon=Tcs_err)
+plot!(p1, Js, Tcs, color="red", label=nothing)
 scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
 xlabel!(p1, "J")
-# title!(p1, "Tc for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $size_str $pot lattice")
+title!(p1, "Tc for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $size_str $pot lattice")
+
+# make linear interpolation
+Tc1_itp = LinearInterpolation(Js, Tcs)
 
 # Superfluid stiffness 
 df_BdG = df_BdG[df_BdG.T.==0, :] # stiffness at 0T only
 gdf_BdG = groupby(df_BdG, [:J])
-BdG_mean = DataFrame(J=[], Tc=[])
+BdG_summary = DataFrame(J=[], Tcx=[], Tcy=[], Tcz=[])
 
 for g in gdf_BdG
     for r in eachrow(g)
         Tc = phase_fluctuation_Tc(m; Δ=r.Δ, K=r.K, Π=r.Π)
-        dfi = DataFrame(J=[r.J], Tc=[Tc])
-        append!(BdG_mean, dfi)
+        dfi = DataFrame(J=[r.J], Tcx=[Tc[1]], Tcy=[Tc[2]], Tcz=[Tc[3]])
+        append!(BdG_summary, dfi)
     end
 end
 
-dirs = ["Dₛ/π (x̂)", "Dₛ/π (ŷ)", "Dₛ/π (ẑ)"]
+gdf = groupby(BdG_summary, [:J])
+BdG_mean = combine(gdf, [:Tcx => mean, :Tcy => mean, :Tcz => mean])
+
+dirs = ["Tc₂ (x̂)", "Tc₂ (ŷ)", "Tc₂ (ẑ)"]
 cmap = ["green", "orange", "blue"]
-Js, Tcs = BdG_mean.J, BdG_mean.Tc
+Js, Tcsx, Tcsy, Tcsz = BdG_mean.J, BdG_mean.Tcx_mean, BdG_mean.Tcy_mean, BdG_mean.Tcz_mean
 sortidx = sortperm(Js)
 Js = Js[sortidx]
-Tcs = Tcs[sortidx]
+Tcsx = Tcsx[sortidx]
+Tcsy = Tcsy[sortidx]
+Tcsz = Tcsz[sortidx]
+toplots = [Tcsx, Tcsy, Tcsz]
 for i in 1:ndims
-    toplot = [Tc[i] for Tc in Tcs]
+    toplot = toplots[i]
     plot!(p1, Js, toplot, label=nothing, c=cmap[i], secondary=true)
     scatter!(p1, Js, toplot, label=dirs[i], c=cmap[i], secondary=true)
 end
-plot!(p1, legend=:right)
-plot!(p1, legend=false)
+plot!(p1, legend=:topright)
+# plot!(p1, legend=false)
+ylims!(p1, 0, 1)
+
+# make linear interpolation
+Tc2x_itp = LinearInterpolation(Js, Tcsx)
+Tc2y_itp = LinearInterpolation(Js, Tcsy)
+Tc2z_itp = LinearInterpolation(Js, Tcsz)
+
+# now plot the minimum of everything 
+Tc_actual = []
+for j in Js
+    t1, t2, t3, t4 = Tc1_itp[j], Tc2x_itp[j], Tc2y_itp[j], Tc2z_itp[j]
+    push!(Tc_actual, minimum([t1, t2, t3, t4]))
+end
+plot!(p1, Js, Tc_actual .- 0.01, label="Tc", ls=:dashdot, c="black")
 
 if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_$(pot)_stiffness.pdf"))
