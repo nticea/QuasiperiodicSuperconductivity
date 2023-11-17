@@ -18,11 +18,11 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = -3
-V1 = 0
+V0 = 1
+V1 = -3
 ndims = 3
 periodic = true
-disorder = true
+disorder = false
 savefigs = false
 slice = 1
 
