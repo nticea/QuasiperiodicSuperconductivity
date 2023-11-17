@@ -744,7 +744,7 @@ function fourier_transform_eigenstates(DH; minus=false)
 end
 
 function compute_scaling_properties(m::ModelParams; λ::Real, E₀::Real, loadpath::Union{String,Nothing}=nothing, num_avg::Int=10)
-    H = DiagonalizedHamiltonian(m, loadpath=loadpath)
+    H = DiagonalizedHamiltonian(m, loadpath=loadpath, scale_μ=false)
 
     # multifractal mean
     α₀ = multifractal_mean(H; E₀=E₀, λ=λ, num_avg=num_avg)

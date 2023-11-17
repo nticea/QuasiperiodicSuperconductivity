@@ -22,8 +22,6 @@ disorder = Bool(disorder)
 datapath = joinpath(@__DIR__, "data")
 mkpath(datapath)
 
-dfs = load_dfs()
-
 Js = LinRange(0, 5, 30)
 for J in Js
     @show L, J
@@ -36,10 +34,8 @@ for J in Js
     # scratchpath = joinpath(scratchbase, stamp)
 
     m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
-    if !already_computed(dfs, m; E₀=E₀, λ=λ)
-        α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀)
-        @show α₀, ipr_real, ipr_k
-        # save it out 
-        save_results(m, λ=λ, E₀=E₀, α₀=α₀, ipr_real=ipr_real, ipr_k=ipr_k)
-    end
+    α₀, ipr_real, ipr_k = compute_scaling_properties(m; λ=λ, E₀=E₀)
+    @show α₀, ipr_real, ipr_k
+    # save it out 
+    save_results(m, λ=λ, E₀=E₀, α₀=α₀, ipr_real=ipr_real, ipr_k=ipr_k)
 end
