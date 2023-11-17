@@ -13,13 +13,13 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 11 # the full system is L × L 
+L = 13 # the full system is L × L 
 t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 1
-V1 = -3
+V0 = -3
+V1 = 0
 ndims = 3
 periodic = true
 disorder = true
@@ -65,7 +65,7 @@ sortidx = sortperm(Js)
 Js = Js[sortidx]
 Tcs = Tcs[sortidx]
 Tcs_err = Tcs_err[sortidx]
-p1 = plot(grid=false, ylims=(0, 1))
+p1 = plot(grid=false)
 plot!(p1, Js, Tcs, color="red", label=nothing, ribbon=Tcs_err)
 scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
 xlabel!(p1, "J")
