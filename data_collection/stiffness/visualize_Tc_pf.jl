@@ -13,13 +13,13 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 13 # the full system is L × L 
+L = 11 # the full system is L × L 
 t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 1
-V1 = -3
+V0 = -3
+V1 = 0
 ndims = 3
 periodic = true
 disorder = false

@@ -127,11 +127,13 @@ end
 function phase_fluctuation_Tc(m::ModelParams; Δ, K, Π, ky::Real=0, A::Real=2.2)
     ξ = coherence_length(m, Δ=Δ, ky=ky)
     if ξ < 1
-        ξ = 1 # ξ cannot be smaller than lattice constant 
+        aSC = 1 # ξ cannot be smaller than lattice constant 
+    else
+        aSC = ξ * √π
     end
     @show ξ
     Ds = -K .+ Π
-    return π^(3 / 2) * ξ * A .* Ds ./ (4)
+    return aSC * A .* Ds ./ (4)
 end
 
 function _spatial_profile(Δ, L, ndims)
