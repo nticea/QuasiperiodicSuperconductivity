@@ -17,7 +17,8 @@ ndims = 3
 # L = 27, time = 4 hrs, mem = 256
 # L = 23, time = 1.5 hrs, mem = 100
 
-Js = expspace(log10(1) - 1, log10(1) + 1, 20)
+# Js = expspace(log10(1) - 1, log10(1) + 1, 20)
+Js = expspace(log10(2) - 1, log10(2) + 1, 21)
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
 job_prefix = "IPR"
