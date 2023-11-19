@@ -18,8 +18,8 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = -3
-V1 = 0
+V0 = 1
+V1 = -3
 ndims = 3
 periodic = true
 disorder = false
@@ -43,8 +43,8 @@ end
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-df_LGE_full = load_LGE(dirname)
-df_BdG_full = load_BdG(dirname)
+# df_LGE_full = load_LGE(dirname)
+# df_BdG_full = load_BdG(dirname)
 
 # for computing fermi velocities
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=0, ϕy=0, ϕz=0, V0=0, V1=0, J=0, periodic=true, ndims=ndims, disorder=false)
