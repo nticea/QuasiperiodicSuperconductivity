@@ -61,7 +61,7 @@ function get_χswave_dwave(χs, Ts)
             zz = [χ[4, 4] for χ in χs]
             xz, zx = [χ[2, 4] for χ in χs], [χ[4, 2] for χ in χs]
             yz, zy = [χ[3, 4] for χ in χs], [χ[4, 3] for χ in χs]
-            χdwave = xx + yy + zz - xy - yx - xz - zx - yz - zy
+            χdwave = xx + yy - xy - yx#xx + yy + zz - xy - yx - xz - zx - yz - zy
         else
             println("sorry")
             χdwave = nothing
