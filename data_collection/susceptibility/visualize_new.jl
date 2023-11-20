@@ -80,7 +80,7 @@ dfmean.dχswave_sem = sems
 Js = sort(unique(dfmean.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
 #cmap = ["red", "blue", "green", "orange"]
-pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave for $title", grid=false), plot(title="χ dwave for $title", grid=false), plot(title="dχdlogT swave for $title", grid=false), plot(title="dχdlogT dwave for $title", grid=false)
+pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave for $title", grid=false, ylims=(-0.2, 0)), plot(title="χ dwave for $title", grid=false, ylims=(-0.2, 0)), plot(title="dχdlogT swave for $title", grid=false, ylims=(-0.2, 0)), plot(title="dχdlogT dwave for $title", grid=false, ylims=(-0.2, 0))
 for (Jᵢ, J) in enumerate(Js)
     dfJ = dfmean[(dfmean.J.==J), :]
     Ts, χswave, χdwave, dχswave, dχdwave = dfJ.T, dfJ.χswave_mean, dfJ.χdwave_mean, dfJ.dχswave_mean, dfJ.dχdwave_mean

@@ -6,7 +6,7 @@ using Profile
 using ProgressBars
 using CSV
 using DataFrames
-using Dates
+using Dates, Random
 
 include("../../src/meanfield.jl")
 include("utilities.jl")
@@ -19,7 +19,6 @@ L = Int(L)
 ndims = Int(ndims)
 periodic = Bool(periodic)
 disorder = Bool(disorder)
-m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
 
 Λ = 0.3
 if disorder
@@ -45,14 +44,16 @@ mkpath(scratchbase)
 scratchpath = joinpath(scratchbase, stamp)
 
 # all the other things we have computed 
-dfs = load_dfs(dirname=dirname)
+Js = [0, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 5, 6]
+Js = shuffle(Js)
 
-if !already_computed(dfs, T=T, L=L, Q=Q, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, ndims=ndims, J=J, Λ=Λ, μ=μ)
+for J in Js
+    m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
     @show L, J, T, ndims
 
     ## CALCULATION ## 
     println("Finding χ")
-    χ, dχdlogT = @time uniform_susceptibility(m, T=T, checkpointpath=scratchpath, calculate_dχdlogT=true, Λ=Λ)
+    χ, dχdlogT = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
 
     ## SAVING ##  
     timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
