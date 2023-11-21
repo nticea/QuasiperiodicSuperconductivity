@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 23 # the full system is L × L 
+L = 17 # the full system is L × L 
 μ = 0.75
 ndims = 3
 Q = (√5 - 1) / 2
@@ -24,25 +24,29 @@ disorder = false
 
 # read files 
 if savefigs
-    mkpath(joinpath(@__DIR__, "figures"))
-end
-if disorder
-    dirname = "3D_data_random_PBC"
-    title = "disordered potential"
-else
-    dirname = "3D_data_PBC"
-    title = "quasiperiodic potential"
+    figpath = mkpath(joinpath(@__DIR__, "figures"))
 end
 # if disorder
-#     dirname = "data_random_3D"
+#     dirname = "3D_data_random_PBC"
 #     title = "disordered potential"
 # else
-#     dirname = "data_QP_3D"
+#     dirname = "3D_data_PBC"
 #     title = "quasiperiodic potential"
 # end
+if disorder
+    dirname = "data_random_PBC"
+    title = "disordered potential"
+    pot = "disorder"
+else
+    dirname = "data_PBC"
+    title = "quasiperiodic potential"
+    pot = "QP"
+end
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
+# xtcks = LinRange(T_cutoff, 10, 20)
+xtcks = [1e-3, 1e-2, 1e-1, 1, 10]
 # make a new dataframe to hold the averaged quantities 
 gdf = groupby(df, [:J, :T])
 dfsummary = DataFrame(J=[], T=[], χswave=[], χdwave=[], dχswave=[], dχdwave=[])
@@ -80,7 +84,7 @@ dfmean.dχswave_sem = sems
 Js = sort(unique(dfmean.J))
 cmap = cgrad(:matter, length(Js), categorical=true)
 #cmap = ["red", "blue", "green", "orange"]
-pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave for $title", grid=false, ylims=(-0.2, 0)), plot(title="χ dwave for $title", grid=false, ylims=(-0.2, 0)), plot(title="dχdlogT swave for $title", grid=false, ylims=(-0.2, 0)), plot(title="dχdlogT dwave for $title", grid=false, ylims=(-0.2, 0))
+pχswave, pχdwave, pdχswave, pdχdwave = plot(title="χ swave for $title", grid=false, ylims=(0, 1.5), xticks=(xtcks, xtcks)), plot(title="χ dwave for $title", grid=false, ylims=(0, 1.5), xticks=(xtcks, xtcks)), plot(title="dχdlogT swave for $title", grid=false, ylims=(-0.25, 0), xticks=(xtcks, xtcks)), plot(title="dχdlogT dwave for $title", grid=false, ylims=(-0.25, 0), xticks=(xtcks, xtcks))
 for (Jᵢ, J) in enumerate(Js)
     dfJ = dfmean[(dfmean.J.==J), :]
     Ts, χswave, χdwave, dχswave, dχdwave = dfJ.T, dfJ.χswave_mean, dfJ.χdwave_mean, dfJ.dχswave_mean, dfJ.dχdwave_mean
@@ -107,4 +111,11 @@ for (Jᵢ, J) in enumerate(Js)
 
     plot!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label=nothing, c=cmap[Jᵢ], ribbon=σ_dχdwave)
     scatter!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
+end
+
+if savefigs
+    savefig(pχswave, joinpath(figpath, "χswave_$(L)L_$(pot).pdf"))
+    savefig(pχdwave, joinpath(figpath, "χdwave_$(L)L_$(pot).pdf"))
+    savefig(pdχswave, joinpath(figpath, "dχswave_$(L)L_$(pot).pdf"))
+    savefig(pdχdwave, joinpath(figpath, "dχdwave_$(L)L_$(pot).pdf"))
 end

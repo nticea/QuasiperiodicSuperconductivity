@@ -7,7 +7,7 @@ include("../../src/model.jl")
 include("utilities.jl")
 
 # Parameters 
-L = 23
+L = 11
 t = 1
 Q = (√5 - 1) / 2
 μ = 1e-8
@@ -15,8 +15,8 @@ Q = (√5 - 1) / 2
 V0 = 0
 V1 = 0
 periodic = true
-disorder = false
-savefigs = false
+disorder = true
+savefigs = true
 ndims = 3
 nbins = 30
 
@@ -28,13 +28,17 @@ else
     pot = "QP"
 end
 
-dirname = "$(ndims)D_data_$pot"
+# new data 
+# dirname = "$(ndims)D_data_$pot"
 # all_dfs = load_dfs(dirname=dirname)
-# all_dfs = DataFrame(CSV.File("/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/IPR/3D_11L_data/IPR_data_11L.csv"))
+
+# old data 
+all_dfs = DataFrame(CSV.File("/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/IPR/3D_11L_data/IPR_data_11L.csv"))
 df = all_dfs[(all_dfs.L.==L).&&(all_dfs.pot.==pot), :]
-# df = convert_df_arrays(df, "ipr_real")
-# df = convert_df_arrays(df, "ipr_k")
-# df = convert_df_arrays(df, "E")
+df = convert_df_arrays(df, "ipr_real")
+df = convert_df_arrays(df, "ipr_k")
+df = convert_df_arrays(df, "E")
+
 
 function sem_dims(arr; dims)
     @assert Base.ndims(arr) == 2
@@ -117,7 +121,7 @@ for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength
         # phase 
         c = get_colour(val_xy, max_val=maximum(hval))
         # onsite term  
-        scatter!(p, [J], [E], ms=abs(dos_xy) * 0.003, c=c, legend=:false)
+        scatter!(p, [J], [E], ms=abs(dos_xy) * 0.03, c=c, legend=:false)
     end
 end
 
@@ -142,11 +146,12 @@ for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength
             # phase 
             c = get_colour(val_xy, max_val=maximum(hval))
             # onsite term  
-            scatter!(p, [J], [E], ms=abs(dos_xy) * 0.003, c=c, legend=:false)
+            scatter!(p, [J], [E], ms=abs(dos_xy) * 0.03, c=c, legend=:false)
         end
     end
 end
-xticks!(p, [0.2, 2, 20])
+xtcks = collect(0.2:0.9:20)
+plot!(p, xticks=(xtcks, xtcks ./ 2))
 
 if savefigs
     savefig(p, joinpath(@__DIR__, "figures", "$(L)L_$(ndims)D_IPR_$(pot).pdf"))
