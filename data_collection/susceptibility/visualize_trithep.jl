@@ -20,7 +20,7 @@ Q = (√5 - 1) / 2
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_cutoff = 0
-disorder = true
+disorder = false
 J_cutoff = 0
 
 # read files 
@@ -111,7 +111,7 @@ for (Tᵢ, T) in enumerate(reverse(Ts))
     scatter!(pdχdwave, Js, dχdwave, xaxis=:log10, xlabel="J", ylabel="dχ", label="T=$T", c=cmap[Tᵢ])
 end
 
-plot!(pdχdwave, legend=false)
-plot!(pdχswave, legend=false)
-plot!(pχdwave, legend=false)
-plot!(pχswave, legend=false)
+# plot!(pdχdwave, legend=false)
+# plot!(pdχswave, legend=false)
+# plot!(pχdwave, legend=false)
+# plot!(pχswave, legend=false)
