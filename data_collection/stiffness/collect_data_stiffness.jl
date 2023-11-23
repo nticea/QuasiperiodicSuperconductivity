@@ -38,8 +38,8 @@ else
     pot = "QP"
 end
 stamp = "BdG_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q_$(V0)V0_$(V1)V1.csv"
-# scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "BdG")
-scratchbase = @__DIR__
+scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "BdG")
+# scratchbase = @__DIR__
 mkpath(scratchbase)
 fname = joinpath(scratchbase, stamp)
 BdG_checkpoint = load_BdG_checkpoint(m, scratchbase)
