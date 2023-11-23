@@ -304,9 +304,5 @@ function load_BdG_checkpoint(m::ModelParams, dirname)
     dropmissing!(df)
     df = df[(df.L.==m.L).&&(df.J.==m.J).&&(df.Q.==m.Q).&&(df.θ.==m.θ).&&(df.ϕx.==m.ϕx).&&(df.ϕy.==m.ϕy).&&(df.ϕz.==m.ϕz).&&(df.ndims.==m.ndims).&&(df.V0.==m.V0).&&(df.V1.==m.V1).&&(df.t.==m.t).&&(df.μ.==m.μ).&&(df.periodic.==m.periodic).&&(df.disorder.==m.disorder), :]
     sort!(df, [:n], rev=true)
-    if size(df)[1] > 0
-        return df[1, :]
-    else
-        return df
-    end
+    return df
 end
