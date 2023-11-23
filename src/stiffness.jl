@@ -3,9 +3,9 @@ include("BdG.jl")
 using Interpolations
 using Polynomials
 
-function superfluid_stiffness_finiteT(m::ModelParams; T::Real, niter::Int=100, tol::Real=1e-12, Δ_init=nothing)
+function superfluid_stiffness_finiteT(m::ModelParams; T::Real, niter::Int=100, tol::Real=1e-12, Δ_init=nothing, scratchpath=nothing)
 
-    U, V, E, Δ = BdG_coefficients(m, T=T, niter=niter, tol=tol, Δ_init=Δ_init)
+    U, V, E, Δ = BdG_coefficients(m, T=T, niter=niter, tol=tol, Δ_init=Δ_init, scratchpath=scratchpath)
 
     # number of sites
     N, _ = size(U)
