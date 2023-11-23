@@ -32,13 +32,21 @@ LGE_tol = 1e-2
 ## SAVING ## 
 if disorder
     dirname = "data_$(ndims)D_disorder"
+    pot = "disorder"
 else
     dirname = "data_$(ndims)D_QP"
+    pot = "QP"
 end
+stamp = "BdG_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q_$(V0)V0_$(V1)V1.csv"
+# scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "BdG")
+scratchbase = @__DIR__
+mkpath(scratchbase)
+fname = joinpath(scratchbase, stamp)
+BdG_checkpoint = load_BdG_checkpoint(m, scratchbase)
 
 datapath = joinpath(@__DIR__, dirname)
 mkpath(datapath)
-dfs = load_dfs(dirname)
+
 timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
 savepath_BdG = joinpath(datapath, "$(L)L_ΦQ_BdG_" * timestamp * ".csv")
 savepath_LGE = joinpath(datapath, "$(L)L_ΦQ_LGE_" * timestamp * ".csv")
@@ -52,16 +60,34 @@ df_LGE = DataFrame(L=[], t=[], μ=[], J=[], Q=[], θ=[],
 # Everything is at 0T
 T = 0
 
-# Get the initial LGE guess 
-println("Finding LGE sol'n at T=0")
-λ, Δ_LGE = @time pairfield_correlation(m, T=T)
-update_results!(m, df_LGE; T=T, λ=λ, Δ=Δ_LGE)
-CSV.write(savepath_LGE, df_LGE)
-flush(stdout)
+if size(BdG_checkpoint)[1] == 0
+    # Get the initial LGE guess 
+    println("Finding LGE sol'n at T=0")
+    λ, Δ_LGE = @time pairfield_correlation(m, T=T)
+    update_results!(m, df_LGE; T=T, λ=λ, Δ=Δ_LGE)
+    CSV.write(savepath_LGE, df_LGE)
 
-# Superfluid stiffness
-println("Computing superfluid stiffness at T=0")
-K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE)
-update_results!(m, df_BdG; T=T, λ=λ, Δ=Δ_BdG, K=K, Π=Π)
-CSV.write(savepath_BdG, df_BdG)
-flush(stdout)
+    # checkpoint 
+    BdG_checkpoint = DataFrame(L=[L], t=[t], μ=[μ], J=[J],
+        Q=[Q], θ=[θ], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], V0=[V0], V1=[V1],
+        ndims=[ndims], periodic=[periodic],
+        disorder=[disorder], Δ=[Δ_LGE], n=[1])
+    CSV.write(fname, BdG_checkpoint)
+    flush(stdout)
+
+    # Superfluid stiffness
+    println("Computing superfluid stiffness at T=0")
+    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE, scratchpath=scratchbase)
+    update_results!(m, df_BdG; T=T, λ=λ, Δ=Δ_BdG, K=K, Π=Π)
+    CSV.write(savepath_BdG, df_BdG)
+    flush(stdout)
+else
+    # Superfluid stiffness
+    println("Computing superfluid stiffness at T=0")
+    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, scratchpath=scratchbase)
+    update_results!(m, df_BdG; T=T, λ=0, Δ=Δ_BdG, K=K, Π=Π)
+    CSV.write(savepath_BdG, df_BdG)
+    flush(stdout)
+end
+
+
