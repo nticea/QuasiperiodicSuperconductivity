@@ -22,7 +22,7 @@ ndims = 3
 disorder = false
 periodic = true
 
-Js = [0, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 5, 6]#collect(0:0.25:6)
+Js = [0, 0.1, 0.25, 0.3, 0.4, 0.45, 0.5, 0.55]
 Ts = expspace(-3, 1, 30) # temperature 
 
 nrep = 40
