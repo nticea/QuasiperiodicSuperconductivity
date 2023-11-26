@@ -45,5 +45,5 @@ for _ in 1:nrep
 
     # L = 25
     ps = ModelParams(L=25, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=256, kwargs="$λ $E₀", time="2:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, kwargs="$λ $E₀", time="2:00:00")
 end
