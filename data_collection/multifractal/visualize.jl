@@ -23,9 +23,27 @@ if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
 
+function parse_strings_as_floats!(df::DataFrame)
+    for col in names(df)
+        for row in 1:nrow(df)
+            if isa(df[row, col], AbstractString)
+                try
+                    df[row, col] = parse(Float64, df[row, col])
+                catch
+                    # Handle the case where parsing fails (e.g., non-numeric string)
+                    # You might want to log a warning or handle this differently based on your needs
+                    println("Failed to parse as Float64: ", df[row, col])
+                end
+            end
+        end
+    end
+end
+
+
 df = load_dfs()
 # @assert 1 == 0
-df = df[(df.Q.==Q).&(df.θ.==θ).&(df.λ.==λ).&(df.ndims.==ndims).&(df.E₀.==E₀).&(typeof.(df.J).==Float64), :]
+df = df[(df.Q.==Q).&(df.θ.==θ).&(df.λ.==λ).&(df.ndims.==ndims).&(df.E₀.==E₀), :]
+parse_strings_as_floats!(df)
 
 # for a fixed L and J, we want to average over all ϕx and ϕy 
 gs = groupby(df, [:L, :J])
