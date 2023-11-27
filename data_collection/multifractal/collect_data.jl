@@ -22,7 +22,7 @@ disorder = Bool(disorder)
 datapath = joinpath(@__DIR__, "data")
 mkpath(datapath)
 
-Js = LinRange(0, 5, 30)
+Js = LinRange(4, 5, 30)
 for J in Js
     @show L, J
 
