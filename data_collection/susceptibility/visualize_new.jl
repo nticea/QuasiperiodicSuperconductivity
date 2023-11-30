@@ -33,15 +33,6 @@ else
     dirname = "3D_data_PBC"
     title = "quasiperiodic potential"
 end
-# if disorder
-#     dirname = "data_random_PBC"
-#     title = "disordered potential"
-#     pot = "disorder"
-# else
-#     dirname = "data_PBC"
-#     title = "quasiperiodic potential"
-#     pot = "QP"
-# end
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
