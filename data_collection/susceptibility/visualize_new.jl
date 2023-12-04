@@ -104,6 +104,12 @@ for (Jᵢ, J) in enumerate(Js)
     scatter!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
 end
 
+xlims!(pχswave, 0.5, 1.5)
+xlims!(pχdwave, 0.5, 1.5)
+xlims!(pdχswave, 0.5, 1.5)
+xlims!(pdχdwave, 0.5, 1.5)
+
+
 if savefigs
     savefig(pχswave, joinpath(figpath, "χswave_$(L)L_$(pot).pdf"))
     savefig(pχdwave, joinpath(figpath, "χdwave_$(L)L_$(pot).pdf"))
