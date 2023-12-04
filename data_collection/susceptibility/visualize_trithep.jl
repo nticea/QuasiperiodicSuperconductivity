@@ -19,9 +19,9 @@ Q = (√5 - 1) / 2
 θ = π / 7
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_cutoff = 0
-disorder = false
-J_cutoff = 0
+T_cutoff = 0.1
+disorder = true
+J_cutoff = -1
 
 # read files 
 if savefigs
@@ -34,15 +34,8 @@ else
     dirname = "3D_data_PBC"
     title = "quasiperiodic potential"
 end
-# if disorder
-#     dirname = "data_random_3D"
-#     title = "disordered potential"
-# else
-#     dirname = "data_QP_3D"
-#     title = "quasiperiodic potential"
-# end
 df = load_dfs(dirname=dirname)
-df = df[(df.L.==L).&&(df.J.>J_cutoff).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
+df = df[(df.L.==L).&&(df.J.>J_cutoff).&&(df.T.<=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
 # make a new dataframe to hold the averaged quantities 
 gdf = groupby(df, [:J, :T])
@@ -98,20 +91,22 @@ for (Tᵢ, T) in enumerate(reverse(Ts))
     σ_dχswave = σ_dχswave[sortidx]
     σ_dχdwave = σ_dχdwave[sortidx]
 
-    plot!(pχswave, Js, χswave, xaxis=:log10, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ])
-    scatter!(pχswave, Js, χswave, xaxis=:log10, xlabel="J", ylabel="χ", label="T=$T", c=cmap[Tᵢ])
+    plot!(pχswave, Js, χswave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ])
+    scatter!(pχswave, Js, χswave, xlabel="J", ylabel="χ", label="T=$T", c=cmap[Tᵢ])
 
-    plot!(pχdwave, Js, χdwave, xaxis=:log10, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ])
-    scatter!(pχdwave, Js, χdwave, xaxis=:log10, xlabel="J", ylabel="χ", label="T=$T", c=cmap[Tᵢ])
+    plot!(pχdwave, Js, χdwave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ])
+    scatter!(pχdwave, Js, χdwave, xlabel="J", ylabel="χ", label="T=$T", c=cmap[Tᵢ])
 
-    plot!(pdχswave, Js, dχswave, xaxis=:log10, xlabel="J", ylabel="dχ", label=nothing, c=cmap[Tᵢ])
-    scatter!(pdχswave, Js, dχswave, xaxis=:log10, xlabel="J", ylabel="dχ", label="T=$T", c=cmap[Tᵢ])
+    plot!(pdχswave, Js, dχswave, xlabel="J", ylabel="dχ", label=nothing, c=cmap[Tᵢ])
+    scatter!(pdχswave, Js, dχswave, xlabel="J", ylabel="dχ", label="T=$T", c=cmap[Tᵢ])
 
-    plot!(pdχdwave, Js, dχdwave, xaxis=:log10, xlabel="J", ylabel="dχ", label=nothing, c=cmap[Tᵢ])
-    scatter!(pdχdwave, Js, dχdwave, xaxis=:log10, xlabel="J", ylabel="dχ", label="T=$T", c=cmap[Tᵢ])
+    plot!(pdχdwave, Js, dχdwave, xlabel="J", ylabel="dχ", label=nothing, c=cmap[Tᵢ])
+    scatter!(pdχdwave, Js, dχdwave, xlabel="J", ylabel="dχ", label="T=$T", c=cmap[Tᵢ])
 end
 
-# plot!(pdχdwave, legend=false)
-# plot!(pdχswave, legend=false)
-# plot!(pχdwave, legend=false)
-# plot!(pχswave, legend=false)
+
+
+plot!(pdχdwave, legend=false)
+plot!(pdχswave, legend=false)
+plot!(pχdwave, legend=false)
+plot!(pχswave, legend=false)
