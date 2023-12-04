@@ -20,7 +20,7 @@ Q = (√5 - 1) / 2
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_cutoff = 0.1
-disorder = true
+disorder = false
 J_cutoff = -1
 
 # read files 
