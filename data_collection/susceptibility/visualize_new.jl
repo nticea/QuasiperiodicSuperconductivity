@@ -20,7 +20,7 @@ Q = (√5 - 1) / 2
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_cutoff = 0#2 * 1e-3
-disorder = true
+disorder = false
 
 # read files 
 if savefigs
@@ -103,6 +103,12 @@ for (Jᵢ, J) in enumerate(Js)
     plot!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label=nothing, c=cmap[Jᵢ], ribbon=σ_dχdwave)
     scatter!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
 end
+
+xlims!(pχswave, 0.5, 1.5)
+xlims!(pχdwave, 0.5, 1.5)
+xlims!(pdχswave, 0.5, 1.5)
+xlims!(pdχdwave, 0.5, 1.5)
+
 
 if savefigs
     savefig(pχswave, joinpath(figpath, "χswave_$(L)L_$(pot).pdf"))
