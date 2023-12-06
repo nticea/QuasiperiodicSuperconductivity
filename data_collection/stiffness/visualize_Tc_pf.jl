@@ -23,7 +23,7 @@ V1 = -3
 ndims = 3
 periodic = true
 disorder = false
-savefigs = true
+savefigs = false
 slice = 1
 
 if disorder
@@ -117,7 +117,7 @@ Tc2z_itp = LinearInterpolation(Js, Tcsz)
 Tc_actual = []
 for j in Js
     t1, t2, t3, t4 = Tc1_itp[j], Tc2x_itp[j], Tc2y_itp[j], Tc2z_itp[j]
-    push!(Tc_actual, minimum([t1, t2, t3, t4]))
+    push!(Tc_actual, finite_minimum([t1, t2, t3, t4]))
 end
 plot!(p1, Js, Tc_actual .- 0.01, label="Tc", ls=:dashdot, c="black")
 

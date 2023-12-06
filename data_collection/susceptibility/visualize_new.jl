@@ -17,7 +17,7 @@ L = 23 # the full system is L × L
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
-savefigs = false
+savefigs = true
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_cutoff = 0#2 * 1e-3
 disorder = false
@@ -29,9 +29,11 @@ end
 if disorder
     dirname = "3D_data_random_PBC"
     title = "disordered potential"
+    pot = "disorder"
 else
     dirname = "3D_data_PBC"
     title = "quasiperiodic potential"
+    pot = "QP"
 end
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.T.>=T_cutoff).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
@@ -104,10 +106,10 @@ for (Jᵢ, J) in enumerate(Js)
     scatter!(pdχdwave, Ts, dχdwave, xaxis=:log10, xlabel="T", ylabel="dχ", label="J=$J", c=cmap[Jᵢ])
 end
 
-xlims!(pχswave, 0.5, 1.5)
-xlims!(pχdwave, 0.5, 1.5)
-xlims!(pdχswave, 0.5, 1.5)
-xlims!(pdχdwave, 0.5, 1.5)
+# xlims!(pχswave, 0.5, 1.5)
+# xlims!(pχdwave, 0.5, 1.5)
+# xlims!(pdχswave, 0.5, 1.5)
+# xlims!(pdχdwave, 0.5, 1.5)
 
 
 if savefigs
