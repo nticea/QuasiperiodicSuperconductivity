@@ -19,6 +19,8 @@ ndims = Int(ndims)
 periodic = Bool(periodic)
 disorder = Bool(disorder)
 
+@assert periodic == false
+
 datapath = joinpath(@__DIR__, "data")
 mkpath(datapath)
 
