@@ -17,8 +17,8 @@ ndims = 3
 # L = 27, time = 4 hrs, mem = 256
 # L = 23, time = 1.5 hrs, mem = 100
 
-Js = [0, 0.8, 0.85, 0.9, 0.95, 1, 1.05]#collect(0:0.25:6)
-Ts = expspace(-3, 1, 30) # temperature 
+Js = collect(0:0.05:1.25)#[0, 0.8, 0.85, 0.9, 0.95, 1, 1.05]#collect(0:0.25:6)
+Ts = expspace(-3, -1, 10) # temperature 
 # Ts = Ts[Ts.<=0.1]
 
 filepath = joinpath(@__DIR__, "collect_data.jl")
