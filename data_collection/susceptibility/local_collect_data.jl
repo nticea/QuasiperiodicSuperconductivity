@@ -11,7 +11,7 @@ using Dates
 include("../../src/meanfield.jl")
 include("utilities.jl")
 
-L = 23
+L = 11
 t = 1 # hopping 
 Q = (√5 - 1) / 2
 μ = 0.75
@@ -22,8 +22,8 @@ ndims = 3
 disorder = false
 periodic = true
 
-Js = [0, 0.8, 0.85, 0.9, 0.95, 1, 1.05]
-Ts = expspace(-3, 1, 30) # temperature 
+Js = collect(0:0.05:1.25)
+Ts = expspace(-3, -1, 15) # temperature 
 
 nrep = 40
 
@@ -44,22 +44,25 @@ for n in 1:nrep
             @show n
             ## QUASIPERIODIC 
             m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-            χ, dχdlogT = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
+            χ0_dwave, dχdlogT_dwave, χ0_pwave, dχdlogT_pwave = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
+            ## SAVING ##  
             timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
-            savepath = joinpath(disorder_datapath, "$(L)L_$(J)J" * timestamp * ".csv")
-            df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
-                ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims],
-                T=[T], χ=[χ], dχdlogT=[dχdlogT], Λ=[Λ])
+            savepath = joinpath(QP_datapath, "$(L)L_$(J)J" * timestamp * ".csv")
+            df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ], μ=[μ],
+                ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims], T=[T], Λ=[Λ],
+                χ_dwave=[χ0_dwave], dχdlogT_dwave=[dχdlogT_dwave],
+                χ_pwave=[χ0_pwave], dχdlogT_pwave=[dχdlogT_pwave])
             CSV.write(savepath, df)
 
             ## DISORDER 
             m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=-1, V1=-1, J=J, periodic=periodic, ndims=ndims, disorder=true)
-            χ, dχdlogT = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
+            χ0_dwave, dχdlogT_dwave, χ0_pwave, dχdlogT_pwave = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
             timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
-            savepath = joinpath(QP_datapath, "$(L)L_$(J)J" * timestamp * ".csv")
-            df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ],
-                ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims],
-                T=[T], χ=[χ], dχdlogT=[dχdlogT], Λ=[Λ])
+            savepath = joinpath(disorder_datapath, "$(L)L_$(J)J" * timestamp * ".csv")
+            df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ], μ=[μ],
+                ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims], T=[T], Λ=[Λ],
+                χ_dwave=[χ0_dwave], dχdlogT_dwave=[dχdlogT_dwave],
+                χ_pwave=[χ0_pwave], dχdlogT_pwave=[dχdlogT_pwave])
             CSV.write(savepath, df)
         end
     end

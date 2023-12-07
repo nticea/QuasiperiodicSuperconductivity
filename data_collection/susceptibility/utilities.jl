@@ -15,25 +15,18 @@ function load_dfs(; dirname="data")
     # read files 
     files = readdir(joinpath(@__DIR__, dirname))
     df = DataFrame(L=[], J=[], Q=[], θ=[], μ=[], ϕx=[], ϕy=[], ϕz=[], ndims=[],
-        T=[], Λ=[], χ=[], dχdlogT=[])
+        T=[], Λ=[], χ_dwave=[], dχdlogT_dwave=[], χ_pwave=[], dχdlogT_pwave=[])
     for f in files
         if endswith(f, ".csv")
             try
                 dfi = DataFrame(CSV.File(joinpath(@__DIR__, dirname, f)))
-                dfi = convert_df_arrays(dfi, "χ")
-                dfi = convert_df_arrays(dfi, "dχdlogT")
+                dfi = convert_df_arrays(dfi, "χ_dwave")
+                dfi = convert_df_arrays(dfi, "dχdlogT_dwave")
+                dfi = convert_df_arrays(dfi, "χ_pwave")
+                dfi = convert_df_arrays(dfi, "dχdlogT_pwave")
                 append!(df, dfi)
             catch e
-                #println("file $f not valid...?")
-                try
-                    dfi = DataFrame(CSV.File(joinpath(@__DIR__, dirname, f)))
-                    dfi = convert_df_arrays(dfi, "χ")
-                    dfi = convert_df_arrays(dfi, "dχdlogT")
-                    dfi.μ = [0.75 for _ in 1:size(dfi)[1]]
-                    append!(df, dfi)
-                catch e
-                    @show e
-                end
+                @show e
             end
         end
     end

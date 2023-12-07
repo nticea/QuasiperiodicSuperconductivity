@@ -33,7 +33,7 @@ for _ in 1:nrep
     for J in Js
         for T in Ts
             ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=0)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="15:00")
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="20:00")
         end
     end
 
@@ -41,7 +41,7 @@ for _ in 1:nrep
     for J in Js
         for T in Ts
             ps = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=1, ndims=ndims, disorder=1)
-            submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="15:00")
+            submit_job(ps, filepath, @__DIR__, job_prefix, mem=128, kwargs="$T", time="20:00")
         end
     end
 end

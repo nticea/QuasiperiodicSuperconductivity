@@ -38,13 +38,9 @@ datapath = joinpath(@__DIR__, dirname)
 mkpath(datapath)
 # for saving the Hamiltonian
 stamp = "diagonalized_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q.h5"
-scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity", "diagonalized_hamiltonians")
-# scratchbase = @__DIR__
-mkpath(scratchbase)
-scratchpath = joinpath(scratchbase, stamp)
 
 # all the other things we have computed 
-Js = [0, 0.8, 0.85, 0.9, 0.95, 1, 1.05]
+Js = collect(0:0.05:1.25)
 Js = shuffle(Js)
 
 for J in Js
