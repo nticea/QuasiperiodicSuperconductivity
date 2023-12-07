@@ -53,14 +53,15 @@ for J in Js
 
     ## CALCULATION ## 
     println("Finding χ")
-    χ, dχdlogT = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
+    χ0_dwave, dχdlogT_dwave, χ0_pwave, dχdlogT_pwave = @time uniform_susceptibility(m, T=T, calculate_dχdlogT=true, Λ=Λ)
 
     ## SAVING ##  
     timestamp = Dates.format(now(), "yyyy-mm-dd_HH:MM:SS")
     savepath = joinpath(datapath, "$(L)L_$(J)J" * timestamp * ".csv")
     df = DataFrame(L=[L], J=[J], Q=[Q], θ=[θ], μ=[μ],
-        ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims],
-        T=[T], χ=[χ], dχdlogT=[dχdlogT], Λ=[Λ])
+        ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], ndims=[ndims], T=[T], Λ=[Λ],
+        χ_dwave=[χ0_dwave], dχdlogT_dwave=[dχdlogT_dwave],
+        χ_pwave=[χ0_pwave], dχdlogT_pwave=[dχdlogT_pwave])
     CSV.write(savepath, df)
     flush(stdout)
 end

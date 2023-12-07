@@ -112,12 +112,6 @@ function uniform_susceptibility(m;
     Um = hcat(Um...)
     Um_minus = hcat(Um_minus...)
 
-    # Uq = fourier_transform_U.(eachcol(U))
-    # Uq = hcat(Uq...)
-
-    # Uminusq = fourier_transform_U.(eachcol(U), minus=true)
-    # Uminusq = hcat(Uminusq...)
-
     if !isnothing(Λ)
         @warn "Keeping only states close to εf"
         sortidx = sortperm(E)
@@ -133,8 +127,6 @@ function uniform_susceptibility(m;
         Um_minus = Um_minus[:, Ẽ.<Λ.&&Ẽ.>-Λ]
     end
 
-    # Uq_conj = conj.(Uq)
-    # Uminusq_conj = conj.(Uminusq)
     Un_minus_conj = conj.(Un_minus)
     Um_conj = conj.(Um)
 
@@ -166,8 +158,10 @@ function uniform_susceptibility(m;
     ϕpfs = twisted_BC_prefactors(m)
     ϕpfsneg = conj.(ϕpfs)
 
-    χ0 = zeros(nblocks, nblocks)
-    dχdlogT = zeros(nblocks, nblocks)
+    χ0_dwave = zeros(nblocks, nblocks)
+    χ0_pwave = copy(χ0_dwave)
+    dχdlogT_dwave = zeros(nblocks, nblocks)
+    dχdlogT_pwave = copy(dχdlogT_dwave)
     normf = numsites(m)
     for (δ, δp) in δδp
         # multiply with the prefactor 
@@ -179,39 +173,28 @@ function uniform_susceptibility(m;
         Tl1 = transpose(Un_minus_l_δ) * Um .* ϕpfsneg[δp]
         Tl2 = transpose(Un_l_δ) * Um_minus .* ϕpfs[δp]
         # sum them together 
-        Tl = Tl1 + Tl2
-        @einsimd χ := 1 / (2 * normf) * Pnm[n, m] * Tq[n, m] * Tl[n, m]
-        χ0[δ, δp] = real.(χ)
+        Tl_dwave = Tl1 + Tl2
+        Tl_pwave = Tl1 - Tl2
+        @einsimd χdwave := 1 / (2 * normf) * Pnm[n, m] * Tq[n, m] * Tl_dwave[n, m]
+        @einsimd χpwave := 1 / (2 * normf) * Pnm[n, m] * Tq[n, m] * Tl_pwave[n, m]
+        χ0_dwave[δ, δp] = real.(χdwave)
+        χ0_pwave[δ, δp] = real.(χpwave)
 
         if calculate_dχdlogT
-            @einsimd dχ := 1 / (2 * normf) * Pnm_logT[n, m] * Tq[n, m] * Tl[n, m]
-            dχdlogT[δ, δp] = real.(dχ)
+            @einsimd dχdwave := 1 / (2 * normf) * Pnm_logT[n, m] * Tq[n, m] * Tl_dwave[n, m]
+            @einsimd dχpwave := 1 / (2 * normf) * Pnm_logT[n, m] * Tq[n, m] * Tl_pwave[n, m]
+            dχdlogT_dwave[δ, δp] = real.(dχdwave)
+            dχdlogT_pwave[δ, δp] = real.(dχpwave)
         end
     end
 
     if calculate_dχdlogT
-        @show χ0, dχdlogT
-        return χ0, dχdlogT
+        @show χ0_dwave, dχdlogT_dwave, χ0_pwave, dχdlogT_pwave
+        return χ0_dwave, dχdlogT_dwave, χ0_pwave, dχdlogT_pwave
     end
 
-    # multiply with the prefactor 
-    # δ = 1
-    # δp = 1
-    # Uminusq_conj_δ = Uminusq_conj .* pfs[δ, :]
-    # Uminusq_δp_minusϕ = Uminusq .* pfsneg[δp, :]
-    # Uminusq_δp_plusϕ = Uminusq .* pfs[δp, :]
-
-    # # create the terms 
-    # Tq = transpose(Uminusq_conj_δ) * Uq_conj
-    # Tl1 = transpose(Uminusq_δp_plusϕ) * Uq
-    # Tl2 = transpose(Uq) * Uminusq_δp_minusϕ
-    # # sum them together 
-    # Tl = Tl1 + Tl2
-    # @einsimd χ[n, m] := Tq[n, m] * Tl[n, m]
-    # return χ
-
-    @show χ0
-    return χ0
+    @show χ0_dwave, χ0_pwave
+    return χ0_dwave, χ0_pwave
 end
 
 function susceptibility_dwave_prefactors(r::Int; m::ModelParams)
