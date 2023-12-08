@@ -12,7 +12,7 @@ include("utilities.jl")
 
 ## PARAMETERS ## 
 
-L = 11 # the full system is L × L 
+L = 23 # the full system is L × L 
 μ = 0.75
 ndims = 3
 Q = (√5 - 1) / 2
@@ -20,7 +20,7 @@ Q = (√5 - 1) / 2
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_max = 0.1
-T_min = 0#0.002
+T_min = 0.002
 disorder = false
 J_cutoff = -1
 
@@ -29,10 +29,11 @@ if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
 if disorder
-    dirname = "data_random_3D"
+    # dirname = "data_random_3D"
+    dirname = "FINAL_3D_data_random_PBC"
     title = "disordered potential"
 else
-    dirname = "data_QP_3D"
+    dirname = "FINAL_3D_data_PBC"
     title = "quasiperiodic potential"
 end
 df = load_dfs(dirname=dirname)
@@ -136,9 +137,9 @@ for (Tᵢ, T) in enumerate(reverse(Ts))
     heatmap!(pdχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 end
 
-plot!(pdχdwave, xlims=[0, 1.5], ylims=[-0.2, 0], legend=false)
-plot!(pdχswave, xlims=[0, 1.5], ylims=[-0.2, 0], legend=false)
-plot!(pdχpwave, xlims=[0, 1.5], ylims=[-0.2, 0], legend=false)
-plot!(pχdwave, xlims=[0, 1.5], legend=false)
-plot!(pχswave, xlims=[0, 1.5], legend=false)
-plot!(pχpwave, xlims=[0, 1.5], legend=false)
+plot!(pdχdwave, xlims=[0, 1.25], ylims=[-0.2, 0], legend=false)
+plot!(pdχswave, xlims=[0, 1.25], ylims=[-0.2, 0], legend=false)
+plot!(pdχpwave, xlims=[0, 1.25], ylims=[-0.2, 0], legend=false)
+plot!(pχdwave, xlims=[0, 1.25], legend=false)
+plot!(pχswave, xlims=[0, 1.25], legend=false)
+plot!(pχpwave, xlims=[0, 1.25], legend=false)
