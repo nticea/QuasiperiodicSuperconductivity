@@ -21,7 +21,7 @@ savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_max = 0.1
 T_min = 0.002
-disorder = false
+disorder = true
 J_cutoff = -1
 
 # read files 

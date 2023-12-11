@@ -15,18 +15,25 @@ include("model.jl")
 include("results.jl")
 
 function pairfield_correlation(m::ModelParams; T::Real,
-    checkpointpath::Union{String,Nothing}=nothing)
+    checkpointpath::Union{String,Nothing}=nothing, symmetry::String)
 
     E, U = diagonalize_hamiltonian(m, loadpath=checkpointpath)
 
     # s-wave case is faster 
-    # println("UNCOMMENT THIS !!!!")
     if V1 == 0
         M = swave(m, T, E=E, U=U)
         return calculate_λ_Δ(M)
     end
 
-    M = dwave(m, T, E=E, U=U)
+    if symmetry == "d-wave"
+        M = dwave(m, T, E=E, U=U)
+    elseif symmetry == "p-wave"
+        M = pwave(m, T, E=E, U=U)
+    else
+        println("Whoa something went wrong!")
+        return
+    end
+
     λ, Δ = calculate_λ_Δ(M)
     @assert abs(imag(λ)) < 1e-6
     λ = real(λ)
@@ -276,6 +283,28 @@ function dwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int, Ntot::Int)
     return -V / 2 .* (χ1 .+ χ2)
 end
 
+function pwave_blocks(b_sites, d_sites; P, U, Uconj, V::Real, N::Int, Ntot::Int)
+    Uconjb = [Uconj[r, :] for r in b_sites]
+    Ud = [U[r, :] for r in d_sites]
+
+    Uconjb = transpose(hcat(Uconjb...))
+    Ud = transpose(hcat(Ud...))
+
+    @tullio PUU[r, n, m] := Uconj[r, n] * P[n, m] * Uconjb[r, m]
+    PUU = reshape(PUU, Ntot, N * N)
+
+    @tullio UU1[m, n, rprime] := U[rprime, n] * Ud[rprime, m]
+    UU1 = reshape(UU1, N * N, Ntot)
+    χ1 = PUU * UU1
+
+    @tullio UU2[m, n, rprime] := Ud[rprime, n] * U[rprime, m]
+    UU2 = reshape(UU2, N * N, Ntot)
+    χ2 = PUU * UU2
+
+    @warn "Check the sign"
+    return V / 2 .* (χ1 .- χ2)
+end
+
 function dwave(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
     V0, V1, ndims = m.V0, m.V1, m.ndims
     println("Computing d-wave configuration")
@@ -391,6 +420,116 @@ function dwave(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
     return M
 end
 
+function pwave(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
+    V0, V1, ndims = m.V0, m.V1, m.ndims
+    println("Computing p-wave configuration")
+    Ntot, N = size(U)
+    Uconj = conj.(U) # This is U^*
+
+    # Initialize the M matrix 
+    if ndims == 2
+        if m.ϕx != 0 || m.ϕy != 0 || m.ϕz != 0
+            M = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+            dM = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+        else
+            M = Matrix{Matrix{Float64}}(undef, 3, 3)
+            dM = Matrix{Matrix{Float64}}(undef, 3, 3)
+        end
+    elseif ndims == 3
+        if m.ϕx != 0 || m.ϕy != 0 || m.ϕz != 0
+            M = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
+            dM = Matrix{Matrix{ComplexF64}}(undef, 4, 4)
+        else
+            M = Matrix{Matrix{Float64}}(undef, 4, 4)
+            dM = Matrix{Matrix{Float64}}(undef, 4, 4)
+        end
+    else
+        println("$ndims dimensions not supported")
+    end
+
+    # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
+    fs = fermi.(E, T)
+    # we also want to construct the dχ/dT prefactors. 
+    texp_stable = 2 * log.(exp.(E ./ T) .+ 1)
+    logsum = (E ./ T) .- log(T) .- texp_stable
+    fs_logT = E .* exp.(logsum)
+
+    fnm = zeros(N, N)
+    fnm_logT = zeros(N, N)
+    Enm = zeros(N, N)
+    for i in 1:N
+        fnm[:, i] = fs .+ fs[i]
+        fnm_logT[:, i] = fs_logT .+ fs_logT[i]
+        Enm[:, i] = E .+ E[i]
+    end
+    P = (1 .- fnm) ./ Enm
+    P_logT = -fnm_logT ./ Enm
+
+    # the s-wave sector. This is in the (1,1) block of M matrix
+    # for p-wave, it is just uniformly zero 
+    M[1, 1] = zeros(Ntot, Ntot)
+
+    if calculate_dlogT
+        dM[1, 1] = zeros(Ntot, Ntot)
+    end
+
+    # make lists of the nearest-neighbour sites 
+    xsites, ysites, zsites, onsites = [], [], [], []
+    for r in 1:Ntot
+        nnr = [nearest_neighbours(r, m=m)...] # get the nearest neighbours
+        push!(xsites, nnr[1])
+        push!(ysites, nnr[2])
+        push!(onsites, r)
+        if ndims == 3
+            push!(zsites, nnr[5])
+        end
+    end
+    if ndims == 2
+        sites = [onsites, xsites, ysites]
+    elseif ndims == 3
+        sites = [onsites, xsites, ysites, zsites]
+    else
+        println("$ndims dimensions is not supported")
+    end
+
+    # iterate through each of the blocks
+    for bd in CartesianIndices(M)
+        (b, d) = Tuple(bd)
+
+        # don't do the s-wave component (we've done it already)
+        if !(b == 1 && d == 1)
+            b_sites, d_sites = sites[b], sites[d]
+
+            if b == 1# only δ=0 term gets V0, not δ'=0! 
+                Mblock = pwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
+                if calculate_dlogT
+                    dMblock = pwave_blocks(b_sites, d_sites; P=P_logT, U=U, Uconj=Uconj, V=V0, N=N, Ntot=Ntot)
+                end
+            else # bond terms have potential V1 
+                # multiply by 2 bc we are only considering 1/2 of each direction
+                Mblock = 2 * pwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
+                if calculate_dlogT
+                    dMblock = 2 * pwave_blocks(b_sites, d_sites; P=P_logT, U=U, Uconj=Uconj, V=V1, N=N, Ntot=Ntot)
+                end
+            end
+
+            # fill in the matrix 
+            M[b, d] = Mblock
+            if calculate_dlogT
+                dM[b, d] = dMblock
+            end
+        end
+    end
+
+    M = mortar(M)
+    if calculate_dlogT
+        dM = mortar(dM)
+        return M, dM
+    end
+
+    return M
+end
+
 function mortar(M::Matrix)
     (n, _) = size(M)
     (N, _) = size(M[1, 1])
@@ -435,7 +574,7 @@ function calculate_λ_Δ(M)
     end
 end
 
-function LGE_find_Tc(m; npts=5, tol=1e-4)
+function LGE_find_Tc(m; npts=5, tol=1e-4, symmetry::String)
     if m.ndims == 2
         L̃ = 11
     elseif m.ndims == 3
@@ -443,19 +582,19 @@ function LGE_find_Tc(m; npts=5, tol=1e-4)
     end
     # find the min and max values based on the Tc of a smaller system
     m_small = ModelParams(L̃, m.t, m.Q, m.μ, m.θ, m.ϕx, m.ϕy, m.ϕz, m.V0, m.V1, m.J, m.periodic, m.ndims, m.disorder)
-    Tc0, λ0, Δ0 = _LGE_find_Tc(m_small, npts=npts, tol=tol)
+    Tc0, λ0, Δ0 = _LGE_find_Tc(m_small, npts=npts, tol=tol, symmetry=symmetry)
     if isnan(Tc0)
         println("No soln for small system size")
-        return _LGE_find_Tc(m, min=0, max=1, npts=npts, tol=tol)
+        return _LGE_find_Tc(m, min=0, max=1, npts=npts, tol=tol, symmetry=symmetry)
     end
 
     min = Tc0 - 0.2 * Tc0
     max = Tc0 + 0.4 * Tc0
-    return _LGE_find_Tc(m, min=min, max=max, npts=npts, tol=tol)
+    return _LGE_find_Tc(m, min=min, max=max, npts=npts, tol=tol, symmetry=symmetry)
 end
 
-function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10)
-    λ0, Δ0 = pairfield_correlation(m, T=0)
+function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10, symmetry::String)
+    λ0, Δ0 = pairfield_correlation(m, T=0, symmetry=symmetry)
     if λ0 < 1
         return NaN, λ0, Δ0
     end
@@ -467,7 +606,7 @@ function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10)
         λs = []
         for T in Ts
             # find λ at this temperature 
-            λ, Δ = pairfield_correlation(m, T=T)
+            λ, Δ = pairfield_correlation(m, T=T, symmetry=symmetry)
 
             @show T, λ
             # If λ is close enough to 1, return T as Tc 
@@ -518,7 +657,7 @@ function _LGE_find_Tc(m::ModelParams; min=0, max=1, npts=5, tol=1e-4, niter=10)
         end
 
         # find λ at this temperature 
-        λ, Δ = pairfield_correlation(m, T=Tc)
+        λ, Δ = pairfield_correlation(m, T=Tc, symmetry=symmetry)
 
         # If λ is close enough to 1, return T as Tc 
         if abs.(λ - 1) < tol
@@ -639,6 +778,79 @@ function dwave_χ(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
         Mblock = 2 * dwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=-1, N=N, Ntot=Ntot)
         if calculate_dlogT
             dMblock = 2 * dwave_blocks(b_sites, d_sites; P=P_logT, U=U, Uconj=Uconj, V=-1, N=N, Ntot=Ntot)
+            dM[b, d] = dMblock
+        end
+        # fill in the matrix 
+        M[b, d] = Mblock
+    end
+
+    M = mortar(M)
+    if calculate_dlogT
+        dM = mortar(dM)
+        return M, dM
+    end
+    return M
+end
+
+function pwave_χ(m::ModelParams, T::Real; E, U, calculate_dlogT::Bool=false)
+    ndims = m.ndims
+    Ntot, N = size(U)
+    Uconj = conj.(U) # This is U^*
+
+    # Initialize the M matrix 
+    if ndims == 2
+        M = Matrix{Matrix{ComplexF64}}(undef, 2, 2)
+        dM = Matrix{Matrix{ComplexF64}}(undef, 2, 2)
+    elseif ndims == 3
+        M = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+        dM = Matrix{Matrix{ComplexF64}}(undef, 3, 3)
+    else
+        println("$ndims dimensions not supported")
+    end
+
+    # make the prefactor (1-fₙ-fₘ)/(Eₙ + Eₘ)
+    fs = fermi.(E, T)
+    # we also want to construct the dχ/dT prefactors. 
+    texp_stable = 2 * log.(exp.(E ./ T) .+ 1)
+    logsum = (E ./ T) .- log(T) .- texp_stable
+    fs_logT = E .* exp.(logsum)
+
+    fnm = zeros(N, N)
+    fnm_logT = zeros(N, N)
+    Enm = zeros(N, N)
+    for i in 1:N
+        fnm[:, i] = fs .+ fs[i]
+        fnm_logT[:, i] = fs_logT .+ fs_logT[i]
+        Enm[:, i] = E .+ E[i]
+    end
+    P = (1 .- fnm) ./ Enm
+    P_logT = -fnm_logT ./ Enm
+
+    # make lists of the nearest-neighbour sites 
+    xsites, ysites, zsites = [], [], []
+    for r in 1:Ntot
+        nnr = [nearest_neighbours(r, m=m)...] # get the nearest neighbours
+        push!(xsites, nnr[1])
+        push!(ysites, nnr[2])
+        if ndims == 3
+            push!(zsites, nnr[5])
+        end
+    end
+    if ndims == 2
+        sites = [xsites, ysites]
+    elseif ndims == 3
+        sites = [xsites, ysites, zsites]
+    else
+        println("$ndims dimensions is not supported")
+    end
+
+    # iterate through each of the blocks
+    for bd in CartesianIndices(M)
+        (b, d) = Tuple(bd)
+        b_sites, d_sites = sites[b], sites[d]
+        Mblock = 2 * pwave_blocks(b_sites, d_sites; P=P, U=U, Uconj=Uconj, V=-1, N=N, Ntot=Ntot)
+        if calculate_dlogT
+            dMblock = 2 * pwave_blocks(b_sites, d_sites; P=P_logT, U=U, Uconj=Uconj, V=-1, N=N, Ntot=Ntot)
             dM[b, d] = dMblock
         end
         # fill in the matrix 

@@ -31,9 +31,9 @@ LGE_tol = 1e-2
 
 ## SAVING ## 
 if disorder
-    dirname = "data_$(ndims)D_disorder"
+    dirname = "data_$(ndims)D_disorder_pwave"
 else
-    dirname = "data_$(ndims)D_QP"
+    dirname = "data_$(ndims)D_QP_pwave"
 end
 
 datapath = joinpath(@__DIR__, dirname)
@@ -53,7 +53,7 @@ if !already_computed(m, dfs, T=0)
 
     ## Tc using LGE ##
     println("Finding Tc using LGE")
-    Tc, λ, Δ_LGE = LGE_find_Tc(m, npts=5, tol=LGE_tol)
+    Tc, λ, Δ_LGE = LGE_find_Tc(m, npts=5, tol=LGE_tol, symmetry="p-wave")
     update_results!(m, df_LGE; T=Tc, λ=λ, Δ=Δ_LGE)
     CSV.write(savepath_LGE, df_LGE)
     flush(stdout)
@@ -66,14 +66,14 @@ if !already_computed(m, dfs, T=0)
 
         # Get the initial LGE guess 
         println("Finding LGE sol'n at T=0")
-        λ, Δ_LGE = @time pairfield_correlation(m, T=T)
+        λ, Δ_LGE = @time pairfield_correlation(m, T=T, symmetry="p-wave")
         update_results!(m, df_LGE; T=T, λ=λ, Δ=Δ_LGE)
         CSV.write(savepath_LGE, df_LGE)
         flush(stdout)
 
         # Superfluid stiffness
         println("Computing superfluid stiffness at T=0")
-        K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE)
+        K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE, symmetry="p-wave")
         update_results!(m, df_BdG; T=T, λ=λ, Δ=Δ_BdG, K=K, Π=Π)
         CSV.write(savepath_BdG, df_BdG)
         flush(stdout)

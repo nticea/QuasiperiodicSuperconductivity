@@ -31,10 +31,10 @@ LGE_tol = 1e-2
 
 ## SAVING ## 
 if disorder
-    dirname = "data_$(ndims)D_disorder"
+    dirname = "data_$(ndims)D_disorder_pwave"
     pot = "disorder"
 else
-    dirname = "data_$(ndims)D_QP"
+    dirname = "data_$(ndims)D_QP_pwave"
     pot = "QP"
 end
 stamp = "BdG_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q_$(V0)V0_$(V1)V1.csv"
@@ -42,7 +42,7 @@ scratchbase = joinpath("/scratch/users/nticea", "QuasiperiodicSuperconductivity"
 # scratchbase = @__DIR__
 mkpath(scratchbase)
 fname = joinpath(scratchbase, stamp)
-BdG_checkpoint = load_BdG_checkpoint(m, scratchbase)
+BdG_checkpoint = load_BdG_checkpoint(m, scratchbase, symmetry)
 
 datapath = joinpath(@__DIR__, dirname)
 mkpath(datapath)
@@ -63,7 +63,7 @@ T = 0
 if size(BdG_checkpoint)[1] == 0
     # Get the initial LGE guess 
     println("Finding LGE sol'n at T=0")
-    λ, Δ_LGE = @time pairfield_correlation(m, T=T)
+    λ, Δ_LGE = @time pairfield_correlation(m, T=T, symmetry="p-wave")
     update_results!(m, df_LGE; T=T, λ=λ, Δ=Δ_LGE)
     CSV.write(savepath_LGE, df_LGE)
 
@@ -77,14 +77,14 @@ if size(BdG_checkpoint)[1] == 0
 
     # Superfluid stiffness
     println("Computing superfluid stiffness at T=0")
-    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE, scratchpath=scratchbase)
+    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE, scratchpath=scratchbase, symmetry="p-wave")
     update_results!(m, df_BdG; T=T, λ=λ, Δ=Δ_BdG, K=K, Π=Π)
     CSV.write(savepath_BdG, df_BdG)
     flush(stdout)
 else
     # Superfluid stiffness
     println("Computing superfluid stiffness at T=0")
-    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, scratchpath=scratchbase)
+    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, scratchpath=scratchbase, symmetry="p-wave")
     update_results!(m, df_BdG; T=T, λ=0, Δ=Δ_BdG, K=K, Π=Π)
     CSV.write(savepath_BdG, df_BdG)
     flush(stdout)

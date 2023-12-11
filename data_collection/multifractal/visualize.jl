@@ -16,6 +16,7 @@ Q = (√5 - 1) / 2
 θ = π / 7
 λ = 1 / 5
 E₀ = 0.75
+Lmin = 10
 
 savefigs = false
 figpath = mkpath(joinpath(@__DIR__, "figures"))
@@ -44,6 +45,7 @@ df = load_dfs()
 # @assert 1 == 0
 df = df[(df.Q.==Q).&(df.θ.==θ).&(df.λ.==λ).&(df.ndims.==ndims).&(df.E₀.==E₀), :]
 parse_strings_as_floats!(df)
+df = df[(df.L.>Lmin), :]
 
 # for a fixed L and J, we want to average over all ϕx and ϕy 
 gs = groupby(df, [:L, :J])
@@ -61,8 +63,7 @@ for (Lᵢ, L) in enumerate(Ls)
     p = plot!(Js, α₀s, label=nothing, c=cmap[Lᵢ])
     p = scatter!(p, Js, α₀s, label="L=$L", c=cmap[Lᵢ])
 end
-# ylims!(p, (2.5, 7.5))
-# xlims!(p, (1.7, 2.5))
+xlims!(p, (4, 5))
 
 # plot everything 
 Ls = unique(res.L)
