@@ -71,7 +71,7 @@ if size(BdG_checkpoint)[1] == 0
     BdG_checkpoint = DataFrame(L=[L], t=[t], μ=[μ], J=[J],
         Q=[Q], θ=[θ], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], V0=[V0], V1=[V1],
         ndims=[ndims], periodic=[periodic],
-        disorder=[disorder], Δ=[Δ_LGE], n=[1])
+        disorder=[disorder], Δ=[Δ_LGE], n=[1], symmetry=["p-wave"])
     CSV.write(fname, BdG_checkpoint)
     flush(stdout)
 
