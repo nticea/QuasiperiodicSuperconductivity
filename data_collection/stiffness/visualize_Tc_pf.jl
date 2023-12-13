@@ -30,7 +30,7 @@ if disorder
     dirname = "data_$(ndims)D_disorder"
     pot = "disorder"
 else
-    dirname = "data_$(ndims)D_QP"
+    dirname = "data_$(ndims)D_QP_pwave"
     pot = "QP"
 end
 if ndims == 3

@@ -21,6 +21,7 @@ ndims = Int(ndims)
 periodic = Bool(periodic)
 disorder = Bool(disorder)
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=disorder)
+symmetry = "p-wave"
 
 @show V0, V1, J
 
@@ -63,7 +64,7 @@ T = 0
 if size(BdG_checkpoint)[1] == 0
     # Get the initial LGE guess 
     println("Finding LGE sol'n at T=0")
-    λ, Δ_LGE = @time pairfield_correlation(m, T=T, symmetry="p-wave")
+    λ, Δ_LGE = @time pairfield_correlation(m, T=T, symmetry=symmetry)
     update_results!(m, df_LGE; T=T, λ=λ, Δ=Δ_LGE)
     CSV.write(savepath_LGE, df_LGE)
 
@@ -71,20 +72,20 @@ if size(BdG_checkpoint)[1] == 0
     BdG_checkpoint = DataFrame(L=[L], t=[t], μ=[μ], J=[J],
         Q=[Q], θ=[θ], ϕx=[ϕx], ϕy=[ϕy], ϕz=[ϕz], V0=[V0], V1=[V1],
         ndims=[ndims], periodic=[periodic],
-        disorder=[disorder], Δ=[Δ_LGE], n=[1], symmetry=["p-wave"])
+        disorder=[disorder], Δ=[Δ_LGE], n=[1], symmetry=[symmetry])
     CSV.write(fname, BdG_checkpoint)
     flush(stdout)
 
     # Superfluid stiffness
     println("Computing superfluid stiffness at T=0")
-    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE, scratchpath=scratchbase, symmetry="p-wave")
+    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE, scratchpath=scratchbase, symmetry=symmetry)
     update_results!(m, df_BdG; T=T, λ=λ, Δ=Δ_BdG, K=K, Π=Π)
     CSV.write(savepath_BdG, df_BdG)
     flush(stdout)
 else
     # Superfluid stiffness
     println("Computing superfluid stiffness at T=0")
-    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, scratchpath=scratchbase, symmetry="p-wave")
+    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, scratchpath=scratchbase, symmetry=symmetry)
     update_results!(m, df_BdG; T=T, λ=0, Δ=Δ_BdG, K=K, Π=Π)
     CSV.write(savepath_BdG, df_BdG)
     flush(stdout)
