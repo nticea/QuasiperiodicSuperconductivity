@@ -78,7 +78,7 @@ if size(BdG_checkpoint)[1] == 0
 
     # Superfluid stiffness
     println("Computing superfluid stiffness at T=0")
-    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, Δ_init=Δ_LGE, scratchpath=scratchbase, symmetry=symmetry)
+    K, Π, Δ_BdG = @time superfluid_stiffness_finiteT(m, T=T, tol=BdG_tol, niter=niter, scratchpath=scratchbase, symmetry=symmetry)
     update_results!(m, df_BdG; T=T, λ=λ, Δ=Δ_BdG, K=K, Π=Π)
     CSV.write(savepath_BdG, df_BdG)
     flush(stdout)
