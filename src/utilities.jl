@@ -81,12 +81,12 @@ function uniform_susceptibility_components(χ; U=nothing, ndims::Int)
             zz = χ[4, 4]
             xz, zx = χ[2, 4], χ[4, 2]
             yz, zy = χ[3, 4], χ[4, 3]
-            χdwave = xx + yy - xy - yx
-            # χdwave_old = xx + yy + zz - xy - yx - xz - zx - yz - zy
-            # λ, _ = eigen(χ[2:end, 2:end])
-            # λ = sort(real.(λ))
-            # @show abs(χdwave_old - λ[1])
-            # χdwave = λ[1]
+            χdwave = (xx + yy + zz) / 3#xx + yy - xy - yx
+        # χdwave_old = xx + yy + zz - xy - yx - xz - zx - yz - zy
+        # λ, _ = eigen(χ[2:end, 2:end])
+        # λ = sort(real.(λ))
+        # @show abs(χdwave_old - λ[1])
+        # χdwave = λ[1]
         else
             println("sorry")
             χdwave = nothing

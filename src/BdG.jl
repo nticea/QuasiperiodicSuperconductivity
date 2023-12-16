@@ -243,13 +243,38 @@ function BdG_iteration_dwave(M::Matrix{Float64}, Δij; Vij, T::Real)
 end
 
 
+# function BdG_iteration_pwave(M::Matrix{Float64}, Δij; Vij, T::Real)
+#     M = copy(M)
+#     N = size(Δij)[1]
+
+#     # Fill in the off-diagonal blocks with Δ
+#     M[1:N, (N+1):end] .= Δij
+#     M[(N+1):end, 1:N] .= -conj.(Δij) # p-wave has neg sign out front
+
+#     # diagonalize this matrix to get the eigenvalues 
+#     E, UV = eigen(Hermitian(M))
+
+#     # Extract the u and the v coefficients
+#     U = UV[1:N, :]
+#     V = UV[(N+1):end, :]
+
+#     # compute the updated Δij
+#     # @einsimd Δnew[i, j] := Vij[i, j] / 4 * (U[i, n] * conj(V[j, n]) - U[j, n] * conj(V[i, n])) * tanh(E[n] / (2 * T))
+#     fs = fermi.(E, T)
+#     fsneg = fermi.(-E, T)
+#     @einsimd Δnew[i, j] := Vij[i, j] * (U[i, n] * conj(V[j, n]) * fsneg[n] + U[j, n] * conj(V[i, n]) * fs[n])
+
+#     return Δnew, U, V, E
+# end
+
+
 function BdG_iteration_pwave(M::Matrix{Float64}, Δij; Vij, T::Real)
     M = copy(M)
     N = size(Δij)[1]
 
     # Fill in the off-diagonal blocks with Δ
     M[1:N, (N+1):end] .= Δij
-    M[(N+1):end, 1:N] .= -conj.(Δij) # p-wave has neg sign out front
+    M[(N+1):end, 1:N] .= Δij' #conj.(Δij) # Check this!! 
 
     # diagonalize this matrix to get the eigenvalues 
     E, UV = eigen(Hermitian(M))
@@ -259,10 +284,9 @@ function BdG_iteration_pwave(M::Matrix{Float64}, Δij; Vij, T::Real)
     V = UV[(N+1):end, :]
 
     # compute the updated Δij
-    # @einsimd Δnew[i, j] := Vij[i, j] / 4 * (U[i, n] * conj(V[j, n]) - U[j, n] * conj(V[i, n])) * tanh(E[n] / (2 * T))
-    fs = fermi.(E, T)
-    fsneg = fermi.(-E, T)
-    @einsimd Δnew[i, j] := Vij[i, j] * (U[i, n] * conj(V[j, n]) * fsneg[n] + U[j, n] * conj(V[i, n]) * fs[n])
+    # sign is opposite -- check this!! 
+    @warn "Check the sign"
+    @einsimd Δnew[i, j] := Vij[i, j] / 4 * (U[i, n] * conj(V[j, n]) - U[j, n] * conj(V[i, n])) * tanh(E[n] / (2 * T))
 
     return Δnew, U, V, E
 end

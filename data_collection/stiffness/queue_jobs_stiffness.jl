@@ -23,7 +23,7 @@ job_prefix = "stiffness_only"
 for J in Js
     # QUASIPERIODIC
     # d-wave 
-    V0 = 1
+    V0 = 0
     V1 = -3
     # ps = ModelParams(L=13, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
     # submit_job(ps, filepath, @__DIR__, job_prefix, mem=800, time="6:00:00")
