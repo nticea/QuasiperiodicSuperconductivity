@@ -40,9 +40,9 @@ function pairfield_correlation(m::ModelParams; T::Real,
 
     # We've only explicitly calculated half the bonds  
     if ndims == 2
-        Δ̃ = to_5N_LGE_Δ(Δ; L=m.L)
+        Δ̃ = to_5N_LGE_Δ(Δ; L=m.L, symmetry=symmetry)
     elseif ndims == 3
-        Δ̃ = to_7N_LGE_Δ(Δ; L=m.L)
+        Δ̃ = to_7N_LGE_Δ(Δ; L=m.L, symmetry=symmetry)
     else
         println("$ndims dimensions not yet implemented")
     end

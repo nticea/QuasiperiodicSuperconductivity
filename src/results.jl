@@ -209,7 +209,9 @@ function _plot_spatial_profile(m::ModelParams; Δ, title=nothing, slice::Int=1)
             plot!(p, [x, x], [y, y - 1], lw=10 * abs(evs[5, x, y]), alpha=10 * abs(evs[5, x, y]), c=colour_phase(5, x, y, all_evs=evs), legend=:false)
 
             # onsite dot 
-            scatter!(p, [x], [y], ms=100 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
+            if abs(evs[1, x, y]) > 1e-8
+                scatter!(p, [x], [y], ms=100 * abs(evs[1, x, y]), c=colour_phase(1, x, y, all_evs=evs), legend=:false)
+            end
         end
     end
 
@@ -412,7 +414,7 @@ function ΔBdG_to_ΔLGE_flat(m::ModelParams; Δ)
     return evs_flat
 end
 
-function to_5N_LGE_Δ(maxev; L)
+function to_5N_LGE_Δ(maxev; L, symmetry)
     @assert length(maxev) == 3 * L * L
     evs = zeros(3, L, L)
     for (n, i) in enumerate(1:(L*L):(3*L*L))
@@ -431,8 +433,13 @@ function to_5N_LGE_Δ(maxev; L)
     new_evs[1, :, :] = evs[1, :, :] # on-site
     new_evs[2, :, :] = Δx
     new_evs[3, :, :] = Δy
-    new_evs[4, :, :] = Δxminus
-    new_evs[5, :, :] = Δyminus
+    if symmetry == "p-wave"
+        new_evs[4, :, :] = -Δxminus
+        new_evs[5, :, :] = -Δyminus
+    else
+        new_evs[4, :, :] = Δxminus
+        new_evs[5, :, :] = Δyminus
+    end
 
     evs_flat = zeros(5 * L * L)
     for (n, i) in enumerate(1:(L*L):(5*L*L))
@@ -443,7 +450,7 @@ function to_5N_LGE_Δ(maxev; L)
     return evs_flat
 end
 
-function to_7N_LGE_Δ(maxev; L)
+function to_7N_LGE_Δ(maxev; L, symmetry)
     N = L * L * L
     @assert length(maxev) == 4 * N
     evs = zeros(4, L, L, L) .* 1im
@@ -464,10 +471,16 @@ function to_7N_LGE_Δ(maxev; L)
     new_evs[1, :, :, :] = evs[1, :, :, :] # on-site term 
     new_evs[2, :, :, :] = Δx
     new_evs[3, :, :, :] = Δy
-    new_evs[4, :, :, :] = Δxminus
-    new_evs[5, :, :, :] = Δyminus
     new_evs[6, :, :, :] = Δz
-    new_evs[7, :, :, :] = Δzminus
+    if symmetry == "p-wave"
+        new_evs[4, :, :, :] = -Δxminus
+        new_evs[5, :, :, :] = -Δyminus
+        new_evs[7, :, :, :] = -Δzminus
+    else
+        new_evs[4, :, :, :] = Δxminus
+        new_evs[5, :, :, :] = Δyminus
+        new_evs[7, :, :, :] = Δzminus
+    end
 
     evs_flat = zeros(7 * N) .* 1im
     for (n, i) in enumerate(1:N:7N)
