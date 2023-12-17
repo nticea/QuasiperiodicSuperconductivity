@@ -262,7 +262,7 @@ function BdG_iteration_pwave(M::Matrix{Float64}, Δij; Vij, T::Real)
     # @einsimd Δnew[i, j] := Vij[i, j] / 4 * (U[i, n] * conj(V[j, n]) - U[j, n] * conj(V[i, n])) * tanh(E[n] / (2 * T))
     fs = fermi.(E, T)
     fsneg = fermi.(-E, T)
-    @einsimd Δnew[i, j] := Vij[i, j] * (U[i, n] * conj(V[j, n]) * fsneg[n] + U[j, n] * conj(V[i, n]) * fs[n])
+    @einsimd Δnew[i, j] := Vij[j, i] / 2 * (U[j, n] * conj(V[i, n]) * fsneg[n] + U[i, n] * conj(V[j, n]) * fs[n])
 
     return Δnew, U, V, E
 end
