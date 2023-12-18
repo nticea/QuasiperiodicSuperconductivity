@@ -15,8 +15,8 @@ Q = (√5 - 1) / 2
 V0 = 0
 V1 = 0
 periodic = true
-disorder = true
-savefigs = true
+disorder = false
+savefigs = false
 ndims = 3
 nbins = 30
 
@@ -30,7 +30,7 @@ end
 
 # new data 
 dirname = "$(ndims)D_data_$pot"
-all_dfs = load_dfs(dirname=dirname)
+# all_dfs = load_dfs(dirname=dirname)
 
 # old data 
 # all_dfs = DataFrame(CSV.File("/Users/nicole/Dropbox/Grad/Trithep/quasiperiodic/QuasiperiodicSuperconductivity/data_collection/IPR/3D_11L_data/IPR_data_11L.csv"))
