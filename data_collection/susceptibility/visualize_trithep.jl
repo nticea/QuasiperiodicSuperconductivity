@@ -17,12 +17,13 @@ L = 23 # the full system is L × L
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
-savefigs = false
+savefigs = true
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_max = 0.1
 T_min = 0.002
-disorder = false
+disorder = true
 J_cutoff = -1
+Jc = 1
 
 # read files 
 if savefigs
@@ -37,7 +38,7 @@ else
     title = "quasiperiodic potential"
 end
 df = load_dfs(dirname=dirname)
-c = df[(df.L.==L).&&(df.J.>J_cutoff).&&(df.T.<=T_max).&&(df.T.>=T_min).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
+df = df[(df.L.==L).&&(df.J.>J_cutoff).&&(df.T.<=T_max).&&(df.T.>=T_min).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
 T_max_act = maximum(df.T)
 T_min_act = minimum(df.T)
@@ -112,34 +113,49 @@ for (Tᵢ, T) in enumerate(reverse(Ts))
     σ_dχdwave = σ_dχdwave[sortidx]
     σ_dχpwave = σ_dχpwave[sortidx]
 
-    plot!(pχswave, Js, χswave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ])#, ribbon=σ_χswave)
+    plot!(pχswave, Js, χswave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ], ribbon=σ_χswave)
     scatter!(pχswave, Js, χswave, xlabel="J", ylabel="χ", label="T=$T", c=cmap[Tᵢ])
     heatmap!(pχswave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    hline!([Jc], c="black", ls=:dashdot)
 
-    plot!(pχdwave, Js, χdwave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ])#, ribbon=σ_χdwave)
+    plot!(pχdwave, Js, χdwave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ], ribbon=σ_χdwave)
     scatter!(pχdwave, Js, χdwave, xlabel="J", ylabel="χ", label="T=$T", c=cmap[Tᵢ])
     heatmap!(pχdwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    vline!([Jc], c="black", ls=:dashdot)
 
-    plot!(pχpwave, Js, χpwave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ])#, ribbon=σ_χpwave)
+    plot!(pχpwave, Js, χpwave, xlabel="J", ylabel="χ", label=nothing, c=cmap[Tᵢ], ribbon=σ_χpwave)
     scatter!(pχpwave, Js, χpwave, xlabel="J", ylabel="χ", label="T=$T", c=cmap[Tᵢ])
     heatmap!(pχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    vline!([Jc], c="black", ls=:dashdot)
 
-    plot!(pdχswave, Js, dχswave, xlabel="J", ylabel="dχ/dT", label=nothing, c=cmap[Tᵢ])#, ribbon=σ_dχswave)
+    plot!(pdχswave, Js, dχswave, xlabel="J", ylabel="dχ/dT", label=nothing, c=cmap[Tᵢ], ribbon=σ_dχswave)
     scatter!(pdχswave, Js, dχswave, xlabel="J", ylabel="dχ/dT", label="T=$T", c=cmap[Tᵢ])
     heatmap!(pdχswave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    vline!([Jc], c="black", ls=:dashdot)
 
-    plot!(pdχdwave, Js, dχdwave, xlabel="J", ylabel="dχ/dT", label=nothing, c=cmap[Tᵢ])#, ribbon=σ_dχdwave)
+    plot!(pdχdwave, Js, dχdwave, xlabel="J", ylabel="dχ/dT", label=nothing, c=cmap[Tᵢ], ribbon=σ_dχdwave)
     scatter!(pdχdwave, Js, dχdwave, xlabel="J", ylabel="dχ/dT", label="T=$T", c=cmap[Tᵢ])
     heatmap!(pdχdwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    vline!([Jc], c="black", ls=:dashdot)
 
-    plot!(pdχpwave, Js, dχpwave, xlabel="J", ylabel="dχ/dT", label=nothing, c=cmap[Tᵢ])#, ribbon=σ_dχpwave)
+    plot!(pdχpwave, Js, dχpwave, xlabel="J", ylabel="dχ/dT", label=nothing, c=cmap[Tᵢ], ribbon=σ_dχpwave)
     scatter!(pdχpwave, Js, dχpwave, xlabel="J", ylabel="dχ/dT", label="T=$T", c=cmap[Tᵢ])
     heatmap!(pdχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    vline!([Jc], c="black", ls=:dashdot)
 end
 
-plot!(pdχdwave, xlims=[0, 1.25], ylims=[-0.2, 0], legend=false)
-plot!(pdχswave, xlims=[0, 1.25], ylims=[-0.2, 0], legend=false)
-plot!(pdχpwave, xlims=[0, 1.25], ylims=[-0.2, 0], legend=false)
+plot!(pdχdwave, xlims=[0, 1.25], ylims=[-0.1, 0], legend=false)
+plot!(pdχswave, xlims=[0, 1.25], ylims=[-0.175, 0], legend=false)
+plot!(pdχpwave, xlims=[0, 1.25], ylims=[-0.1, 0], legend=false)
 plot!(pχdwave, xlims=[0, 1.25], legend=false)
 plot!(pχswave, xlims=[0, 1.25], legend=false)
 plot!(pχpwave, xlims=[0, 1.25], legend=false)
+
+if savefigs
+    savefig(pdχdwave, joinpath(@__DIR__, "figures", "pdχdwave.pdf"))
+    savefig(pdχswave, joinpath(@__DIR__, "figures", "pdχswave.pdf"))
+    savefig(pdχpwave, joinpath(@__DIR__, "figures", "pdχpwave.pdf"))
+    savefig(pχdwave, joinpath(@__DIR__, "figures", "pχdwave.pdf"))
+    savefig(pχswave, joinpath(@__DIR__, "figures", "pχswave.pdf"))
+    savefig(pχpwave, joinpath(@__DIR__, "figures", "pχpwave.pdf"))
+end
