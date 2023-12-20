@@ -92,6 +92,7 @@ end
 
 subdf = df_mean[(df_mean.pot.==pot), :]
 dos, iprs_real, iprs_k, Js = hcat(subdf.E...), hcat(subdf.ipr_real_mean...), hcat(subdf.ipr_k_mean...), subdf.J
+dos = mapslices(x -> x / norm(x), dos, dims=1)
 
 iprs = iprs_real
 nx = length(Js)
@@ -121,7 +122,7 @@ for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength
         # phase 
         c = get_colour(val_xy, max_val=maximum(hval))
         # onsite term  
-        scatter!(p, [J], [E], ms=abs(dos_xy) * 0.003, c=c, legend=:false)
+        scatter!(p, [J], [E], ms=abs(dos_xy) * 20, c=c, legend=:false)
     end
 end
 
@@ -146,7 +147,7 @@ for (x, J) in Iterators.reverse(enumerate(Js)) # potential strength
             # phase 
             c = get_colour(val_xy, max_val=maximum(hval))
             # onsite term  
-            scatter!(p, [J], [E], ms=abs(dos_xy) * 0.003, c=c, legend=:false)
+            scatter!(p, [J], [E], ms=abs(dos_xy) * 20, c=c, legend=:false)
         end
     end
 end
@@ -155,4 +156,29 @@ plot!(p, xticks=(xtcks, xtcks ./ 2))
 
 if savefigs
     savefig(p, joinpath(@__DIR__, "figures", "$(L)L_$(ndims)D_IPR_$(pot).pdf"))
+end
+
+# plot the slices
+sortidx = sortperm(Js)
+Js = Js[sortidx]
+iprs_real = iprs_real[:, sortidx]
+pcut = plot(Js, iprs_real[14, :], c="blue", label="IPR real", xaxis=:log10, grid=false)
+plot!(pcut, Js, iprs_k[14, :], c="red", label="IPR real", xaxis=:log10)
+scatter!(pcut, Js, iprs_real[14, :], c="blue", label=nothing, xaxis=:log10)
+scatter!(pcut, Js, iprs_k[14, :], c="red", label=nothing, xaxis=:log10)
+xtcks = collect(0.2:0.9:20)
+plot!(pcut, xticks=(xtcks, xtcks ./ 2), legend=:top)
+vline!([1], ls=:dashdot, c="black")
+if savefigs
+    savefig(pcut, joinpath(@__DIR__, "figures", "cut_$(L)L_$(ndims)D_IPR_$(pot).pdf"))
+end
+
+# plot the slices
+dos = dos[sortidx, :]
+pcut2 = plot(dos'[14, :], c="black", grid=false, ylims=(0, 0.5))
+scatter!(dos'[14, :], c="black", grid=false, ylims=(0, 0.5))
+plot!(pcut2, xticks=[], legend=false)
+vline!([8], ls=:dashdot, c="black")
+if savefigs
+    savefig(pcut2, joinpath(@__DIR__, "figures", "dos_cut_$(L)L_$(ndims)D_IPR_$(pot).pdf"))
 end

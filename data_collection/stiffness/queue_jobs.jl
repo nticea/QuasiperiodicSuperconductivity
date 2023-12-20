@@ -20,6 +20,8 @@ job_prefix = "stiffness"
 ϕy = 0
 ϕz = 0
 
+Js = [0.25, 0.5]
+
 for J in Js
     # QUASIPERIODIC
     # d-wave 

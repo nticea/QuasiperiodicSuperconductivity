@@ -5,6 +5,8 @@ using Plots
 using CSV
 using DataFrames
 using StatsPlots, Statistics
+logocolors = Colors.JULIA_LOGO_COLORS
+
 
 include("../../src/BdG.jl")
 include("../../src/meanfield.jl")
@@ -18,19 +20,19 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 1
-V1 = -3
+V0 = -3
+V1 = 0
 ndims = 3
 periodic = true
 disorder = false
-savefigs = false
+savefigs = true
 slice = 1
 
 if disorder
     dirname = "data_$(ndims)D_disorder"
     pot = "disorder"
 else
-    dirname = "data_$(ndims)D_QP_pwave"
+    dirname = "data_$(ndims)D_QP"
     pot = "QP"
 end
 if ndims == 3
@@ -43,8 +45,8 @@ end
 if savefigs
     mkpath(joinpath(@__DIR__, "figures"))
 end
-df_LGE_full = load_LGE(dirname)
-df_BdG_full = load_BdG(dirname)
+# df_LGE_full = load_LGE(dirname)
+# df_BdG_full = load_BdG(dirname)
 
 # for computing fermi velocities
 m = ModelParams(L=L, t=t, Q=Q, μ=μ, θ=θ, ϕx=0, ϕy=0, ϕz=0, V0=0, V1=0, J=0, periodic=true, ndims=ndims, disorder=false)
@@ -66,8 +68,8 @@ Js = Js[sortidx]
 Tcs = Tcs[sortidx]
 Tcs_err = Tcs_err[sortidx]
 p1 = plot(grid=false)
-plot!(p1, Js, Tcs, color="red", label=nothing)
-scatter!(p1, Js, Tcs, color="red", label="LGE Tc")
+plot!(p1, Js, Tcs, color=logocolors.green, label=nothing)
+scatter!(p1, Js, Tcs, color=logocolors.green, label="LGE Tc")
 xlabel!(p1, "J")
 title!(p1, "Tc for V0=$V0, V1=$V1, θ=$(θ_to_π(θ))\n on $size_str $pot lattice")
 
@@ -99,28 +101,44 @@ Tcsx = Tcsx[sortidx]
 Tcsy = Tcsy[sortidx]
 Tcsz = Tcsz[sortidx]
 toplots = [Tcsx, Tcsy, Tcsz]
-for i in 1:ndims
-    toplot = toplots[i]
-    plot!(p1, Js, toplot, label=nothing, c=cmap[i], secondary=true)
-    scatter!(p1, Js, toplot, label=dirs[i], c=cmap[i], secondary=true)
-end
-plot!(p1, legend=:topright)
-# plot!(p1, legend=false)
-ylims!(p1, 0, 1)
+# for i in 1:ndims
+#     toplot = toplots[i]
+#     plot!(p1, Js, toplot, label=nothing, c=cmap[i], secondary=true)
+#     scatter!(p1, Js, toplot, label=dirs[i], c=cmap[i], secondary=true)
+# end
+# plot!(p1, legend=:topright)
 
 # make linear interpolation
-Tc2x_itp = LinearInterpolation(Js, Tcsx)
-Tc2y_itp = LinearInterpolation(Js, Tcsy)
-Tc2z_itp = LinearInterpolation(Js, Tcsz)
+# Tc2x_itp = LinearInterpolation(Js, Tcsx)
+# Tc2y_itp = LinearInterpolation(Js, Tcsy)
+# Tc2z_itp = LinearInterpolation(Js, Tcsz)
 
-# now plot the minimum of everything 
+# # now plot the minimum of everything 
+# Tc_actual = []
+# for j in Js
+#     t1, t2, t3, t4 = Tc1_itp[j], Tc2x_itp[j], Tc2y_itp[j], Tc2z_itp[j]
+#     push!(Tc_actual, finite_minimum([t1, t2, t3, t4]))
+# end
+# plot!(p1, Js, Tc_actual .- 0.01, label="Tc", ls=:dashdot, c="black")
+
+# OTHER APPROACH 
+toplots = hcat(toplots...)
+toplot = geomean.(eachrow(toplots))
+plot!(p1, Js, toplot, label=nothing, c=logocolors.purple, secondary=true)
+scatter!(p1, Js, toplot, label="Stiffness", c=logocolors.purple, secondary=true)
+
+# make linear interpolation
+TcBdG_itp = LinearInterpolation(Js, toplot)
+
 Tc_actual = []
 for j in Js
-    t1, t2, t3, t4 = Tc1_itp[j], Tc2x_itp[j], Tc2y_itp[j], Tc2z_itp[j]
-    push!(Tc_actual, finite_minimum([t1, t2, t3, t4]))
+    t1, t2 = Tc1_itp[j], TcBdG_itp[j]
+    push!(Tc_actual, finite_minimum([t1, t2]))
 end
-plot!(p1, Js, Tc_actual .- 0.01, label="Tc", ls=:dashdot, c="black")
+plot!(p1, Js, Tc_actual .- 0.005, label="Tc", ls=:dashdot, c="black")
 
+
+ylims!(p1, 0, 1)
 if savefigs
     savefig(p1, joinpath(@__DIR__, "figures", "$(L)L_$(V0)V0_$(V1)V1_$(pot)_stiffness.pdf"))
 end
