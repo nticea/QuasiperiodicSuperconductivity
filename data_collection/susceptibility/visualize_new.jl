@@ -17,11 +17,11 @@ L = 23 # the full system is L × L
 ndims = 3
 Q = (√5 - 1) / 2
 θ = π / 7
-savefigs = false
+savefigs = true
 figpath = mkpath(joinpath(@__DIR__, "figures"))
-T_max = 0.1
+T_max = 10
 T_min = 0.002
-disorder = false
+disorder = true
 J_cutoff = -1
 
 # read files 
@@ -32,12 +32,14 @@ if disorder
     # dirname = "data_random_3D"
     dirname = "FINAL_3D_data_random_PBC"
     title = "disordered potential"
+    pot = "disorder"
 else
     dirname = "FINAL_3D_data_PBC"
     title = "quasiperiodic potential"
+    pot = "random"
 end
 df = load_dfs(dirname=dirname)
-c = df[(df.L.==L).&&(df.J.>J_cutoff).&&(df.T.<=T_max).&&(df.T.>=T_min).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
+df = df[(df.L.==L).&&(df.J.>J_cutoff).&&(df.T.<=T_max).&&(df.T.>=T_min).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
 
 T_max_act = maximum(df.J)
 T_min_act = minimum(df.J)
@@ -134,3 +136,12 @@ plot!(pdχpwave, ylims=[-0.2, 0], legend=false, xaxis=:log10)
 plot!(pχdwave, legend=false, xaxis=:log10)
 plot!(pχswave, legend=false, xaxis=:log10)
 plot!(pχpwave, legend=false, xaxis=:log10)
+
+if savefigs
+    savefig(pdχdwave, joinpath(@__DIR__, "figures", "pdχdwave_$pot.pdf"))
+    savefig(pdχswave, joinpath(@__DIR__, "figures", "pdχswave_$pot.pdf"))
+    savefig(pdχpwave, joinpath(@__DIR__, "figures", "pdχpwave_$pot.pdf"))
+    savefig(pχdwave, joinpath(@__DIR__, "figures", "pχdwave_$pot.pdf"))
+    savefig(pχswave, joinpath(@__DIR__, "figures", "pχswave_$pot.pdf"))
+    savefig(pχpwave, joinpath(@__DIR__, "figures", "pχpwave_$pot.pdf"))
+end

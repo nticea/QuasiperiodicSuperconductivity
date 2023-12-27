@@ -21,7 +21,7 @@ savefigs = true
 figpath = mkpath(joinpath(@__DIR__, "figures"))
 T_max = 0.1
 T_min = 0.002
-disorder = true
+disorder = false
 J_cutoff = -1
 Jc = 1
 
@@ -33,9 +33,11 @@ if disorder
     # dirname = "data_random_3D"
     dirname = "FINAL_3D_data_random_PBC"
     title = "disordered potential"
+    pot = "disorder"
 else
     dirname = "FINAL_3D_data_PBC"
     title = "quasiperiodic potential"
+    pot = "quasiperiodic"
 end
 df = load_dfs(dirname=dirname)
 df = df[(df.L.==L).&&(df.J.>J_cutoff).&&(df.T.<=T_max).&&(df.T.>=T_min).&&(df.Q.==Q).&&(df.θ.==θ).&&(df.ndims.==ndims), :]
@@ -103,9 +105,9 @@ for (Tᵢ, T) in enumerate(reverse(Ts))
     χswave = χswave[sortidx]
     χdwave = χdwave[sortidx]
     χpwave = χpwave[sortidx]
-    dχswave = dχswave[sortidx]
-    dχdwave = dχdwave[sortidx]
-    dχpwave = dχpwave[sortidx]
+    dχswave = -1 .* dχswave[sortidx]
+    dχdwave = -1 .* dχdwave[sortidx]
+    dχpwave = -1 .* dχpwave[sortidx]
     σ_χswave = σ_χswave[sortidx]
     σ_χdwave = σ_χdwave[sortidx]
     σ_χpwave = σ_χpwave[sortidx]
@@ -144,18 +146,18 @@ for (Tᵢ, T) in enumerate(reverse(Ts))
     vline!([Jc], c="black", ls=:dashdot)
 end
 
-plot!(pdχdwave, xlims=[0, 1.25], ylims=[-0.1, 0], legend=false)
-plot!(pdχswave, xlims=[0, 1.25], ylims=[-0.175, 0], legend=false)
-plot!(pdχpwave, xlims=[0, 1.25], ylims=[-0.1, 0], legend=false)
+plot!(pdχdwave, xlims=[0, 1.25], ylims=[0, 0.1], legend=false)
+plot!(pdχswave, xlims=[0, 1.25], ylims=[0, 0.175], legend=false)
+plot!(pdχpwave, xlims=[0, 1.25], ylims=[0, 0.1], legend=false)
 plot!(pχdwave, xlims=[0, 1.25], legend=false)
 plot!(pχswave, xlims=[0, 1.25], legend=false)
 plot!(pχpwave, xlims=[0, 1.25], legend=false)
 
 if savefigs
-    savefig(pdχdwave, joinpath(@__DIR__, "figures", "pdχdwave.pdf"))
-    savefig(pdχswave, joinpath(@__DIR__, "figures", "pdχswave.pdf"))
-    savefig(pdχpwave, joinpath(@__DIR__, "figures", "pdχpwave.pdf"))
-    savefig(pχdwave, joinpath(@__DIR__, "figures", "pχdwave.pdf"))
-    savefig(pχswave, joinpath(@__DIR__, "figures", "pχswave.pdf"))
-    savefig(pχpwave, joinpath(@__DIR__, "figures", "pχpwave.pdf"))
+    savefig(pdχdwave, joinpath(@__DIR__, "figures", "trithep_pdχdwave_$pot.pdf"))
+    savefig(pdχswave, joinpath(@__DIR__, "figures", "trithep_pdχswave_$pot.pdf"))
+    savefig(pdχpwave, joinpath(@__DIR__, "figures", "trithep_pdχpwave_$pot.pdf"))
+    savefig(pχdwave, joinpath(@__DIR__, "figures", "trithep_pχdwave_$pot.pdf"))
+    savefig(pχswave, joinpath(@__DIR__, "figures", "trithep_pχswave_$pot.pdf"))
+    savefig(pχpwave, joinpath(@__DIR__, "figures", "trithep_pχpwave_$pot.pdf"))
 end
