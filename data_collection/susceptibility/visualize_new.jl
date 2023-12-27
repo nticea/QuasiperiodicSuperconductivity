@@ -80,7 +80,7 @@ dfmean = combine(gdf, [:χswave => mean, :χdwave => mean, :χpwave => mean,
     :dχswave => sem, :dχdwave => sem, :dχpwave => sem])
 
 Js = sort(unique(dfmean.J))
-cmap = reverse(cgrad(:viridis, length(Js), categorical=true))
+cmap = reverse(cgrad(:thermal, length(Js), categorical=true))
 #cmap = ["red", "blue", "green", "orange"]
 pχswave, pdχswave = plot(title="χ swave for $title", grid=false), plot(title="dχdlogT swave for $title", grid=false)
 pχdwave, pdχdwave = plot(title="χ dwave for $title", grid=false), plot(title="dχdlogT dwave for $title", grid=false)
@@ -107,27 +107,27 @@ for (Jᵢ, J) in enumerate(Js)
 
     plot!(pχswave, Ts, χswave, xlabel="T", ylabel="χ", label=nothing, c=cmap[Jᵢ], ribbon=σ_χswave)
     scatter!(pχswave, Ts, χswave, xlabel="T", ylabel="χ", label="J=$J", c=cmap[Jᵢ])
-    #heatmap!(pχswave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    # heatmap!(pχswave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 
     plot!(pχdwave, Ts, χdwave, xlabel="T", ylabel="χ", label=nothing, c=cmap[Jᵢ], ribbon=σ_χdwave)
     scatter!(pχdwave, Ts, χdwave, xlabel="T", ylabel="χ", label="J=$J", c=cmap[Jᵢ])
-    #heatmap!(pχdwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    # heatmap!(pχdwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 
     plot!(pχpwave, Ts, χpwave, xlabel="T", ylabel="χ", label=nothing, c=cmap[Jᵢ], ribbon=σ_χpwave)
     scatter!(pχpwave, Ts, χpwave, xlabel="T", ylabel="χ", label="J=$J", c=cmap[Jᵢ])
-    #heatmap!(pχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    # heatmap!(pχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 
     plot!(pdχswave, Ts, dχswave, xlabel="T", ylabel="dχ/dT", label=nothing, c=cmap[Jᵢ], ribbon=σ_dχswave)
     scatter!(pdχswave, Ts, dχswave, xlabel="T", ylabel="dχ/dT", label="J=$J", c=cmap[Jᵢ])
-    #heatmap!(pdχswave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    # heatmap!(pdχswave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 
     plot!(pdχdwave, Ts, dχdwave, xlabel="T", ylabel="dχ/dT", label=nothing, c=cmap[Jᵢ], ribbon=σ_dχdwave)
     scatter!(pdχdwave, Ts, dχdwave, xlabel="T", ylabel="dχ/dT", label="J=$J", c=cmap[Jᵢ])
-    #heatmap!(pdχdwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    # heatmap!(pdχdwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 
     plot!(pdχpwave, Ts, dχpwave, xlabel="T", ylabel="dχ/dT", label=nothing, c=cmap[Jᵢ], ribbon=σ_dχpwave)
     scatter!(pdχpwave, Ts, dχpwave, xlabel="T", ylabel="dχ/dT", label="J=$J", c=cmap[Jᵢ])
-    #heatmap!(pdχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
+    # heatmap!(pdχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 end
 
 plot!(pdχdwave, ylims=[-0.2, 0], legend=false, xaxis=:log10)
@@ -145,3 +145,5 @@ if savefigs
     savefig(pχswave, joinpath(@__DIR__, "figures", "pχswave_$pot.pdf"))
     savefig(pχpwave, joinpath(@__DIR__, "figures", "pχpwave_$pot.pdf"))
 end
+
+h = heatmap(rand(5, 5), cmap=:thermal, clims=(T_min_act, T_max_act))
