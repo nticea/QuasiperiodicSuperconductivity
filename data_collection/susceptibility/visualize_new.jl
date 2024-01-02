@@ -130,9 +130,9 @@ for (Jᵢ, J) in enumerate(Js)
     # heatmap!(pdχpwave, [T_min_act T_min_act; T_max_act T_max_act], cmap=:viridis, clims=(T_min_act, T_max_act), alpha=0)
 end
 
-plot!(pdχdwave, ylims=[-0.2, 0], legend=false, xaxis=:log10)
-plot!(pdχswave, ylims=[-0.2, 0], legend=false, xaxis=:log10)
-plot!(pdχpwave, ylims=[-0.2, 0], legend=false, xaxis=:log10)
+plot!(pdχdwave, ylims=[-0.1, 0], legend=false, xaxis=:log10)
+plot!(pdχswave, ylims=[-0.17, 0], legend=false, xaxis=:log10)
+plot!(pdχpwave, ylims=[-0.1, 0], legend=false, xaxis=:log10)
 plot!(pχdwave, legend=false, xaxis=:log10)
 plot!(pχswave, legend=false, xaxis=:log10)
 plot!(pχpwave, legend=false, xaxis=:log10)

@@ -22,10 +22,10 @@ disorder = Bool(disorder)
 
 Λ = 0.3
 if disorder
-    dirname = "FINAL_$(ndims)D_data_random"
+    dirname = "SUPERFINAL_$(ndims)D_data_random"
     println("We are adding disorder!")
 else
-    dirname = "FINAL_$(ndims)D_data"
+    dirname = "SUPERFINAL_$(ndims)D_data"
 end
 if periodic
     dirname = dirname * "_PBC"

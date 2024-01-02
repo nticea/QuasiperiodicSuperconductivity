@@ -31,9 +31,9 @@ LGE_tol = 1e-2
 
 ## SAVING ## 
 if disorder
-    dirname = "data_$(ndims)D_disorder_pwave"
+    dirname = "SUPERFINAL_data_$(ndims)D_disorder_pwave"
 else
-    dirname = "data_$(ndims)D_QP_pwave"
+    dirname = "SUPERFINAL_data_$(ndims)D_QP_pwave"
 end
 
 datapath = joinpath(@__DIR__, dirname)
