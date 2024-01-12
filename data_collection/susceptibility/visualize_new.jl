@@ -30,11 +30,11 @@ if savefigs
 end
 if disorder
     # dirname = "data_random_3D"
-    dirname = "FINAL_3D_data_random_PBC"
+    dirname = "SUPERFINAL_3D_data_random_PBC"
     title = "disordered potential"
     pot = "disorder"
 else
-    dirname = "FINAL_3D_data_PBC"
+    dirname = "SUPERFINAL_3D_data_PBC"
     title = "quasiperiodic potential"
     pot = "random"
 end

@@ -83,7 +83,7 @@ end
 function noninteracting_hamiltonian(m::ModelParams; scale_model::Bool=false, shift_origin::Bool=true, scale_μ::Bool=true)
     if scale_μ
         println("Rescaling μ by J")
-        μ = m.μ * (1 + m.J / 2)
+        μ = m.μ / (1 + m.J / 2)
     else
         μ = m.μ
     end
