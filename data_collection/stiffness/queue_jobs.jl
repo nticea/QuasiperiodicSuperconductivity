@@ -20,18 +20,18 @@ job_prefix = "stiffness"
 ϕy = 0
 ϕz = 0
 
-Js = [0.24, 0.49]
-for J in Js
-    # QUASIPERIODIC
-    # p-wave 
-    V0 = 0
-    V1 = -3
-    ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="48:00:00")
-end
+# Js = [0.24, 0.49]
+# for J in Js
+#     # QUASIPERIODIC
+#     # p-wave 
+#     V0 = 0
+#     V1 = -3
+#     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
+#     submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="48:00:00")
+# end
 
 # s-wave 
-Js = [2.49, 2.74]
+Js = [2.51, 2.76]
 for J in Js
     V0 = -3
     V1 = 0

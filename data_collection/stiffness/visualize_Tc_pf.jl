@@ -20,21 +20,16 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = 0
-V1 = -3
+V0 = -3
+V1 = 0
 ndims = 3
 periodic = true
-disorder = false
 savefigs = true
 slice = 1
 
-if disorder
-    dirname = "data_$(ndims)D_disorder"
-    pot = "disorder"
-else
-    dirname = "data_$(ndims)D_QP_pwave"
-    pot = "QP"
-end
+
+dirname = "data_$(ndims)D_QP"
+pot = "QP"
 if ndims == 3
     size_str = "$L × $L × $L"
 elseif ndims == 2
@@ -135,7 +130,7 @@ for j in Js
     t1, t2 = Tc1_itp[j], TcBdG_itp[j]
     push!(Tc_actual, finite_minimum([t1, t2]))
 end
-plot!(p1, Js, Tc_actual .- 0.005, label="Tc", ls=:dashdot, c="black")
+# plot!(p1, Js, Tc_actual .- 0.005, label="Tc", ls=:dashdot, c="black")
 
 
 ylims!(p1, 0, 1)
