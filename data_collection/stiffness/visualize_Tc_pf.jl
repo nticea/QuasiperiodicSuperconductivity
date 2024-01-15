@@ -20,15 +20,15 @@ t = 1
 Q = (√5 - 1) / 2
 μ = 0.75
 θ = π / 7
-V0 = -3
-V1 = 0
+V0 = 0
+V1 = -3
 ndims = 3
 periodic = true
 savefigs = true
 slice = 1
 
 
-dirname = "data_$(ndims)D_QP"
+dirname = "data_$(ndims)D_QP_pwave"
 pot = "QP"
 if ndims == 3
     size_str = "$L × $L × $L"
