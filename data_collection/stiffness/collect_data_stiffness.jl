@@ -35,7 +35,7 @@ if disorder
     dirname = "data_$(ndims)D_disorder_pwave"
     pot = "disorder"
 else
-    dirname = "data_$(ndims)D_QP_pwave"
+    dirname = "SUPERFINAL_data_$(ndims)D_QP_pwave"
     pot = "QP"
 end
 stamp = "BdG_$(ndims)D_$(L)L_$(J)J_$(round(θ, digits=3))theta_$(round(Q,digits=3))Q_$(V0)V0_$(V1)V1.csv"
