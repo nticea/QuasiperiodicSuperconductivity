@@ -22,22 +22,22 @@ job_prefix = "stiffness_only"
 
 # QUASIPERIODIC
 # p-wave 
-Js = [2.74, 3.0, 3.24, 3.49, 3.74, 4.24, 5.24]
-for J in Js
-    V0 = 0
-    V1 = -3
-    ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="48:00:00")
-end
+# Js = [2.74, 3.0, 3.24, 3.49, 3.74, 4.24, 5.24]
+# for J in Js
+#     V0 = 0
+#     V1 = -3
+#     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
+#     submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="48:00:00")
+# end
 
-# d-wave 
-Js = [1.75, 2, 3.24, 4.49, 4.74, 4.99, 5.24, 5.99]
-for J in Js
-    V0 = 1
-    V1 = -3
-    ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="48:00:00")
-end
+# # d-wave 
+# Js = [1.75, 2, 3.24, 4.49, 4.74, 4.99, 5.24, 5.99]
+# for J in Js
+#     V0 = 1
+#     V1 = -3
+#     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
+#     submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="48:00:00")
+# end
 
 # s-wave 
 Js = collect(0:0.25:6)
@@ -46,7 +46,7 @@ for J in Js
     V0 = -3
     V1 = 0
     ps = ModelParams(L=11, t=t, Q=Q, μ=μ, θ=θ, ϕx=ϕx, ϕy=ϕy, ϕz=ϕz, V0=V0, V1=V1, J=J, periodic=periodic, ndims=ndims, disorder=false)
-    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="4:00:00")
+    submit_job(ps, filepath, @__DIR__, job_prefix, mem=512, time="48:00:00")
 end
 
 # for J in Js
