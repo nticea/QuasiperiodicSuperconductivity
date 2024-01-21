@@ -22,7 +22,7 @@ job_prefix = "stiffness_only"
 
 # QUASIPERIODIC
 # p-wave 
-Js = [2.74, 3.0, 3.24, 3.49, 3.74, 4.24, 5.24]
+Js = [2.99, 3.49, 3.74, 4.49, 4.24, 5.24]
 for J in Js
     V0 = 0
     V1 = -3
@@ -31,7 +31,7 @@ for J in Js
 end
 
 # d-wave 
-Js = [1.75, 2, 3.24, 4.49, 4.74, 4.99, 5.24, 5.99]
+Js = [1.74, 1.99, 4.74, 4.99, 5.24]
 for J in Js
     V0 = 1
     V1 = -3
@@ -41,7 +41,6 @@ end
 
 # s-wave 
 Js = collect(0:0.25:6)
-push!(Js, 3.76, 4.76)
 for J in Js
     V0 = -3
     V1 = 0
